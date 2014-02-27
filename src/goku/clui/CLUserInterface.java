@@ -15,7 +15,6 @@ public class CLUserInterface implements UserInterface{
 	/*** GLOBAL VARIABLES ***/
 	private Task toDo = null;
 	private static Type commandType = null;
-	private String source = null;
 	private static SortOrder sortOrder = null;
 	
 	
@@ -49,7 +48,10 @@ public class CLUserInterface implements UserInterface{
 	 * Parser that deals with String input from user to extract necessary information to create Command object
 	 * @author jchiam
 	 */
-	private static class CLUIParser implements Parser{
+	protected static class CLUIParser implements Parser{
+
+		/**GLOBAL VARIABLES **/
+		String restOfInput = new String();	// string that holds remaining unprocessed input
 		
 		/**
 		 * Method: parseString
@@ -58,17 +60,13 @@ public class CLUserInterface implements UserInterface{
 		 */
 		public Task parseString(String input) {
 			
-			String restOfInput = new String();	// string that holds remaining unprocessed input
-			
-			//EXTRACT COMMAND TYPE RETURN REMAINING STRING
-			// extract first word
-			String firstWord = splitCmdAndParam(input, restOfInput);
+			String firstWord = splitCmdAndParam(input);
 			
 			// determine commandType
-			determineCommandType(firstWord);
+			commandType = determineCommandType(firstWord);
 			
 			//FIND STRING FOR SORTORDER
-			determineSortOrder(restOfInput);
+			sortOrder = determineSortOrder();
 			
 			return null;
 		}
@@ -77,29 +75,68 @@ public class CLUserInterface implements UserInterface{
 		 * Method: determineSortOrder
 		 * @param input
 		 */
-		private void determineSortOrder(String input) {
-			if(input.contains("sort:")) {
+		protected Command.SortOrder determineSortOrder() {
+			
+			Command.SortOrder sort = null;
+			
+			if(restOfInput.contains("sort:")) {
 				
 				// find out what sort it is
 				int indexOfSortCmd = 0;
-				if(input.contains("sort:EDF")) {
-					sortOrder = Command.SortOrder.EARLIEST_DEADLINE_FIRST;
-					indexOfSortCmd = input.indexOf("sort:EDF");
+				if(sortFound("sort:EDF")) {
+					sort = Command.SortOrder.EARLIEST_DEADLINE_FIRST;
+					indexOfSortCmd = restOfInput.indexOf("sort:EDF");
 					
-					input = removeSortInput(input, indexOfSortCmd);
+					restOfInput = removeSortInput(indexOfSortCmd);
 				}
-				else if(input.contains("sort:HPF")) {
-					sortOrder = Command.SortOrder.HIGHEST_PRIORITY_FIRST;
-					indexOfSortCmd = input.indexOf("sort:EDF");
+				else if(sortFound("sort:HPF")) {
+					sort = Command.SortOrder.HIGHEST_PRIORITY_FIRST;
+					indexOfSortCmd = restOfInput.indexOf("sort:EDF");
 					
-					input = removeSortInput(input, indexOfSortCmd);
+					restOfInput = removeSortInput(indexOfSortCmd);
 				}
 				else {
 					//TODO throw error message for invalid sort order
 				}
-				
-				
 			}
+			
+			return sort;
+		}
+		
+		/**
+		 * Method: sortFound
+		 * @param sortString to search for
+		 * @return true or false if precise sort string is found
+		 */
+		private boolean sortFound(String sortString) {
+			
+			// boolean variables to check for clearance on left and right ends of string
+			boolean leftClear = false;
+			boolean rightClear = false;
+			
+			if(restOfInput.contains(sortString)) {
+				int indexOfSortFound = restOfInput.indexOf(sortString);
+				
+				// check left
+				try {
+					if(restOfInput.charAt(indexOfSortFound-1) == ' ') {
+						leftClear = true;
+					}
+				} catch(IndexOutOfBoundsException e) {
+					leftClear = true;
+				}
+				
+				// check right
+				try {
+					if(restOfInput.charAt(indexOfSortFound+sortString.length()) == ' ') {
+						rightClear = true;
+					}
+				} catch(IndexOutOfBoundsException e) {
+					rightClear = true;
+				}
+			}
+			
+			return leftClear && rightClear;
 		}
 
 		/**
@@ -108,24 +145,42 @@ public class CLUserInterface implements UserInterface{
 		 * @param indexOfSortCmd
 		 * @return resultant string without sort input
 		 */
-		private String removeSortInput(String restOfInput, int indexOfSortCmd) {
-			// remove sort input
-			// TODO catch index out of bounds
-			return restOfInput.substring(0, indexOfSortCmd-1).concat(
-					restOfInput.substring(indexOfSortCmd+9));
+		private String removeSortInput(int indexOfSortCmd) {
+
+			String leftEnd = new String();
+			String rightEnd = new String();
+			
+			try {
+				leftEnd = restOfInput.substring(0, indexOfSortCmd-1);
+			} catch(IndexOutOfBoundsException e) {
+				leftEnd = "";
+			}
+			try {
+				rightEnd = restOfInput.substring(indexOfSortCmd+9);
+			} catch(IndexOutOfBoundsException e) {
+				rightEnd = ""; 
+			}
+			
+			return leftEnd.concat(rightEnd);
 		}
 
 		/**
 		 * Method: splitCmdAndParam
 		 * @param input string
-		 * @param cmd to take command word
-		 * @param param to take rest of string
 		 * @return word containing command
 		 */
-		private String splitCmdAndParam(String input, String param) {
-			int indexOfFirstSpace = input.indexOf(' ');
-			param = input.substring(indexOfFirstSpace+1);
-			String cmd = input.substring(0, indexOfFirstSpace+1);
+		protected String splitCmdAndParam(String input) {
+			String cmd = new String();
+			
+			try {
+				int indexOfFirstSpace = input.indexOf(' ');
+				
+				restOfInput = input.substring(indexOfFirstSpace+1);
+				cmd = input.substring(0, indexOfFirstSpace);
+			} catch (IndexOutOfBoundsException e) {
+				restOfInput = "";
+				cmd = input;
+			}
 			
 			return cmd;
 		}
@@ -134,38 +189,37 @@ public class CLUserInterface implements UserInterface{
 		 * Method: determineCommandType
 		 * @param firstWord
 		 */
-		private void determineCommandType(String firstWord) {
+		protected Command.Type determineCommandType(String firstWord) {
+			
+			Command.Type cmdType = null;
+			
 			switch(firstWord) {
 			
 				// Use Case: add
 				case "add":
 				case "a":
-					commandType = Command.Type.ADD;
+					cmdType =  Command.Type.ADD;
 					break;
-					
 				// Use Case: view
 				case "view":
-					commandType = Command.Type.DISPLAY;
+					cmdType = Command.Type.DISPLAY;
 					break;
-					
 				// Use Case: update
 				case "update":
-					commandType = Command.Type.EDIT;
+					cmdType = Command.Type.EDIT;
 					break;
-					
 				// Use Case: delete
 				case "delete":
-					commandType = Command.Type.DELETE;
+					cmdType = Command.Type.DELETE;
 					break;
-				
 				// Use Case: search
 				case "search":
-					commandType = Command.Type.SEARCH;
+					cmdType = Command.Type.SEARCH;
 					break;
-					
 				default:
 					//TODO error handle invalid command
 			}
+			return cmdType;
 		}
 		
 	}
