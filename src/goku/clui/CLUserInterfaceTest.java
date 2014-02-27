@@ -2,9 +2,6 @@ package goku.clui;
 
 import static org.junit.Assert.*;
 import goku.Command;
-import goku.Task;
-import goku.Command.SortOrder;
-import goku.Command.Type;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -13,10 +10,12 @@ public class CLUserInterfaceTest {
 	
 	/** GLOBAL TEST VARIABLES AND OBJECTS **/
 	CLUserInterface.CLUIParser parser;
+	CLUserInterface ui;
 	
 	@Before
-	public void initParser() {
-		parser = new CLUserInterface.CLUIParser();
+	public void initObjects() {
+		parser = new CLUserInterface().getParser();
+		ui = new CLUserInterface();
 		parser.restOfInput = new String();
 	}
 	
@@ -114,9 +113,46 @@ public class CLUserInterfaceTest {
 	@Test
 	public void getInputTest() {
 		
-		//TEST CASE 1: determine command type with only command word - add
-		//parser.parseString("add");
-		//assertEquals(Command.Type.ADD, commandType); 
+		Command test = null;
+		
+		//TEST CASE 1: only command word
+		test = ui.getUserInput("add");
+		assertEquals("add", test.getSource());
+		assertEquals(Command.Type.ADD, test.getType());
+		assertEquals(Command.SortOrder.EARLIEST_DEADLINE_FIRST, test.getSortOrder());
+		
+		//TEST CASE 2: command word and task description
+		test = ui.getUserInput("add task");
+		assertEquals("add task", test.getSource());
+		assertEquals(Command.Type.ADD, test.getType());
+		assertEquals(Command.SortOrder.EARLIEST_DEADLINE_FIRST, test.getSortOrder());
+		
+		//TEST CASE 3: command word, task description and sort order:EDF
+		test = ui.getUserInput("add task sort:EDF");
+		assertEquals("add task sort:EDF", test.getSource());
+		assertEquals(Command.Type.ADD, test.getType());
+		assertEquals(Command.SortOrder.EARLIEST_DEADLINE_FIRST, test.getSortOrder());
+		
+		//TEST CASE 4: command word, task description and sort order:HPF
+		test = ui.getUserInput("delete task sort:HPF");
+		assertEquals("delete task sort:HPF", test.getSource());
+		assertEquals(Command.Type.DELETE, test.getType());
+		assertEquals(Command.SortOrder.HIGHEST_PRIORITY_FIRST, test.getSortOrder());
+		
+		//TEST CASE 5: command word, task description and invalid sort order
+		test = ui.getUserInput("add tasksort:EDF");
+		assertEquals("add tasksort:EDF", test.getSource());
+		assertEquals(Command.Type.ADD, test.getType());
+		assertEquals(Command.SortOrder.EARLIEST_DEADLINE_FIRST, test.getSortOrder());
+		
+		//TEST CASE 6: invalid input
+		test = ui.getUserInput("addtasksort:EDF");
+		assertEquals("addtasksort:EDF", test.getSource());
+		assertEquals(null, test.getType());
+		assertEquals(Command.SortOrder.EARLIEST_DEADLINE_FIRST, test.getSortOrder());
+		
+
+		
 		
 	}
 
