@@ -20,8 +20,7 @@ public interface UserInterface {
 	/**
 	 * Method: feedBack
 	 * @param result obtained from Main
-	 * @return string output to UI
 	 */
-	String feedBack(Result result);
+	void feedBack(Result result);
 	
 }

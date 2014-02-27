@@ -17,6 +17,14 @@ public class CLUserInterface implements UserInterface{
 	private static Type commandType = null;
 	private static SortOrder sortOrder = null;
 	
+	/*** STRING CONSTANTS ***/
+	private static String INPUT_ERROR = "Input cannot be recognised.";
+	
+	private CLUIParser parser = new CLUIParser();
+	
+	public CLUIParser getParser() {
+		return this.parser;
+	}
 	
 	/**
 	 * Method: getUserInput
@@ -26,7 +34,8 @@ public class CLUserInterface implements UserInterface{
 	 */
 	public Command getUserInput(String input) {
 		
-		CLUIParser parser = new CLUIParser();
+//		CLUIParser parser = new CLUIParser();
+		
 		
 		// Parse, creates task modifies necessary Command object parameters
 		toDo = parser.parseString(input);
@@ -38,9 +47,8 @@ public class CLUserInterface implements UserInterface{
 		}
 	}
 
-	public String feedBack(Result result) {
+	public void feedBack(Result result) {
 		// TODO Auto-generated method stub
-		return null;
 	}
 	
 	
@@ -48,7 +56,7 @@ public class CLUserInterface implements UserInterface{
 	 * Parser that deals with String input from user to extract necessary information to create Command object
 	 * @author jchiam
 	 */
-	protected static class CLUIParser implements Parser{
+	protected class CLUIParser implements Parser{
 
 		/**GLOBAL VARIABLES **/
 		String restOfInput = new String();	// string that holds remaining unprocessed input
@@ -217,7 +225,8 @@ public class CLUserInterface implements UserInterface{
 					cmdType = Command.Type.SEARCH;
 					break;
 				default:
-					//TODO error handle invalid command
+					feedBack(new Result(false, null, INPUT_ERROR, null));
+					return null;
 			}
 			return cmdType;
 		}
