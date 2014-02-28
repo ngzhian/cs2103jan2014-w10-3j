@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 
 import goku.Command;
+import goku.Task;
 
 import org.junit.After;
 import org.junit.Before;
@@ -286,59 +287,79 @@ public class CLUserInterfaceTest {
 	/*-------------------------------------*/
 	
 	@Test
-	public void getInputTest() throws IOException {
-
-		Command test = null;
-
-		// TEST CASE 1: only command word
-		test = ui.makeCommand("add");
+	public void makeCommand_InvalidInput() {
+		ui.makeCommand("addtasksort:EDF");
+		assertEquals(CLUserInterface.INPUT_ERROR+'\n', outContent.toString());
+	}
+	
+	@Test
+	public void makeCommand_OnlyCommandWord() {
+		Command test = ui.makeCommand("add");
 		assertEquals("add", test.getSource());
 		assertEquals(Command.Type.ADD, test.getType());
-		assertEquals(Command.SortOrder.EARLIEST_DEADLINE_FIRST,
-				test.getSortOrder());
-
-		// TEST CASE 2: command word and task description
-		test = ui.makeCommand("add task");
+		assertEquals(Command.SortOrder.EARLIEST_DEADLINE_FIRST,	test.getSortOrder());
+	}
+	
+	@Test
+	public void makeCommand_CommandWord__Description() {
+		Command test = ui.makeCommand("add task");
 		assertEquals("add task", test.getSource());
 		assertEquals(Command.Type.ADD, test.getType());
-		assertEquals(Command.SortOrder.EARLIEST_DEADLINE_FIRST,
-				test.getSortOrder());
-
-		// TEST CASE 3: command word, task description and sort order:EDF
-		test = ui.makeCommand("add task sort:EDF");
+		assertEquals(Command.SortOrder.EARLIEST_DEADLINE_FIRST,	test.getSortOrder());
+	}
+	
+	@Test
+	public void makeCommand_CommandWord__Description__EDF() {
+		Command test = ui.makeCommand("add task sort:EDF");
 		assertEquals("add task sort:EDF", test.getSource());
 		assertEquals(Command.Type.ADD, test.getType());
-		assertEquals(Command.SortOrder.EARLIEST_DEADLINE_FIRST,
-				test.getSortOrder());
-
-		// TEST CASE 4: command word, task description and sort order:HPF
-		test = ui.makeCommand("delete task sort:HPF");
+		assertEquals(Command.SortOrder.EARLIEST_DEADLINE_FIRST,	test.getSortOrder());
+	}
+	
+	@Test
+	public void makeCommand_CommandWord__Description__HPF() {
+		Command test = ui.makeCommand("delete task sort:HPF");
 		assertEquals("delete task sort:HPF", test.getSource());
 		assertEquals(Command.Type.DELETE, test.getType());
-		assertEquals(Command.SortOrder.HIGHEST_PRIORITY_FIRST,
-				test.getSortOrder());
-
-		// TEST CASE 5: command word, task description and invalid sort order
-		test = ui.makeCommand("add tasksort:EDF");
+		assertEquals(Command.SortOrder.HIGHEST_PRIORITY_FIRST, test.getSortOrder());
+	}
+	
+	@Test
+	public void makeCommand_CommandWord__Description__InvalidSortDueToNoSpacing() {
+		Command test = ui.makeCommand("add tasksort:EDF");
 		assertEquals("add tasksort:EDF", test.getSource());
 		assertEquals(Command.Type.ADD, test.getType());
-		assertEquals(Command.SortOrder.EARLIEST_DEADLINE_FIRST,
-				test.getSortOrder());
-		
-		// TEST CASE 6: command word, task description and non existent sort order
-		test = ui.makeCommand("add task sort:ABC");
-		System.setErr(new PrintStream(outContent));
-		assertEquals(CLUserInterface.SORT_ERROR+'\n', outContent.toString());
-		outContent.flush();
-
-		// TEST CASE 7: invalid input
-		test = ui.makeCommand("addtasksort:EDF");
-		assertEquals("addtasksort:EDF", test.getSource());
-		assertEquals(Command.SortOrder.EARLIEST_DEADLINE_FIRST,
-				test.getSortOrder());
-		assertEquals(CLUserInterface.INPUT_ERROR+'\n', outContent.toString());
-		outContent.flush();
-
+		assertEquals(Command.SortOrder.EARLIEST_DEADLINE_FIRST, test.getSortOrder());
 	}
-
+	
+	@Test
+	public void makeCommand_CommandWord__Description__NonexistentSortOrder() {
+		ui.makeCommand("add task sort:ABC");
+		assertEquals(CLUserInterface.SORT_ERROR+'\n', outContent.toString());
+	}
+	
+	@Test
+	public void makeCommand_CommandWord__Description__EDF__OneTag() {
+		Command test = ui.makeCommand("add task sort:EDF #homework");
+		Task testTask = test.getTask();
+		tags[0] = "homework";
+		
+		assertEquals("add task sort:EDF #homework", test.getSource());
+		assertEquals(Command.Type.ADD, test.getType());
+		assertArrayEquals(tags, testTask.getTags());
+		assertEquals(Command.SortOrder.EARLIEST_DEADLINE_FIRST,	test.getSortOrder());
+	}
+	
+	@Test
+	public void makeCommand_CommandWord__Description__EDF__TwoTags() {
+		Command test = ui.makeCommand("add task sort:EDF #homework #urgent");
+		Task testTask = test.getTask();
+		tags[0] = "homework";
+		tags[1] = "urgent";
+		
+		assertEquals("add task sort:EDF #homework #urgent", test.getSource());
+		assertEquals(Command.Type.ADD, test.getType());
+		assertArrayEquals(tags, testTask.getTags());
+		assertEquals(Command.SortOrder.EARLIEST_DEADLINE_FIRST,	test.getSortOrder());
+	}
 }
