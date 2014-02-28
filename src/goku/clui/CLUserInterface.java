@@ -127,26 +127,33 @@ public class CLUserInterface implements UserInterface {
 			// split string by spaces
 			String[] tokenBuffer = restOfInput.split(" ");
 			
-			// if input is empty
+			// if input string is empty
 			if(tokenBuffer.length==1 && tokenBuffer[0]=="") {
-				return new String[0];
+				return new String[10];
 			}
 			
 			// find tags in buffer
-			for(String token : tokenBuffer) {
+			int tagCount = 0; //track number of tags
+			for(int i=0; i<tokenBuffer.length && tagCount<10 ; i++) {
 				// if token is a tag
-				if(token.charAt(0) == '#') {
-					token = token.substring(1);	// remove '#'
-					tags.add(token);			// add tag
-					token = "";					// empty token from buffer
+				if(tokenBuffer[i].charAt(0) == '#') {
+					tokenBuffer[i] = tokenBuffer[i].substring(1);	// remove '#'
+					tags.add(tokenBuffer[i]);						// add tag
+					tokenBuffer[i] = "";							// empty token from buffer
+					tagCount++;
 				}
 			}
 			
 			reconstructInput(tokenBuffer);
 			
-			return tags.toArray(new String[tags.size()]);
+			return tags.toArray(new String[10]);
 		}
 
+		/**
+		 * Method: reconstructInput
+		 * @param tokenBuffer
+		 * Reconstructs remain rest of input from array of string tokens
+		 */
 		protected void reconstructInput(String[] tokenBuffer) {
 			// concatenate remaining input back into restOfInput
 			restOfInput = "";

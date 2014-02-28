@@ -1,6 +1,7 @@
 package goku.clui;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertArrayEquals;
 import goku.Command;
 
 import org.junit.Before;
@@ -11,12 +12,14 @@ public class CLUserInterfaceTest {
 	/** GLOBAL TEST VARIABLES AND OBJECTS **/
 	CLUserInterface.CLUIParser parser;
 	CLUserInterface ui;
+	String[] tags;
 
 	@Before
 	public void initObjects() {
 		parser = new CLUserInterface().getParser();
 		ui = new CLUserInterface();
 		parser.restOfInput = new String();
+		tags = new String[10];
 	}
 
 	@Test
@@ -179,6 +182,65 @@ public class CLUserInterfaceTest {
 		String[] token3 = {"this", "is", "the", "test"};
 		parser.reconstructInput(token3);
 		assertEquals("this is the test", parser.restOfInput);
+		
+	}
+	
+	@Test
+	public void extractTagsTest() {
+		
+		//TEST CASE 1: no tags
+		tags = new String[10];
+		parser.restOfInput = "add task";
+		assertArrayEquals(tags, parser.extractTags());
+		assertEquals("add task", parser.restOfInput);
+		
+		//TEST CASE 2: one tag
+		tags = new String[10];
+		parser.restOfInput = "add task #homework";
+		tags[0] = "homework";
+		assertArrayEquals(tags, parser.extractTags());
+		assertEquals("add task", parser.restOfInput);
+		
+		//TEST CASE 3: two tags
+		tags = new String[10];
+		parser.restOfInput = "add task #homework #urgent";
+		tags[0] = "homework";
+		tags[1] = "urgent";
+		assertArrayEquals(tags, parser.extractTags());
+		assertEquals("add task", parser.restOfInput);
+		
+		//TEST CASE 4: multiple tags
+		tags = new String[10];
+		parser.restOfInput = "add task #homework #urgent #busy";
+		tags[0] = "homework";
+		tags[1] = "urgent";
+		tags[2] = "busy";
+		assertArrayEquals(tags, parser.extractTags());
+		assertEquals("add task", parser.restOfInput);
+		
+		//TEST CASE 5: failed attempt at tagging due to no spacing
+		tags = new String[10];
+		parser.restOfInput = "add task#homework";
+		assertArrayEquals(tags, parser.extractTags());
+		assertEquals("add task#homework", parser.restOfInput);
+		
+		//TEST CASE 6: mixture of valid and invalid tagging due to spacing
+		tags = new String[10];
+		parser.restOfInput = "add task#homework #urgent";
+		tags[0] = "urgent";
+		assertArrayEquals(tags, parser.extractTags());
+		assertEquals("add task#homework", parser.restOfInput);
+		
+		//TEST CASE 7: more than 10 tags
+		tags = new String[10];
+		parser.restOfInput = "add task #homework #homework #homework "
+				+ "#homework #homework #homework #homework #homework "
+				+ "#homework #homework #homework";
+		for(int i=0; i<10; i++) {
+			tags[i] = "homework";
+		}
+		assertArrayEquals(tags, parser.extractTags());
+		//assertEquals("add task #homework", parser.restOfInput);
 		
 	}
 }
