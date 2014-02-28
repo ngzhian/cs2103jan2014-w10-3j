@@ -132,6 +132,21 @@ public class CLUserInterface implements UserInterface {
 				return new String[10];
 			}
 			
+			findAddRemoveTags(tags, tokenBuffer);
+			
+			reconstructInput(tokenBuffer);
+			
+			return tags.toArray(new String[10]);
+		}
+
+		/**
+		 * Method: findAddRemoveTags
+		 * @param tags
+		 * @param tokenBuffer
+		 * Iterates through token array, find, add and remove any tags
+		 */
+		private void findAddRemoveTags(ArrayList<String> tags,
+				String[] tokenBuffer) {
 			// find tags in buffer
 			int tagCount = 0; //track number of tags
 			for(int i=0; i<tokenBuffer.length && tagCount<10 ; i++) {
@@ -143,10 +158,6 @@ public class CLUserInterface implements UserInterface {
 					tagCount++;
 				}
 			}
-			
-			reconstructInput(tokenBuffer);
-			
-			return tags.toArray(new String[10]);
 		}
 
 		/**
