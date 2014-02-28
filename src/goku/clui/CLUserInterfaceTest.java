@@ -172,12 +172,14 @@ public class CLUserInterfaceTest {
 	@Test
 	public void determineSortOrder_EmptySortInput() {
 		parser.restOfInput = "sort:";
+		parser.determineSortOrder();
 		assertEquals(CLUserInterface.SORT_ERROR+'\n', outContent.toString());
 	}
 	
 	@Test
 	public void determineSortOrder_InvalidWithIncorrectLength() {
 		parser.restOfInput = "task is... sort:OOPS testtest";
+		parser.determineSortOrder();
 		assertEquals(CLUserInterface.SORT_ERROR+'\n', outContent.toString());
 	}
 
@@ -283,6 +285,7 @@ public class CLUserInterfaceTest {
 	/********** makeCommand Tests **********/
 	/*-------------------------------------*/
 	
+	@Test
 	public void getInputTest() throws IOException {
 
 		Command test = null;
