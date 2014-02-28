@@ -199,8 +199,7 @@ public class CLUserInterface implements UserInterface {
 		 * @param tokenBuffer
 		 * Iterates through token array, find, add and remove any tags
 		 */
-		private void findAddRemoveTags(ArrayList<String> tags,
-				String[] tokenBuffer) {
+		private void findAddRemoveTags(ArrayList<String> tags, String[] tokenBuffer) {
 			// find tags in buffer
 			int tagCount = 0; //track number of tags
 			for(int i=0; i<tokenBuffer.length && tagCount<10 ; i++) {
@@ -235,100 +234,65 @@ public class CLUserInterface implements UserInterface {
 
 		/**
 		 * Method: determineSortOrder
-		 * @param input
 		 */
 		protected Command.SortOrder determineSortOrder() {
 
 			Command.SortOrder sort = null;
-
-			if (restOfInput.contains("sort:")) {
-
-				// find out what sort it is
-				int indexOfSortCmd = 0;
-				if (sortFound("sort:EDF")) {
-					sort = Command.SortOrder.EARLIEST_DEADLINE_FIRST;
-					indexOfSortCmd = restOfInput.indexOf("sort:EDF");
-
-					restOfInput = removeSortInput(indexOfSortCmd);
-				} else if (sortFound("sort:HPF")) {
-					sort = Command.SortOrder.HIGHEST_PRIORITY_FIRST;
-					indexOfSortCmd = restOfInput.indexOf("sort:EDF");
-
-					restOfInput = removeSortInput(indexOfSortCmd);
-				} else {
-					feedBack(new Result(false, null, SORT_ERROR, null));
-					//getUserInput();
+			
+			// split string by spaces
+			String[] tokenBuffer = restOfInput.split(" ");
+			
+			// if input string is empty
+			if(tokenBuffer.length==1 && tokenBuffer[0]=="") {
+				return null;
+			}
+			
+			// find first occurrence of sort and register, subsequent ones are discarded
+			boolean sortFound = false;
+			for(int i=0; i<tokenBuffer.length; i++) {
+				
+				// check if string starts with "sort:"
+				boolean containsSortHeader = false;
+				try {
+					containsSortHeader = tokenBuffer[i].substring(0, 5).equals("sort:");
+				} catch(StringIndexOutOfBoundsException e) {
+					continue;
+				}
+				
+				// determine sort type
+				if(containsSortHeader==true && sortFound==false) {
+					try {
+						tokenBuffer[i] = tokenBuffer[i].substring(5);		// remove "sort:"
+					} catch(StringIndexOutOfBoundsException e) {
+						tokenBuffer[i] = "";
+						continue;
+					}
+					
+					// determine sort type
+					if(tokenBuffer[i].equals("EDF")) {
+						sort = Command.SortOrder.EARLIEST_DEADLINE_FIRST;
+						tokenBuffer[i] = "";
+						sortFound = true;
+					}
+					else if(tokenBuffer[i].equals("HPF")) {
+						sort = Command.SortOrder.HIGHEST_PRIORITY_FIRST;
+						tokenBuffer[i] = "";
+						sortFound = true;
+					}
+					else {
+						feedBack(new Result(false, null, SORT_ERROR, null));
+						//getUserInput();
+					}
+				}
+				// remove all subsequent sort options found
+				else if(containsSortHeader==true && sortFound==true) {
+					tokenBuffer[i] = "";
 				}
 			}
+			
+			reconstructInput(tokenBuffer);
 
 			return sort;
-		}
-
-		/**
-		 * Method: sortFound
-		 * 
-		 * @param sortString
-		 *            to search for
-		 * @return true or false if precise sort string is found
-		 */
-		private boolean sortFound(String sortString) {
-
-			// boolean variables to check for clearance on left and right ends
-			// of
-			// string
-			boolean leftClear = false;
-			boolean rightClear = false;
-
-			if (restOfInput.contains(sortString)) {
-				int indexOfSortFound = restOfInput.indexOf(sortString);
-
-				// check left
-				try {
-					if (restOfInput.charAt(indexOfSortFound - 1) == ' ') {
-						leftClear = true;
-					}
-				} catch (IndexOutOfBoundsException e) {
-					leftClear = true;
-				}
-
-				// check right
-				try {
-					if (restOfInput.charAt(indexOfSortFound
-							+ sortString.length()) == ' ') {
-						rightClear = true;
-					}
-				} catch (IndexOutOfBoundsException e) {
-					rightClear = true;
-				}
-			}
-
-			return leftClear && rightClear;
-		}
-
-		/**
-		 * Method: removeSortInput
-		 * 
-		 * @param restOfInput
-		 * @param indexOfSortCmd
-		 * @return resultant string without sort input
-		 */
-		private String removeSortInput(int indexOfSortCmd) {
-
-			String leftEnd = new String();
-			String rightEnd = new String();
-
-			try {
-				leftEnd = restOfInput.substring(0, indexOfSortCmd - 1);
-			} catch (IndexOutOfBoundsException e) {
-				leftEnd = "";
-			}
-			try {
-				rightEnd = restOfInput.substring(indexOfSortCmd + 9);
-			} catch (IndexOutOfBoundsException e) {
-				rightEnd = "";
-			}
-
-			return leftEnd.concat(rightEnd);
 		}
 
 		/**
