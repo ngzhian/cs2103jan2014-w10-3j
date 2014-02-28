@@ -24,22 +24,22 @@ class GOKU {
       case DISPLAY :
         Display display = new Display();
         if (command.getTask().getDeadline() != null) {
-          display.displayDate(command);
+          display.displayDate(command.getTask());
         } else {
-          display.displayAll(command);
+          display.displayAll();
         }
         break;
       case SEARCH :
         Search search = new Search();
         if (command.getTask().getTitle() != null) {
-          search.searchTitle(command);
+          search.searchTitle(command.getTask());
         } else {
-          search.searchTag(command);
+          search.searchTag(command.getTask());
         }
         break;
       case EDIT :
         Edit edit = new Edit();
-        edit.updateTask(command);
+        edit.updateTask(command.getTask());
         break;
     }
   }
