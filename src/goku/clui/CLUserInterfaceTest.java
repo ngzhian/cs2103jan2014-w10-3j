@@ -366,33 +366,49 @@ public class CLUserInterfaceTest {
 	@Test
 	public void makeCommand_CommandWord__Description() {
 		Command test = ui.makeCommand("add task");
+		Task testTask = test.getTask();
+		
 		assertEquals("add task", test.getSource());
 		assertEquals(Command.Type.ADD, test.getType());
 		assertEquals(Command.SortOrder.EARLIEST_DEADLINE_FIRST,	test.getSortOrder());
+		assertEquals("task", testTask.getTitle());
+		assertEquals(false, testTask.getStatus());
 	}
 	
 	@Test
 	public void makeCommand_CommandWord__Description__EDF() {
 		Command test = ui.makeCommand("add task sort:EDF");
+		Task testTask = test.getTask();
+		
 		assertEquals("add task sort:EDF", test.getSource());
 		assertEquals(Command.Type.ADD, test.getType());
 		assertEquals(Command.SortOrder.EARLIEST_DEADLINE_FIRST,	test.getSortOrder());
+		assertEquals("task", testTask.getTitle());
+		assertEquals(false, testTask.getStatus());
 	}
 	
 	@Test
 	public void makeCommand_CommandWord__Description__HPF() {
 		Command test = ui.makeCommand("delete task sort:HPF");
+		Task testTask = test.getTask();
+		
 		assertEquals("delete task sort:HPF", test.getSource());
 		assertEquals(Command.Type.DELETE, test.getType());
 		assertEquals(Command.SortOrder.HIGHEST_PRIORITY_FIRST, test.getSortOrder());
+		assertEquals("task", testTask.getTitle());
+		assertEquals(false, testTask.getStatus());
 	}
 	
 	@Test
 	public void makeCommand_CommandWord__Description__InvalidSortDueToNoSpacing() {
 		Command test = ui.makeCommand("add tasksort:EDF");
+		Task testTask = test.getTask();
+		
 		assertEquals("add tasksort:EDF", test.getSource());
 		assertEquals(Command.Type.ADD, test.getType());
 		assertEquals(Command.SortOrder.EARLIEST_DEADLINE_FIRST, test.getSortOrder());
+		assertEquals("tasksort:EDF", testTask.getTitle());
+		assertEquals(false, testTask.getStatus());
 	}
 	
 	@Test
@@ -409,8 +425,10 @@ public class CLUserInterfaceTest {
 		
 		assertEquals("add task sort:EDF #homework", test.getSource());
 		assertEquals(Command.Type.ADD, test.getType());
-		assertArrayEquals(tags, testTask.getTags());
 		assertEquals(Command.SortOrder.EARLIEST_DEADLINE_FIRST,	test.getSortOrder());
+		assertEquals("task", testTask.getTitle());
+		assertArrayEquals(tags, testTask.getTags());
+		assertEquals(false, testTask.getStatus());
 	}
 	
 	@Test
@@ -422,8 +440,10 @@ public class CLUserInterfaceTest {
 		
 		assertEquals("add task sort:EDF #homework #urgent", test.getSource());
 		assertEquals(Command.Type.ADD, test.getType());
-		assertArrayEquals(tags, testTask.getTags());
 		assertEquals(Command.SortOrder.EARLIEST_DEADLINE_FIRST,	test.getSortOrder());
+		assertEquals("task", testTask.getTitle());
+		assertArrayEquals(tags, testTask.getTags());
+		assertEquals(false, testTask.getStatus());
 	}
 
 	@Test
@@ -437,13 +457,11 @@ public class CLUserInterfaceTest {
 		
 		assertEquals("add task sort:EDF #homework #urgent due:14/2/2014", test.getSource());
 		assertEquals(Command.Type.ADD, test.getType());
-		assertArrayEquals(tags, testTask.getTags());
 		assertEquals(Command.SortOrder.EARLIEST_DEADLINE_FIRST,	test.getSortOrder());
+		assertEquals("task", testTask.getTitle());
+		assertArrayEquals(tags, testTask.getTags());
+		assertEquals(false, testTask.getStatus());
 		assertEquals(testDate, testTask.getDeadline());
 	}
-
-
-
-
 
 }
