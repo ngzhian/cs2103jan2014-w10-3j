@@ -108,7 +108,7 @@ public class CLUserInterface implements UserInterface {
 			
 			taskTags = extractTags();
 			
-			taskDeadline = extractDeadline();
+			//taskDeadline = extractDeadline();
 			
 			return createTask(false, taskDeadline, taskTags, restOfInput);
 		}
