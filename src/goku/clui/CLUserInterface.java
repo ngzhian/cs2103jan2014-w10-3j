@@ -247,6 +247,21 @@ public class CLUserInterface implements UserInterface {
 				return null;
 			}
 			
+			sort = findFirstValidSort(sort, tokenBuffer);
+			
+			reconstructInput(tokenBuffer);
+
+			return sort;
+		}
+
+		/**
+		 * Method: findFirstValidSort
+		 * @param sort to assign valid sort to
+		 * @param tokenBuffer tokenized string
+		 * @return
+		 */
+		private Command.SortOrder findFirstValidSort(Command.SortOrder sort, String[] tokenBuffer) {
+			
 			// find first occurrence of sort and register, subsequent ones are discarded
 			boolean sortFound = false;
 			for(int i=0; i<tokenBuffer.length; i++) {
@@ -289,9 +304,6 @@ public class CLUserInterface implements UserInterface {
 					tokenBuffer[i] = "";
 				}
 			}
-			
-			reconstructInput(tokenBuffer);
-
 			return sort;
 		}
 
