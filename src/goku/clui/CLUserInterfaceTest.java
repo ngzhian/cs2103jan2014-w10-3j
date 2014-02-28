@@ -165,13 +165,20 @@ public class CLUserInterfaceTest {
 	@Test
 	public void reconstructInputTest() {
 		
-		
-		
-		//TEST CASE 1: input with empty
-		
+		//TEST CASE 1: input with empty tokens
+		String[] token1 = {"", "", ""};
+		parser.reconstructInput(token1);
+		assertEquals("", parser.restOfInput);
 		
 		//TEST CASE 2: input with 1 token
+		String[] token2 = {"", "test", ""};
+		parser.reconstructInput(token2);
+		assertEquals("test", parser.restOfInput);
 		
 		//TEST CASE 3: input with multiple tokens
+		String[] token3 = {"this", "is", "the", "test"};
+		parser.reconstructInput(token3);
+		assertEquals("this is the test", parser.restOfInput);
+		
 	}
 }

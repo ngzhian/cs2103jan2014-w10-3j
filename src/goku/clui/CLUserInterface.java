@@ -26,7 +26,7 @@ public class CLUserInterface implements UserInterface {
 
 	public CLUserInterface() {
 		parser = new CLUIParser();
-		sc = new Scanner(System.in);
+		//sc = new Scanner(System.in);
 		input = "";
 	}
 
@@ -127,6 +127,11 @@ public class CLUserInterface implements UserInterface {
 			// split string by spaces
 			String[] tokenBuffer = restOfInput.split(" ");
 			
+			// if input is empty
+			if(tokenBuffer.length==1 && tokenBuffer[0]=="") {
+				return new String[0];
+			}
+			
 			// find tags in buffer
 			for(String token : tokenBuffer) {
 				// if token is a tag
@@ -139,7 +144,7 @@ public class CLUserInterface implements UserInterface {
 			
 			reconstructInput(tokenBuffer);
 			
-			return (String[]) tags.toArray();
+			return tags.toArray(new String[tags.size()]);
 		}
 
 		protected void reconstructInput(String[] tokenBuffer) {
@@ -178,7 +183,7 @@ public class CLUserInterface implements UserInterface {
 					restOfInput = removeSortInput(indexOfSortCmd);
 				} else {
 					feedBack(new Result(false, null, INPUT_ERROR, null));
-					getUserInput();
+					//getUserInput();
 				}
 			}
 
