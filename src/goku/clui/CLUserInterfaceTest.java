@@ -6,6 +6,9 @@ import static org.junit.Assert.assertArrayEquals;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import goku.Command;
 import goku.Task;
@@ -282,6 +285,66 @@ public class CLUserInterfaceTest {
 		
 	}
 	
+	/*------------------------------------------*/
+	/********** findDeadlineDate Tests **********/
+	/*------------------------------------------*/
+	
+	@Test
+	public void findDeadlineDate_NoDueFound() {
+		String[] tokens = {"test", "test", "test"};
+		assertEquals(null, parser.findDeadlineDate(tokens));
+	}
+	
+	@Test
+	public void findDeadlineDate_ValidString() {
+		String[] tokens = {"test", "due:14/02/2014", "test"};
+		assertEquals("14/02/2014", parser.findDeadlineDate(tokens));
+	}
+	
+	@Test
+	public void findDeadlineDate_EmptyDateString() {
+		String[] tokens = {"test", "due:", "test"};
+		assertEquals(null, parser.findDeadlineDate(tokens));
+	}
+	
+	@Test
+	public void findDeadlineDate_InvalidDueToNoSpacing() {
+		String[] tokens = {"testdue:14/2/2014", "test"};
+		assertEquals(null, parser.findDeadlineDate(tokens));
+	}
+	
+	/*-----------------------------------------*/
+	/********** extractDeadline Tests **********/
+	/*-----------------------------------------*/
+	
+	@Test
+	public void extractDeadline_NoDueFound() {
+		parser.restOfInput = "add task";
+		assertEquals(null, parser.extractDeadline());
+	}
+	
+	@Test
+	public void extractDeadline_InvalidDateFound() {
+		parser.restOfInput = "due: test";
+		parser.extractDeadline();
+		assertEquals(CLUserInterface.DATE_ERROR+'\n', outContent.toString());
+	}
+	
+	@Test
+	public void extractDeadline_InvalidDateDueToNoSpace() throws ParseException {
+		parser.restOfInput = "due: 14/2/2014";
+		assertEquals(null, parser.extractDeadline());
+	}
+	
+	@Test
+	public void extractDeadline_ValidDateFound() throws ParseException {
+		SimpleDateFormat dFormat = new SimpleDateFormat("dd/M/yyyy");
+		Date testDate = dFormat.parse("14/2/2014");
+		
+		parser.restOfInput = "due:14/2/2014";
+		assertEquals(testDate, parser.extractDeadline());
+	}
+	
 	/*-------------------------------------*/
 	/********** makeCommand Tests **********/
 	/*-------------------------------------*/
@@ -362,4 +425,25 @@ public class CLUserInterfaceTest {
 		assertArrayEquals(tags, testTask.getTags());
 		assertEquals(Command.SortOrder.EARLIEST_DEADLINE_FIRST,	test.getSortOrder());
 	}
+
+	@Test
+	public void makeCommand_CommandWord__Description__EDF__TwoTags__ValidDeadline() throws ParseException {
+		Command test = ui.makeCommand("add task sort:EDF #homework #urgent due:14/2/2014");
+		Task testTask = test.getTask();
+		tags[0] = "homework";
+		tags[1] = "urgent";
+		SimpleDateFormat dFormat = new SimpleDateFormat("dd/M/yyyy");
+		Date testDate = dFormat.parse("14/2/2014");
+		
+		assertEquals("add task sort:EDF #homework #urgent due:14/2/2014", test.getSource());
+		assertEquals(Command.Type.ADD, test.getType());
+		assertArrayEquals(tags, testTask.getTags());
+		assertEquals(Command.SortOrder.EARLIEST_DEADLINE_FIRST,	test.getSortOrder());
+		assertEquals(testDate, testTask.getDeadline());
+	}
+
+
+
+
+
 }

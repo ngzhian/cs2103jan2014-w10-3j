@@ -108,7 +108,7 @@ public class CLUserInterface implements UserInterface {
 			
 			taskTags = extractTags();
 			
-			//taskDeadline = extractDeadline();
+			taskDeadline = extractDeadline();
 			
 			return createTask(false, taskDeadline, taskTags, restOfInput);
 		}
@@ -141,33 +141,83 @@ public class CLUserInterface implements UserInterface {
 			
 			String[] tokenBuffer = restOfInput.split(" ");
 			
-			// process date value (only supports full date in dd/MM/yyyy format)
-			SimpleDateFormat dateFormatter = new SimpleDateFormat("dd.MM.yyyy");
+			//TODO to improve formatter in future revisions
+			SimpleDateFormat dateFormatter = new SimpleDateFormat("dd/M/yyyy");
+			
+			String preParsedDate = findDeadlineDate(tokenBuffer);
+			
+			reconstructInput(tokenBuffer);
+			
+			// if deadline date cannot be found
+			if(preParsedDate == null) {
+				return null;
+			}
+			
+			// parse date string
+			try {
+				deadline = dateFormatter.parse(preParsedDate);
+			} catch(ParseException e) {
+				feedBack(new Result(false, null, DATE_ERROR, null));
+				//getUserInput();
+			}
+			
+			return deadline;
+			
+		}
+
+		/**
+		 * Method: findDeadlineDate
+		 * @param tokenBuffer
+		 * @return date in string format
+		 * @return null if no due: found
+		 */
+		protected String findDeadlineDate(String[] tokenBuffer) {
+			
+			String dateString = null;
 			
 			// if input string is empty
 			if(tokenBuffer.length==1 && tokenBuffer[0]=="") {
 				return null;
 			}
 			
-			// search for "due:"
+			// find first occurrence of due and register, subsequent ones are discarded
+			boolean dueFound = false;
 			for(int i=0; i<tokenBuffer.length; i++) {
-				// check if string starts with "due:"
-				if(tokenBuffer[i].substring(0,4).equals("due:")) {
-					tokenBuffer[i] = tokenBuffer[i].substring(4);	// remove "due:"
-					
+				
+				// check if string starts with "sort:"
+				boolean containsDueHeader = false;
+				try {
+					containsDueHeader = tokenBuffer[i].substring(0, 4).equals("due:");
+				} catch(StringIndexOutOfBoundsException e) {
+					continue;
+				}
+				
+				// determine sort type
+				if(containsDueHeader==true && dueFound==false) {
 					try {
-						deadline = dateFormatter.parse(tokenBuffer[i]);
-					} catch(ParseException e) {
+						tokenBuffer[i] = tokenBuffer[i].substring(4);		// remove "due:"
+					} catch(StringIndexOutOfBoundsException e) {
+						tokenBuffer[i] = "";
+						continue;
+					}
+					
+					if(tokenBuffer[i].length() > 0) {
+						dateString = tokenBuffer[i];		// store string containing date
+						tokenBuffer[i] = "";				// remove from input
+						dueFound = true;
+					}
+					else {
 						feedBack(new Result(false, null, DATE_ERROR, null));
 						//getUserInput();
 					}
-					
-					break;		// end search for date
+				}
+				// remove all subsequent due options found
+				else if(containsDueHeader==true && dueFound==true) {
+					tokenBuffer[i] = "";
 				}
 			}
 			
-			
-			return deadline;
+			return dateString;
 		}
 		
 		/**
