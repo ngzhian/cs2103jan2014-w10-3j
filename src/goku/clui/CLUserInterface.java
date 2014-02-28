@@ -6,6 +6,8 @@ import goku.Command.Type;
 import goku.Result;
 import goku.Task;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Scanner;
@@ -18,7 +20,9 @@ import java.util.Scanner;
  */
 public class CLUserInterface implements UserInterface {
 	/*** STRING CONSTANTS ***/
-	private static String INPUT_ERROR = "Input cannot be recognised.";
+	protected static String INPUT_ERROR = "Input cannot be recognised.";
+	protected static String SORT_ERROR = "Invalid sort.";
+	protected static String DATE_ERROR = "Invalid date(s).";
 
 	private CLUIParser parser;
 	private Scanner sc;
@@ -67,7 +71,6 @@ public class CLUserInterface implements UserInterface {
 	protected class CLUIParser implements Parser {
 
 		/** GLOBAL VARIABLES **/
-		private Task toDo = null;
 		private Type commandType = null;
 		private SortOrder sortOrder = null;
 		private String[] taskTags = new String[10];	// holds 10 tags at most
@@ -88,10 +91,10 @@ public class CLUserInterface implements UserInterface {
 		}
 
 		/**
+		 * Method: parseString
 		 * @param input string to be parsed
 		 * @return created task
 		 */
-		@Override
 		public Task parseString(String input) {
 
 			String firstWord = splitCmdAndParam(input);
@@ -101,19 +104,70 @@ public class CLUserInterface implements UserInterface {
 			sortOrder = determineSortOrder();
 			
 			// PULL OUT NECESSARY INFO FOR TASK
-			/*
-			 * 2. Deadlines
-			 * 3. remainder as title
-			 */
+			// 3. remainder as title
 			
 			taskTags = extractTags();
 			
+			taskDeadline = extractDeadline();
 			
-			// extract deadline
-			
-			toDo = new Task();
+			return createTask(false, taskDeadline, taskTags, restOfInput);
+		}
 
-			return null;
+		/**
+		 * Method: createTask
+		 * Creates task with appropriate parameters
+		 * TODO modify to add more params in future revisions
+		 */
+		private Task createTask(boolean status, Date deadline, String[] tags, String title) {
+			
+			Task toDo = new Task();
+			toDo.setStatus(status);
+			toDo.setDeadline(deadline);
+			toDo.setTags(tags);
+			toDo.setTitle(title);
+			
+			return toDo;
+		}
+		
+		
+		/**
+		 * Method: extractDeadline
+		 * @return deadline
+		 * Returns null if no deadline found
+		 */
+		protected Date extractDeadline() {
+			
+			Date deadline = null;
+			
+			String[] tokenBuffer = restOfInput.split(" ");
+			
+			// process date value (only supports full date in dd/MM/yyyy format)
+			SimpleDateFormat dateFormatter = new SimpleDateFormat("dd.MM.yyyy");
+			
+			// if input string is empty
+			if(tokenBuffer.length==1 && tokenBuffer[0]=="") {
+				return null;
+			}
+			
+			// search for "due:"
+			for(int i=0; i<tokenBuffer.length; i++) {
+				// check if string starts with "due:"
+				if(tokenBuffer[i].substring(0,4).equals("due:")) {
+					tokenBuffer[i] = tokenBuffer[i].substring(4);	// remove "due:"
+					
+					try {
+						deadline = dateFormatter.parse(tokenBuffer[i]);
+					} catch(ParseException e) {
+						feedBack(new Result(false, null, DATE_ERROR, null));
+						//getUserInput();
+					}
+					
+					break;		// end search for date
+				}
+			}
+			
+			
+			return deadline;
 		}
 		
 		/**
@@ -169,7 +223,9 @@ public class CLUserInterface implements UserInterface {
 			// concatenate remaining input back into restOfInput
 			restOfInput = "";
 			for(String token : tokenBuffer) {
-				restOfInput = restOfInput.concat(token+' ');
+				if(!token.equals("")) {
+					restOfInput = restOfInput.concat(token+' ');
+				}
 			}
 			
 			// remove last space at tail
@@ -200,7 +256,7 @@ public class CLUserInterface implements UserInterface {
 
 					restOfInput = removeSortInput(indexOfSortCmd);
 				} else {
-					feedBack(new Result(false, null, INPUT_ERROR, null));
+					feedBack(new Result(false, null, SORT_ERROR, null));
 					//getUserInput();
 				}
 			}
@@ -331,7 +387,8 @@ public class CLUserInterface implements UserInterface {
 				cmdType = Command.Type.SEARCH;
 				break;
 			default:
-				return null;
+				feedBack(new Result(false, null, INPUT_ERROR, null));
+				//TODO getUserInput();
 			}
 			return cmdType;
 		}

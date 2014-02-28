@@ -2,8 +2,14 @@ package goku.clui;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertArrayEquals;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.PrintStream;
+
 import goku.Command;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -13,6 +19,7 @@ public class CLUserInterfaceTest {
 	CLUserInterface.CLUIParser parser;
 	CLUserInterface ui;
 	String[] tags;
+	ByteArrayOutputStream outContent = new ByteArrayOutputStream();
 
 	@Before
 	public void initObjects() {
@@ -21,103 +28,255 @@ public class CLUserInterfaceTest {
 		parser.restOfInput = new String();
 		tags = new String[10];
 	}
+	
+	@Before
+	public void setOutputStreams() {
+		System.setOut(new PrintStream(outContent));
+	}
+	
+	@After
+	public void closeStreams() throws IOException {
+		outContent.close();
+	}
 
+	/*------------------------------------------/
+	/********** splitCmdAndParam Tests **********/
+	/*-----------------------------------------*/
+	
 	@Test
-	public void splitFirstWordTest() {
-
+	public void splitFirstWord_WithOneWord() {
 		String cmd = new String();
-
-		// TEST CASE 1: check split for single word
+		
 		cmd = parser.splitCmdAndParam("add");
 		assertEquals("add", cmd);
 		assertEquals("", parser.restOfInput);
-
-		// TEST CASE 2: check split for single word with space right after
+	}
+	
+	@Test
+	public void splitFirstWord_WithOneWordAndSpace() {
+		String cmd = new String();
+		
 		cmd = parser.splitCmdAndParam("add ");
 		assertEquals("add", cmd);
 		assertEquals("", parser.restOfInput);
-
-		// TEST CASE 3: check split for single word with string right after
+	}
+	
+	@Test
+	public void splitFirstWord_WithNormalString() {
+		String cmd = new String();
+		
 		cmd = parser.splitCmdAndParam("add tasks");
 		assertEquals("add", cmd);
-		assertEquals("tasks", parser.restOfInput);
-
+		assertEquals("tasks", parser.restOfInput);		
 	}
-
+	
+	/*----------------------------------------------*/
+	/********** determineCommandType Tests **********/
+	/*----------------------------------------------*/
+	
 	@Test
-	public void determineCommandTypeTest() {
-
-		// TEST CASE 1: ADD
+	public void determineAddCommand() {
 		assertEquals(Command.Type.ADD, parser.determineCommandType("add"));
-
-		// TEST CASE 2: ADD (short form) - "a"
+	}
+	
+	@Test
+	public void determineAddCommand_a_shortcut() {
 		assertEquals(Command.Type.ADD, parser.determineCommandType("a"));
-
-		// TEST CASE 3: DISPLAY
+	}
+	
+	@Test
+	public void determineDisplayCommand() {
 		assertEquals(Command.Type.DISPLAY, parser.determineCommandType("view"));
-
-		// TEST CASE 4: EDIT
+	}
+	
+	@Test
+	public void determineEditCommand() {
 		assertEquals(Command.Type.EDIT, parser.determineCommandType("update"));
-
-		// TEST CASE 5: DELETE
+	}
+	
+	@Test
+	public void determineDeleteCommand() {
 		assertEquals(Command.Type.DELETE, parser.determineCommandType("delete"));
-
-		// TEST CASE 6: SEARCH
+	}
+	
+	@Test
+	public void determineSearchCommand() {
 		assertEquals(Command.Type.SEARCH, parser.determineCommandType("search"));
-
+	}
+	
+	@Test
+	public void determineCommand_InvalidCommand() throws IOException {
+		assertEquals(null, parser.determineCommandType("gibberish"));
+		assertEquals(CLUserInterface.INPUT_ERROR+'\n', outContent.toString());
 	}
 
+	/*--------------------------------------------*/
+	/********** determineSortOrder Tests **********/
+	/*--------------------------------------------*/
+	
 	@Test
-	public void determineSortType() {
-
-		// TEST CASE 1: EDF sort
+	public void determineSortOrder_EDF() {
 		parser.restOfInput = "sort:EDF";
-		assertEquals(Command.SortOrder.EARLIEST_DEADLINE_FIRST,
-				parser.determineSortOrder());
-
-		// TEST CASE 2: HPF sort
+		assertEquals(Command.SortOrder.EARLIEST_DEADLINE_FIRST,	parser.determineSortOrder());
+	}
+	
+	@Test
+	public void determineSortOrder_HPF() {
 		parser.restOfInput = "sort:HPF";
-		assertEquals(Command.SortOrder.HIGHEST_PRIORITY_FIRST,
-				parser.determineSortOrder());
-
-		// TEST CASE 3: left end contains string
+		assertEquals(Command.SortOrder.HIGHEST_PRIORITY_FIRST, parser.determineSortOrder());
+	}
+	
+	@Test
+	public void determineSortOrder_WithStringLeftEnd() {
 		parser.restOfInput = "task is... sort:EDF";
-		assertEquals(Command.SortOrder.EARLIEST_DEADLINE_FIRST,
-				parser.determineSortOrder());
-
-		// TEST CASE 4: right end contains string
+		assertEquals(Command.SortOrder.EARLIEST_DEADLINE_FIRST,	parser.determineSortOrder());
+	}
+	
+	@Test
+	public void determineSortOrder_WithStringRightEnd() {
 		parser.restOfInput = "sort:EDF testtest";
-		assertEquals(Command.SortOrder.EARLIEST_DEADLINE_FIRST,
-				parser.determineSortOrder());
-
-		// TEST CASE 5: both ends contain string
+		assertEquals(Command.SortOrder.EARLIEST_DEADLINE_FIRST,	parser.determineSortOrder());
+	}
+	
+	@Test
+	public void determineSortOrder_WithStringBothEnds() {
 		parser.restOfInput = "task is... sort:EDF testtest";
-		assertEquals(Command.SortOrder.EARLIEST_DEADLINE_FIRST,
-				parser.determineSortOrder());
-
-		// TEST CASE 6: left end contains string (no spacing in between)
+		assertEquals(Command.SortOrder.EARLIEST_DEADLINE_FIRST,	parser.determineSortOrder());
+	}
+	
+	@Test
+	public void determineSortOrder_WithStringLeftEndNoSpace() {
 		parser.restOfInput = "task is...sort:EDF";
 		assertEquals(null, parser.determineSortOrder());
-
-		// TEST CASE 7: right end contains string (no spacing in between)
+	}
+	
+	@Test
+	public void determineSortOrder_WithStringRightEndNoSpace() {
 		parser.restOfInput = "sort:EDFtesttest";
 		assertEquals(null, parser.determineSortOrder());
-
-		// TEST CASE 8: both ends contain string (no spacing in between)
+	}
+	
+	@Test
+	public void determineSortOrder_WithStringBothEndsNoSpace() {
 		parser.restOfInput = "task is...sort:EDFtesttest";
 		assertEquals(null, parser.determineSortOrder());
-
-		// TEST CASE 9: invalid sort order of correct length
+	}
+	
+	@Test
+	public void determineSortOrder_InvalidWithCorrectLength() {
 		parser.restOfInput = "task is... sort:HMM testtest";
 		assertEquals(null, parser.determineSortOrder());
-
-		// TEST CASE 10: invalid sort order of wrong length
+	}
+	
+	@Test
+	public void determineSortOrder_InvalidWithIncorrectLength() {
 		parser.restOfInput = "task is... sort:OOPS testtest";
-		assertEquals(null, parser.determineSortOrder());
+		assertEquals(CLUserInterface.SORT_ERROR+'\n', outContent.toString());
 	}
 
+	/*------------------------------------------*/
+	/********** reconstructInput Tests **********/
+	/*------------------------------------------*/
+	
 	@Test
-	public void getInputTest() {
+	public void reconstructInput_EmptyTokens() {
+		String[] tokens = {"", "", ""};
+		parser.reconstructInput(tokens);
+		assertEquals("", parser.restOfInput);
+	}
+	
+	@Test
+	public void reconstructInput_Only1Token() {
+		String[] tokens = {"", "test", ""};
+		parser.reconstructInput(tokens);
+		assertEquals("test", parser.restOfInput);
+	}
+	
+	public void reconstructInput_MultipleTokens() {
+		String[] tokens = {"this", "is", "the", "test"};
+		parser.reconstructInput(tokens);
+		assertEquals("this is the test", parser.restOfInput);
+		
+	}
+	
+	/*-------------------------------------*/
+	/********** extractTags Tests **********/
+	/*-------------------------------------*/
+	
+	@Test
+	public void extractTags_NoTags() {
+		tags = new String[10];
+		parser.restOfInput = "add task";
+		assertArrayEquals(tags, parser.extractTags());
+		assertEquals("add task", parser.restOfInput);
+	}
+	
+	@Test
+	public void extractTags_OneTag() {
+		tags = new String[10];
+		parser.restOfInput = "add task #homework";
+		tags[0] = "homework";
+		assertArrayEquals(tags, parser.extractTags());
+		assertEquals("add task", parser.restOfInput);
+	}
+	
+	@Test
+	public void extractTags_TwoTags() {
+		tags = new String[10];
+		parser.restOfInput = "add task #homework #urgent";
+		tags[0] = "homework";
+		tags[1] = "urgent";
+		assertArrayEquals(tags, parser.extractTags());
+		assertEquals("add task", parser.restOfInput);
+	}
+	
+	@Test
+	public void extractTags_MultipleTags() {
+		tags = new String[10];
+		parser.restOfInput = "add task #homework #urgent #busy";
+		tags[0] = "homework";
+		tags[1] = "urgent";
+		tags[2] = "busy";
+		assertArrayEquals(tags, parser.extractTags());
+		assertEquals("add task", parser.restOfInput);
+	}
+	
+	@Test
+	public void extractTags_NoTagDetectedDueToNoSpacing() {
+		tags = new String[10];
+		parser.restOfInput = "add task#homework";
+		assertArrayEquals(tags, parser.extractTags());
+		assertEquals("add task#homework", parser.restOfInput);
+	}
+	
+	@Test
+	public void extractTags_MixtureOfGoodAndBadTagsDueToSpacing() {
+		tags = new String[10];
+		parser.restOfInput = "add task#homework #urgent";
+		tags[0] = "urgent";
+		assertArrayEquals(tags, parser.extractTags());
+		assertEquals("add task#homework", parser.restOfInput);
+	}
+	
+	@Test
+	public void extractTags_ExceedLimitOfTenTags() {
+		tags = new String[10];
+		parser.restOfInput = "add task #homework #homework #homework "
+				+ "#homework #homework #homework #homework #homework "
+				+ "#homework #homework #homework";
+		for(int i=0; i<10; i++) {
+			tags[i] = "homework";
+		}
+		assertArrayEquals(tags, parser.extractTags());
+		assertEquals("add task #homework", parser.restOfInput);
+		
+	}
+	
+	/*-------------------------------------*/
+	/********** makeCommand Tests **********/
+	/*-------------------------------------*/
+	
+	public void getInputTest() throws IOException {
 
 		Command test = null;
 
@@ -155,92 +314,21 @@ public class CLUserInterfaceTest {
 		assertEquals(Command.Type.ADD, test.getType());
 		assertEquals(Command.SortOrder.EARLIEST_DEADLINE_FIRST,
 				test.getSortOrder());
+		
+		// TEST CASE 6: command word, task description and non existent sort order
+		test = ui.makeCommand("add task sort:ABC");
+		System.setErr(new PrintStream(outContent));
+		assertEquals(CLUserInterface.SORT_ERROR+'\n', outContent.toString());
+		outContent.flush();
 
-		// TEST CASE 6: invalid input
+		// TEST CASE 7: invalid input
 		test = ui.makeCommand("addtasksort:EDF");
 		assertEquals("addtasksort:EDF", test.getSource());
-		assertEquals(null, test.getType());
 		assertEquals(Command.SortOrder.EARLIEST_DEADLINE_FIRST,
 				test.getSortOrder());
+		assertEquals(CLUserInterface.INPUT_ERROR+'\n', outContent.toString());
+		outContent.flush();
 
 	}
 
-	@Test
-	public void reconstructInputTest() {
-		
-		//TEST CASE 1: input with empty tokens
-		String[] token1 = {"", "", ""};
-		parser.reconstructInput(token1);
-		assertEquals("", parser.restOfInput);
-		
-		//TEST CASE 2: input with 1 token
-		String[] token2 = {"", "test", ""};
-		parser.reconstructInput(token2);
-		assertEquals("test", parser.restOfInput);
-		
-		//TEST CASE 3: input with multiple tokens
-		String[] token3 = {"this", "is", "the", "test"};
-		parser.reconstructInput(token3);
-		assertEquals("this is the test", parser.restOfInput);
-		
-	}
-	
-	@Test
-	public void extractTagsTest() {
-		
-		//TEST CASE 1: no tags
-		tags = new String[10];
-		parser.restOfInput = "add task";
-		assertArrayEquals(tags, parser.extractTags());
-		assertEquals("add task", parser.restOfInput);
-		
-		//TEST CASE 2: one tag
-		tags = new String[10];
-		parser.restOfInput = "add task #homework";
-		tags[0] = "homework";
-		assertArrayEquals(tags, parser.extractTags());
-		assertEquals("add task", parser.restOfInput);
-		
-		//TEST CASE 3: two tags
-		tags = new String[10];
-		parser.restOfInput = "add task #homework #urgent";
-		tags[0] = "homework";
-		tags[1] = "urgent";
-		assertArrayEquals(tags, parser.extractTags());
-		assertEquals("add task", parser.restOfInput);
-		
-		//TEST CASE 4: multiple tags
-		tags = new String[10];
-		parser.restOfInput = "add task #homework #urgent #busy";
-		tags[0] = "homework";
-		tags[1] = "urgent";
-		tags[2] = "busy";
-		assertArrayEquals(tags, parser.extractTags());
-		assertEquals("add task", parser.restOfInput);
-		
-		//TEST CASE 5: failed attempt at tagging due to no spacing
-		tags = new String[10];
-		parser.restOfInput = "add task#homework";
-		assertArrayEquals(tags, parser.extractTags());
-		assertEquals("add task#homework", parser.restOfInput);
-		
-		//TEST CASE 6: mixture of valid and invalid tagging due to spacing
-		tags = new String[10];
-		parser.restOfInput = "add task#homework #urgent";
-		tags[0] = "urgent";
-		assertArrayEquals(tags, parser.extractTags());
-		assertEquals("add task#homework", parser.restOfInput);
-		
-		//TEST CASE 7: more than 10 tags
-		tags = new String[10];
-		parser.restOfInput = "add task #homework #homework #homework "
-				+ "#homework #homework #homework #homework #homework "
-				+ "#homework #homework #homework";
-		for(int i=0; i<10; i++) {
-			tags[i] = "homework";
-		}
-		assertArrayEquals(tags, parser.extractTags());
-		//assertEquals("add task #homework", parser.restOfInput);
-		
-	}
 }
