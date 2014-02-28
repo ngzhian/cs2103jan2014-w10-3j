@@ -19,7 +19,7 @@ public class CLUserInterfaceTest {
 	CLUserInterface.CLUIParser parser;
 	CLUserInterface ui;
 	String[] tags;
-	ByteArrayOutputStream outContent = new ByteArrayOutputStream();
+	ByteArrayOutputStream outContent;
 
 	@Before
 	public void initObjects() {
@@ -31,6 +31,7 @@ public class CLUserInterfaceTest {
 	
 	@Before
 	public void setOutputStreams() {
+		outContent = new ByteArrayOutputStream();
 		System.setOut(new PrintStream(outContent));
 	}
 	
@@ -166,6 +167,12 @@ public class CLUserInterfaceTest {
 	public void determineSortOrder_InvalidWithCorrectLength() {
 		parser.restOfInput = "task is... sort:HMM testtest";
 		assertEquals(null, parser.determineSortOrder());
+	}
+	
+	@Test
+	public void determineSortOrder_EmptySortInput() {
+		parser.restOfInput = "sort:";
+		assertEquals(CLUserInterface.SORT_ERROR+'\n', outContent.toString());
 	}
 	
 	@Test
