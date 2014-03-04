@@ -41,7 +41,7 @@ public class AddAction extends Action {
     Task task = new Task();
     task.setTitle(title);
     task.setDeadline(dline);
-    
+    task.setPeriod(period);
     return task;
   }
 
