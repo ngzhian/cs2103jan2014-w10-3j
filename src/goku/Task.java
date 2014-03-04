@@ -1,6 +1,7 @@
 package goku;
 
 import java.util.Date;
+import com.google.gson.Gson;
 
 /*
  * Task is the core of GOKU. GOKU is designed to keep track of tasks, which are
@@ -13,7 +14,6 @@ public class Task {
     HIGH, MEDIUM, LOW
   }
 
-  private static Integer count = 0;
   private Integer id;
   private String title;
   private Date deadline;
@@ -24,7 +24,6 @@ public class Task {
   private boolean isComplete;
 
   public Task() {
-    this.id = ++count;
   }
 
   /*
@@ -168,24 +167,16 @@ public class Task {
   public void setTitle(String title) {
     this.title = title;
   }
+  
+  public void setId(int id) {
+	  this.id = id;
+  }
 
   @Override
   public String toString() {
-    StringBuffer sb = new StringBuffer();
-    sb.append(String.valueOf(id));
-    sb.append(" ");
-    if (deadline != null) {
-      sb.append(deadline.toString());
-      sb.append(" ");
-    }
-    if (period != null) {
-      sb.append(period.getStartDate().toString());
-      sb.append("-");
-      sb.append(period.getEndDate().toString());
-      sb.append(" ");
-    }
-    sb.append(title);
-    return sb.toString();
+	  Gson gson = new Gson();
+	  
+    return gson.toJson(this);
   }
 
   public String toStorageFormat() {

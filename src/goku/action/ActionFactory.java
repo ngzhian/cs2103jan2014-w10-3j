@@ -19,7 +19,7 @@ package goku.action;
 //        break;
 //      default :
 //        action = null;
-//        throw new Error("Unkonwn command type");
+//        throw new Error("Unknown command type");
 //    }
 //    return action;
 //  }

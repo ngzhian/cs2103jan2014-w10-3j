@@ -40,6 +40,8 @@ public class AddAction extends Action {
   private Task makeTask() {
     Task task = new Task();
     task.setTitle(title);
+    task.setDeadline(dline);
+    
     return task;
   }
 

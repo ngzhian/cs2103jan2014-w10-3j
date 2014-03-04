@@ -3,6 +3,7 @@ package goku.action;
 import goku.GOKU;
 import goku.Result;
 import goku.Task;
+import java.util.Date;
 
 /*
  * Task is the core of GOKU. GOKU is designed to keep track of tasks, which are
@@ -21,10 +22,12 @@ public class EditAction extends Action {
   public String from;
   public String to;
   public String title;
-
+  public Date dline;
+  
   public Result updateTask() {
     Task taskWithEdits = new Task();
     taskWithEdits.setTitle(title);
+    taskWithEdits.setDeadline(dline);
     Task t = list.getTaskById(id);
     t.updateWith(taskWithEdits);
     return new Result(true, MSG_SUCCESS, null, null);

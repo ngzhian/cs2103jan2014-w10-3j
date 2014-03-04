@@ -4,131 +4,134 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 public class TaskList implements Iterable<Task> {
-  private ArrayList<Task> _list;
+	private static Integer count = 0;
 
-  public TaskList() {
-    _list = new ArrayList<Task>();
-  }
+	private ArrayList<Task> _list;
 
-  public boolean addTask(Task task) {
-    return _list.add(task);
-  }
+	public TaskList() {
+		_list = new ArrayList<Task>();
+	}
 
-  /*
-   * @param id
-   * 
-   * @returns the task with specified id
-   */
-  public Task getTaskById(int id) {
-    for (Task task : _list) {
-      if (task.getId() == id) {
-        return task;
-      }
-    }
-    return null;
-  }
+	public boolean addTask(Task task) {
+		task.setId(++count);
+		return _list.add(task);
+	}
 
-  public TaskList getAllCompleted() {
-    TaskList result = new TaskList();
-    for (Task task : _list) {
-      if (task.getStatus()) {
-        result.addTask(task);
-      }
-    }
-    return result;
-  }
+	/*
+	 * @param id
+	 * 
+	 * @returns the task with specified id
+	 */
+	public Task getTaskById(int id) {
+		for (Task task : _list) {
+			if (task.getId() == id) {
+				return task;
+			}
+		}
+		return null;
+	}
 
-  public TaskList getAllIncomplete() {
-    TaskList result = new TaskList();
-    for (Task task : _list) {
-      if (!task.getStatus()) {
-        result.addTask(task);
-      }
-    }
-    return result;
-  }
+	public TaskList getAllCompleted() {
+		TaskList result = new TaskList();
+		for (Task task : _list) {
+			if (task.getStatus()) {
+				result.addTask(task);
+			}
+		}
+		return result;
+	}
 
-  public TaskList findTaskByTitle(Task toFind) {
-    TaskList matches = new TaskList();
-    for (Task task : _list) {
-      if (task.titleMatches(toFind)) {
-        matches.addTask(task);
-      }
-    }
-    return matches;
-  }
+	public TaskList getAllIncomplete() {
+		TaskList result = new TaskList();
+		for (Task task : _list) {
+			if (!task.getStatus()) {
+				result.addTask(task);
+			}
+		}
+		return result;
+	}
 
-  public TaskList findTaskByTags(Task toFind) {
-    TaskList matches = new TaskList();
-    for (Task task : _list) {
-      if (task.tagsMatch(toFind)) {
-        matches.addTask(task);
-      }
-    }
-    return matches;
-  }
+	public TaskList findTaskByTitle(Task toFind) {
+		TaskList matches = new TaskList();
+		for (Task task : _list) {
+			if (task.titleMatches(toFind)) {
+				matches.addTask(task);
+			}
+		}
+		return matches;
+	}
 
-  public TaskList findTaskByDeadline(Task toFind) {
-    TaskList matches = new TaskList();
-    for (Task task : _list) {
-      if (task.isDueBefore(toFind)) {
-        matches.addTask(task);
-      }
-    }
-    return matches;
+	public TaskList findTaskByTags(Task toFind) {
+		TaskList matches = new TaskList();
+		for (Task task : _list) {
+			if (task.tagsMatch(toFind)) {
+				matches.addTask(task);
+			}
+		}
+		return matches;
+	}
 
-  }
+	public TaskList findTaskByDeadline(Task toFind) {
+		TaskList matches = new TaskList();
+		for (Task task : _list) {
+			if (task.isDueBefore(toFind)) {
+				matches.addTask(task);
+			}
+		}
+		return matches;
 
-  public Task deleteTaskByIndex(int index) {
-    return _list.remove(index);
-  }
+	}
 
-  public Task deleteTaskById(int id) {
-    int index = getIndexOfTaskById(id);
-    if (index < 0) {
-      return null;
-    } else {
-      return deleteTaskByIndex(index);
-    }
-  }
+	public Task deleteTaskByIndex(int index) {
+		return _list.remove(index);
+	}
 
-  public TaskList deleteTaskByTitle(Task toDelete) {
-    TaskList matches = findTaskByTitle(toDelete);
-    return deleteTask(matches);
-  }
+	public Task deleteTaskById(int id) {
+		int index = getIndexOfTaskById(id);
+		if (index < 0) {
+			return null;
+		} else {
+			return deleteTaskByIndex(index);
+		}
+	}
 
-  public int size() {
-    return _list.size();
-  }
+	public TaskList deleteTaskByTitle(Task toDelete) {
+		TaskList matches = findTaskByTitle(toDelete);
+		return deleteTask(matches);
+	}
 
-  public TaskList getAll() {
-    return this;
-  }
+	public int size() {
+		return _list.size();
+	}
 
-  public void clear() {
-    _list.clear();
-  }
+	public TaskList getAll() {
+		return this;
+	}
 
-  private TaskList deleteTask(TaskList matches) {
-    if (matches.size() == 1) {
-      deleteTaskById(matches.getTaskByIndex(0).getId());
-      return new TaskList();
-    } else {
-      return matches;
-    }
-  }
+	public void clear() {
+		_list.clear();
+	}
 
-  private int getIndexOfTaskById(int id) {
-    return _list.indexOf(getTaskById(id));
-  }
+	private TaskList deleteTask(TaskList matches) {
+		if (matches.size() == 1) {
+			deleteTaskById(matches.getTaskByIndex(0).getId());
+			return new TaskList();
+		} else {
+			return matches;
+		}
+	}
 
-  protected Task getTaskByIndex(int index) {
-    return _list.get(index);
-  }
+	private int getIndexOfTaskById(int id) {
+		return _list.indexOf(getTaskById(id));
+	}
 
-  @Override
-  public Iterator<Task> iterator() {
-    return _list.listIterator();
-  }
+	protected Task getTaskByIndex(int index) {
+		return _list.get(index);
+	}
+
+	@Override
+	public Iterator<Task> iterator() {
+		return _list.listIterator();
+	}
 
 }
