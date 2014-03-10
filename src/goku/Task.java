@@ -1,6 +1,7 @@
 package goku;
 
 import java.util.Date;
+
 import com.google.gson.Gson;
 
 /*
@@ -21,7 +22,7 @@ public class Task {
   private String[] tags;
   private String notes;
   private Importance importance;
-  private boolean isComplete;
+  private Boolean isComplete;
 
   public Task() {
   }
@@ -78,6 +79,8 @@ public class Task {
     title = otherTask.title == null ? title : otherTask.title;
     deadline = otherTask.deadline == null ? deadline : otherTask.deadline;
     period = otherTask.period == null ? period : otherTask.period;
+    isComplete = otherTask.isComplete == null ? isComplete
+        : otherTask.isComplete;
     tags = otherTask.tags == null ? tags : otherTask.tags;
     notes = otherTask.notes == null ? notes : otherTask.notes;
     importance = otherTask.importance == null ? importance
@@ -136,8 +139,16 @@ public class Task {
     return title;
   }
 
+  public Boolean isDone() {
+    return isComplete;
+  }
+
   public void setDeadline(Date deadline) {
     this.deadline = deadline;
+  }
+
+  public void setComplete(Boolean complete) {
+    this.isComplete = complete;
   }
 
   public void setImportance(Importance importance) {
@@ -179,26 +190,26 @@ public class Task {
     sb.append(id);
     sb.append(" | Title: ");
     sb.append(title);
-    
+
     if (deadline != null) {
       sb.append(" | Deadline: ");
       sb.append(deadline);
     }
-    
+
     if (period != null) {
       sb.append(" | From: ");
       sb.append(period.getStartDate());
       sb.append(" To: ");
       sb.append(period.getEndDate());
     }
-    
+
     sb.append(" | Status: ");
-    if (isComplete) {
+    if (isComplete != null && isComplete) {
       sb.append("done");
     } else {
       sb.append("not done");
     }
-    
+
     return sb.toString();
   }
 

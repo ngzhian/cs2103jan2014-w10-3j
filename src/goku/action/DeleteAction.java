@@ -20,6 +20,7 @@ public class DeleteAction extends Action {
   private static final String MSG_SUCCESS = "Deleted \"%s\"";
   private static final String ERR_FAILURE = "Many matches found for \"%s\".";
   private static final String ERR_NOT_FOUND = "Cannot find \"%s\".";
+  public static final String ERR_INSUFFICIENT_ARGS = "Can't delete. Need an ID. Try \"delete 1\"";
 
   public int id;
 

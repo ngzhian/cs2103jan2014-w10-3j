@@ -32,14 +32,12 @@ public class SearchActionTest {
     Task b = new Task();
     Task c = new Task();
 
-    int idA = a.getId();
-
     a.setTitle("hello world");
     b.setTitle("byebye");
     c.setTitle("hello");
 
-    list.addTask(a);
-    list.addTask(b);
+    int idA = list.addTask(a);
+    int idB = list.addTask(b);
 
     SearchAction search = new SearchAction(goku);
     search.title = "hello";

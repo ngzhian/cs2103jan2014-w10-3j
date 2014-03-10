@@ -1,11 +1,15 @@
 package goku.action;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import goku.DateUtil;
 import goku.GOKU;
 import goku.Result;
 import goku.Task;
 import goku.TaskList;
+
+import java.util.Date;
 
 import org.junit.After;
 import org.junit.Before;
@@ -28,22 +32,45 @@ public class EditActionTest {
 
   @Test
   public void editTask_returnsEditedResult() throws Exception {
-    Task a = new Task();
-    a.setTitle("hello");
-    int idA = a.getId();
-    list.addTask(a);
+    Task toEdit, changedTask;
+    Integer id;
+    EditAction editAction;
+    Result result;
 
-    Task b = new Task(a);
-    b.setTitle("byebye");
+    toEdit = new Task();
+    toEdit.setTitle("hello");
+    id = list.addTask(toEdit);
 
-    EditAction edit = new EditAction(goku);
-    edit.id = idA;
-    edit.title = "byebye";
-    Result result = edit.doIt();
+    changedTask = new Task(toEdit);
+    changedTask.setTitle("byebye");
 
-    Task editedTask = list.getTaskById(idA);
+    editAction = new EditAction(goku);
+    editAction.id = id;
+    editAction.title = "byebye";
+    result = editAction.doIt();
+
     assertTrue(result.isSuccess());
-    assertEquals("byebye", editedTask.getTitle());
+    assertEquals("byebye", toEdit.getTitle());
+
+    editAction = new EditAction(goku);
+    editAction.id = id;
+    editAction.isComplete = true;
+    assertNull(toEdit.isDone());
+    result = editAction.doIt();
+    assertTrue(result.isSuccess());
+    assertEquals("byebye", toEdit.getTitle());
+    assertTrue(toEdit.isDone());
+
+    editAction = new EditAction(goku);
+    editAction.id = id;
+    Date deadline = DateUtil.toDate(DateUtil.getNow());
+    editAction.dline = deadline;
+    assertNull(toEdit.getDeadline());
+    result = editAction.doIt();
+    assertTrue(result.isSuccess());
+    assertEquals("byebye", toEdit.getTitle());
+    assertTrue(toEdit.isDone());
+    assertEquals(deadline, toEdit.getDeadline());
   }
 
 }

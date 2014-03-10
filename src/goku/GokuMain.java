@@ -33,7 +33,7 @@ public class GokuMain {
       while (line != null) {
         Gson gson = new Gson();
         Task task = gson.fromJson(line, Task.class);
-        tasklist.addTaskWithoutSettingId(task);
+        tasklist.addTask(task);
         line = br.readLine();
       }
     }

@@ -12,13 +12,11 @@ public class ObservableTaskList extends TaskList implements ListModel<Task> {
   private List<ListDataListener> listeners = new ArrayList<ListDataListener>();
 
   @Override
-  public boolean addTask(Task task) {
+  public int addTask(Task task) {
     // TODO Auto-generated method stub
-    boolean success = super.addTask(task);
-    if (success) {
-      notifyChange();
-    }
-    return success;
+    int newId = super.addTask(task);
+    notifyChange();
+    return newId;
   }
 
   private void notifyChange() {

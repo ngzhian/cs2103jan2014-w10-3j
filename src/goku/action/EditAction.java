@@ -1,5 +1,6 @@
 package goku.action;
 
+import goku.DateRange;
 import goku.GOKU;
 import goku.Result;
 import goku.Task;
@@ -12,16 +13,18 @@ import java.util.Date;
  * analogous to real life tasks which the user wishes to note down.
  */
 public class EditAction extends Action {
-  private final String MSG_SUCCESS = "edited task";
+  public static final String ERR_INSUFFICIENT_ARGS = "Can't edit, need ID! Try \"edit 1 new title!\"";
+
+  public static final String ERR_INSUFFICIENT_ARGS_FOR_COMPLETION = "Can't complete, need ID! Try \"do 1\"";
+
+  private final String MSG_SUCCESS = "edited task %d";
 
   public int id;
 
-  public String deadline;
-
-  public String from;
-  public String to;
   public String title;
   public Date dline;
+  public DateRange period;
+  public Boolean isComplete;
 
   public EditAction(GOKU goku) {
     super(goku);
@@ -42,17 +45,18 @@ public class EditAction extends Action {
   }
 
   public Result updateTask() {
-    TaskList beforeAddList = new TaskList();
-    for (Task t : list.getArrayList()) {
-      beforeAddList.addUndoTask(new Task(t));
-    }
-    goku.getUndoList().offer(beforeAddList);
+    addToUndoList();
+
     Task taskWithEdits = new Task();
     taskWithEdits.setTitle(title);
     taskWithEdits.setDeadline(dline);
+    taskWithEdits.setPeriod(period);
+    taskWithEdits.setComplete(isComplete);
+
     Task t = list.getTaskById(id);
     t.updateWith(taskWithEdits);
-    return new Result(true, MSG_SUCCESS, null, null);
+
+    return new Result(true, String.format(MSG_SUCCESS, id), null, null);
   }
 
 }

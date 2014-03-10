@@ -211,7 +211,13 @@ public class GUserInterface extends JFrame implements UserInterface,
       } else {
         String input = textArea.getText();
         // Command c = makeCommand(input);
-        Action action = pparser.parse(input);
+        Action action = null;
+        try {
+          action = pparser.parse(input);
+        } catch (MakeActionException e) {
+          // TODO Auto-generated catch block
+          e.printStackTrace();
+        }
         if (action instanceof DisplayAction) {
           System.out.println("DISPLAY");
         } else {

@@ -1,6 +1,8 @@
 package goku.ui;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import goku.DateUtil;
 import goku.GOKU;
@@ -9,6 +11,7 @@ import goku.action.AddAction;
 import goku.action.DeleteAction;
 import goku.action.DisplayAction;
 import goku.action.EditAction;
+import goku.action.ExitAction;
 import goku.action.NoAction;
 import goku.action.SearchAction;
 import hirondelle.date4j.DateTime;
@@ -33,14 +36,18 @@ public class InputParserTest {
     a = null;
   }
 
-  @Test
-  public void parse_AddAction() throws Exception {
+  @Test(expected = MakeActionException.class)
+  public void parse_AddAction_throwsException() throws Exception {
     a = p.parse("");
     assertTrue(a instanceof NoAction);
     a = p.parse(null);
     assertTrue(a instanceof NoAction);
     a = p.parse("add");
     assertTrue(a instanceof NoAction);
+  }
+
+  @Test
+  public void parse_AddAction() throws Exception {
     a = p.parse("add this is a title");
     assertTrue(a instanceof AddAction);
     AddAction aa;
@@ -63,15 +70,13 @@ public class InputParserTest {
     assertTrue(a instanceof AddAction);
     aa = (AddAction) a;
     assertEquals("this is a task", aa.getTitle());
-    assertEquals("today", aa.from);
-    assertEquals("tomorrow", aa.to);
+    assertNotNull(aa.period);
 
     a = p.parse("add this is a task from 3pm to 4pm    ");
     assertTrue(a instanceof AddAction);
     aa = (AddAction) a;
     assertEquals("this is a task", aa.getTitle());
-    assertEquals("3pm", aa.from);
-    assertEquals("4pm", aa.to);
+    assertNotNull(aa.period);
 
     a = p.parse("add this is a task by 3pm tomorrow");
     assertTrue(a instanceof AddAction);
@@ -109,17 +114,26 @@ public class InputParserTest {
     assertTrue(to.getDay() == 20);
     assertTrue(to.getMonth() == 8);
     assertTrue(to.getYear() == 2014);
-    assertEquals(aa.from, "3pm 12/3");
-    assertEquals(aa.to, "1pm 20/8/14");
+    assertNotNull(aa.period);
+    // assertEquals(aa.from, "3pm 12/3");
+    // assertEquals(aa.to, "1pm 20/8/14");
+  }
+
+  @Test(expected = MakeActionException.class)
+  public void parse_DeleteAction_throwsException() throws Exception {
+    a = p.parse("delete");
+    assertTrue(a instanceof NoAction);
   }
 
   @Test
   public void parse_DeleteAction() throws Exception {
     DeleteAction da;
+
     a = p.parse("delete 1");
     assertTrue(a instanceof DeleteAction);
     da = (DeleteAction) a;
     assertEquals(1, da.id);
+    assertNull(da.title);
 
     a = p.parse("delete 1 task");
     assertTrue(a instanceof DeleteAction);
@@ -132,15 +146,18 @@ public class InputParserTest {
     assertEquals("abc", da.title);
   }
 
-  @Test
-  public void parse_EditAction() throws Exception {
-    EditAction ea;
-
+  @Test(expected = MakeActionException.class)
+  public void parse_EditAction_throwsException() throws Exception {
     a = p.parse("edit");
     assertTrue(a instanceof NoAction);
 
     a = p.parse("edit 1");
     assertTrue(a instanceof NoAction);
+  }
+
+  @Test
+  public void parse_EditAction() throws Exception {
+    EditAction ea;
 
     a = p.parse("edit 1 abc");
     assertTrue(a instanceof EditAction);
@@ -153,11 +170,30 @@ public class InputParserTest {
     ea = (EditAction) a;
     assertEquals("123", ea.title);
     assertEquals(1, ea.id);
+    assertNull(ea.isComplete);
+    assertNull(ea.dline);
+    assertNull(ea.period);
 
-    a = p.parse("edit a abc");
+    a = p.parse("edit 1 from 3pm to 6pm");
     assertTrue(a instanceof EditAction);
     ea = (EditAction) a;
-    assertEquals(null, ea.title);
+    assertEquals(1, ea.id);
+    assertNull(ea.isComplete);
+    assertNull(ea.title);
+    assertNull(ea.dline);
+    assertNotNull(ea.period);
+
+    a = p.parse("edit a abc");
+    assertTrue(a instanceof NoAction);
+
+    a = p.parse("do 1 abc");
+    assertTrue(a instanceof EditAction);
+    ea = (EditAction) a;
+    assertEquals(1, ea.id);
+    assertTrue(ea.isComplete);
+    assertNull(ea.dline);
+    assertNull(ea.period);
+
   }
 
   @Test
@@ -166,17 +202,38 @@ public class InputParserTest {
     assertTrue(a instanceof DisplayAction);
   }
 
+  @Test(expected = MakeActionException.class)
+  public void parse_SearchAction_throwsException() throws Exception {
+    a = p.parse("search");
+    assertTrue(a instanceof NoAction);
+  }
+
   @Test
   public void parse_SearchAction() throws Exception {
     SearchAction sa;
-
-    a = p.parse("search");
-    assertTrue(a instanceof NoAction);
 
     a = p.parse("search abc");
     assertTrue(a instanceof SearchAction);
     sa = (SearchAction) a;
     assertEquals("abc", sa.title);
+
+    a = p.parse("search from today to tomorrow");
+    assertTrue(a instanceof SearchAction);
+    sa = (SearchAction) a;
+    assertNull(sa.title);
+    assertNotNull(sa.period);
+
+    a = p.parse("search by tomorrow");
+    assertTrue(a instanceof SearchAction);
+    sa = (SearchAction) a;
+    assertNull(sa.title);
+    assertNotNull(sa.dline);
+
+    a = p.parse("search abc by tomorrow");
+    assertTrue(a instanceof SearchAction);
+    sa = (SearchAction) a;
+    assertNotNull(sa.title);
+    assertNotNull(sa.dline);
   }
 
   @Test

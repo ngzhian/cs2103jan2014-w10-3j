@@ -12,9 +12,10 @@ public class TaskList implements Iterable<Task> {
     _list = new ArrayList<Task>();
   }
 
-  public boolean addTask(Task task) {
+  public int addTask(Task task) {
     task.setId(++count);
-    return _list.add(task);
+    boolean success = _list.add(task);
+    return success ? task.getId() : -1;
   }
 
   public boolean addTaskWithoutSettingId(Task task) {
@@ -154,6 +155,18 @@ public class TaskList implements Iterable<Task> {
 
   public int size() {
     return _list.size();
+  }
+
+  public TaskList findTaskByTitle(String title) {
+    Task toFind = new Task();
+    toFind.setTitle(title);
+    TaskList matches = new TaskList();
+    for (Task task : _list) {
+      if (task.titleMatches(toFind)) {
+        matches.appendTask(task);
+      }
+    }
+    return matches;
   }
 
 }

@@ -1,8 +1,7 @@
-package goku.ui;
+package goku.action;
 
 import goku.GOKU;
 import goku.Result;
-import goku.action.Action;
 
 public class ExitAction extends Action {
 

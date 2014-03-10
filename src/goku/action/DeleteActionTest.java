@@ -30,8 +30,7 @@ public class DeleteActionTest {
   @Test
   public void deleteTask_withIdFound_returnsSuccess() throws Exception {
     Task aTask = new Task();
-    int id = aTask.getId();
-    list.addTask(aTask);
+    int id = list.addTask(aTask);
     DeleteAction delete = new DeleteAction(goku);
     delete.id = id;
     Result result = delete.doIt();
@@ -42,8 +41,7 @@ public class DeleteActionTest {
   @Test
   public void deleteTask_withIdNotFound_returnsFailure() throws Exception {
     Task aTask = new Task();
-    int id = aTask.getId();
-    list.addTask(aTask);
+    int id = list.addTask(aTask);
 
     DeleteAction delete = new DeleteAction(goku);
     delete.id = id + 1;
