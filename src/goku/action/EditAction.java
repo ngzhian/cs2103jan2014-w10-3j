@@ -32,11 +32,11 @@ public class EditAction extends Action {
   }
 
   public void addToUndoList() {
-    TaskList beforeAddList = new TaskList();
+    TaskList currList = new TaskList();
     for (Task t : list.getArrayList()) {
-      beforeAddList.addUndoTask(t);
+      currList.addUndoTask(t);
     }
-    goku.getUndoList().offer(beforeAddList);
+    goku.getUndoList().offer(currList);
   }
 
   @Override
