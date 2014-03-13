@@ -10,10 +10,16 @@ public class GOKU {
 
   private TaskList _list;
   private LinkedList<TaskList> undoList;
+  private LinkedList<TaskList> redoList;
 
   public GOKU() {
     _list = new TaskList();
     undoList = new LinkedList<TaskList>();
+    redoList = new LinkedList<TaskList>();
+  }
+
+  public LinkedList<TaskList> getRedoList() {
+    return redoList;
   }
 
   public TaskList getTaskList() {
