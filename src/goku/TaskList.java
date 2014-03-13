@@ -4,169 +4,175 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 public class TaskList implements Iterable<Task> {
-  private static Integer count = 0;
+	private static Integer count = 0;
 
-  private ArrayList<Task> _list;
+	private ArrayList<Task> _list;
 
-  public TaskList() {
-    _list = new ArrayList<Task>();
-  }
+	public TaskList() {
+		_list = new ArrayList<Task>();
+	}
 
-  public int addTask(Task task) {
-    task.setId(++count);
-    boolean success = _list.add(task);
-    return success ? task.getId() : -1;
-  }
+	public int addTask(Task task) {
+		task.setId(++count);
+		boolean success = _list.add(task);
+		return success ? task.getId() : -1;
+	}
 
-  public boolean addTaskWithoutSettingId(Task task) {
-    if (getTaskById(task.getId()) == null) {
-      return _list.add(task);
-    }
-    return false;
-  }
+	public boolean addTaskWithoutSettingId(Task task) {
+		if (getTaskById(task.getId()) == null) {
+			return _list.add(task);
+		}
+		return false;
+	}
 
-  public boolean appendTask(Task task) {
-    return _list.add(task);
-  }
+	public boolean appendTask(Task task) {
+		return _list.add(task);
+	}
 
-  public void addUndoTask(Task task) {
-    _list.add(task);
-  }
+	public void addUndoTask(Task task) {
+		_list.add(task);
+	}
 
-  public void clear() {
-    _list.clear();
-  }
+	public void clear() {
+		_list.clear();
+	}
 
-  private TaskList deleteTask(TaskList matches) {
-    if (matches.size() == 1) {
-      deleteTaskById(matches.getTaskByIndex(0).getId());
-      return new TaskList();
-    } else {
-      return matches;
-    }
-  }
+	private TaskList deleteTask(TaskList matches) {
+		if (matches.size() == 1) {
+			deleteTaskById(matches.getTaskByIndex(0).getId());
+			return new TaskList();
+		} else {
+			return matches;
+		}
+	}
 
-  public Task deleteTaskById(int id) {
-    int index = getIndexOfTaskById(id);
-    if (index < 0) {
-      return null;
-    } else {
-      return deleteTaskByIndex(index);
-    }
-  }
+	public Task deleteTaskById(int id) {
+		int index = getIndexOfTaskById(id);
+		if (index < 0) {
+			return null;
+		} else {
+			return deleteTaskByIndex(index);
+		}
+	}
 
-  public Task deleteTaskByIndex(int index) {
-    return _list.remove(index);
-  }
+	public Task deleteTaskByIndex(int index) {
+		return _list.remove(index);
+	}
 
-  public TaskList deleteTaskByTitle(Task toDelete) {
-    TaskList matches = findTaskByTitle(toDelete);
-    return deleteTask(matches);
-  }
+	public TaskList deleteTaskByTitle(Task toDelete) {
+		TaskList matches = findTaskByTitle(toDelete);
+		return deleteTask(matches);
+	}
 
-  public TaskList findTaskByDeadline(Task toFind) {
-    TaskList matches = new TaskList();
-    for (Task task : _list) {
-      if (task.getDeadline() == null) {
-        continue;
-      }
-      if (task.isDueOn(toFind)) {
-        matches.appendTask(task);
-      }
-    }
-    return matches;
+	public TaskList findTaskByDeadline(Task toFind) {
+		TaskList matches = new TaskList();
+		for (Task task : _list) {
+			if (task.getDeadline() == null) {
+				continue;
+			}
+			if (task.isDueOn(toFind)) {
+				matches.appendTask(task);
+			}
+		}
+		return matches;
+	}
+	
+	public TaskList findTaskByPeriod(Task toFind) {
+		TaskList matches = new TaskList();
+		for (Task task : _list) {
+			if (task.getDateRange() == null && task.getDeadline() == null) {
+				continue;
+			} else if (task.getDeadline()!=null && toFind.inPeriod(task.getDeadline())) {				// deadline falls within period
+				matches.appendTask(task);
+				continue;
+			} else if (task.getDateRange()!=null && toFind.inPeriod(task.getDateRange().startDate)) {	// start date of period falls within search period
+				matches.appendTask(task);
+				continue;
+			}
+		}	
+		
+		return matches;
+	}
 
-  }
+	public TaskList findTaskByTitle(Task toFind) {
+		TaskList matches = new TaskList();
+		for (Task task : _list) {
+			if (task.titleMatches(toFind)) {
+				matches.appendTask(task);
+			}
+		}
+		return matches;
+	}
 
-  public TaskList findTaskByTags(Task toFind) {
-    TaskList matches = new TaskList();
-    for (Task task : _list) {
-      if (task.tagsMatch(toFind)) {
-        matches.appendTask(task);
-      }
-    }
-    return matches;
-  }
+	public TaskList getAll() {
+		return this;
+	}
 
-  public TaskList findTaskByTitle(Task toFind) {
-    TaskList matches = new TaskList();
-    for (Task task : _list) {
-      if (task.titleMatches(toFind)) {
-        matches.appendTask(task);
-      }
-    }
-    return matches;
-  }
+	public TaskList getAllCompleted() {
+		TaskList result = new TaskList();
+		for (Task task : _list) {
+			if (task.getStatus()) {
+				result.addTask(task);
+			}
+		}
+		return result;
+	}
 
-  public TaskList getAll() {
-    return this;
-  }
+	public TaskList getAllIncomplete() {
+		TaskList result = new TaskList();
+		for (Task task : _list) {
+			if ((task.getStatus()) == null || !task.getStatus()) {
+				result.addTask(task);
+			}
+		}
+		return result;
+	}
 
-  public TaskList getAllCompleted() {
-    TaskList result = new TaskList();
-    for (Task task : _list) {
-      if (task.getStatus()) {
-        result.addTask(task);
-      }
-    }
-    return result;
-  }
+	public ArrayList<Task> getArrayList() {
+		return _list;
+	}
 
-  public TaskList getAllIncomplete() {
-    TaskList result = new TaskList();
-    for (Task task : _list) {
-      if ((task.getStatus()) == null || !task.getStatus()) {
-        result.addTask(task);
-      }
-    }
-    return result;
-  }
+	private int getIndexOfTaskById(int id) {
+		return _list.indexOf(getTaskById(id));
+	}
 
-  public ArrayList<Task> getArrayList() {
-    return _list;
-  }
+	/*
+	 * @param id
+	 * 
+	 * @returns the task with specified id
+	 */
+	public Task getTaskById(int id) {
+		for (Task task : _list) {
+			if (task.getId() == id) {
+				return task;
+			}
+		}
+		return null;
+	}
 
-  private int getIndexOfTaskById(int id) {
-    return _list.indexOf(getTaskById(id));
-  }
+	protected Task getTaskByIndex(int index) {
+		return _list.get(index);
+	}
 
-  /*
-   * @param id
-   * 
-   * @returns the task with specified id
-   */
-  public Task getTaskById(int id) {
-    for (Task task : _list) {
-      if (task.getId() == id) {
-        return task;
-      }
-    }
-    return null;
-  }
+	@Override
+	public Iterator<Task> iterator() {
+		return _list.listIterator();
+	}
 
-  protected Task getTaskByIndex(int index) {
-    return _list.get(index);
-  }
+	public int size() {
+		return _list.size();
+	}
 
-  @Override
-  public Iterator<Task> iterator() {
-    return _list.listIterator();
-  }
-
-  public int size() {
-    return _list.size();
-  }
-
-  public TaskList findTaskByTitle(String title) {
-    Task toFind = new Task();
-    toFind.setTitle(title);
-    TaskList matches = new TaskList();
-    for (Task task : _list) {
-      if (task.titleMatches(toFind)) {
-        matches.appendTask(task);
-      }
-    }
-    return matches;
-  }
+	public TaskList findTaskByTitle(String title) {
+		Task toFind = new Task();
+		toFind.setTitle(title);
+		TaskList matches = new TaskList();
+		for (Task task : _list) {
+			if (task.titleMatches(toFind)) {
+				matches.appendTask(task);
+			}
+		}
+		return matches;
+	}
 
 }
