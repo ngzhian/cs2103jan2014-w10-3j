@@ -58,7 +58,7 @@ public class CLUserInterface implements UserInterface {
 		}
 	}
 
-	private void doAction(Action action) {
+	private void doAction(Action action) throws MakeActionException {
 		if (action instanceof DisplayAction) {
 			printTaskList(action.doIt().getTasks());
 		} else if (action instanceof SearchAction) {
