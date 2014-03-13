@@ -5,8 +5,10 @@ import goku.GOKU;
 import goku.Result;
 import goku.Task;
 import goku.TaskList;
+import goku.ui.MakeActionException;
 
 import java.util.Date;
+import java.util.Iterator;
 
 public class SearchAction extends Action {
 
@@ -31,6 +33,7 @@ public class SearchAction extends Action {
 	private static final String MSG_SUCCESS = "Found tasks!";
 	private static final String MSG_FAIL = "No relevant tasks.";
 	public static final String ERR_INSUFFICIENT_ARGS = "Can't search! Try \"search title\"";
+	private static final String ERR_DEADLINE_PERIOD_CONFLICT = "Can't search! Conflicting deadline and period.";
 
 	public Result searchTitle() {
 		Task task = new Task();
@@ -62,14 +65,67 @@ public class SearchAction extends Action {
 	}
 
 	@Override
-	public Result doIt() {
-		if (dline != null) {
-			return searchByDeadline();
+	public Result doIt() throws MakeActionException{
+		
+		Result result = null;
+		
+		if (dline!=null && period!=null) {
+			result = searchByDeadlineAndPeriod();
+		} else if (dline != null) {
+			result = searchByDeadline();
 		} else if (period != null) {
-			return searchByPeriod();
+			result = searchByPeriod();
 		} else {
-			return searchTitle();
+			result = searchTitle();
 		}
+		
+		return result;
+	}
+
+	/*
+	 * Searches by both deadline and period and merges result
+	 */
+	private Result searchByDeadlineAndPeriod() throws MakeActionException{
+		
+		// check for conflicting deadline and period
+		if(!dline.before(period.getEndDate()) || !dline.after(period.getStartDate())) {
+			throw new MakeActionException(ERR_DEADLINE_PERIOD_CONFLICT);
+		}
+		
+		Result mergedResults = null;
+		
+		Result byDeadline = searchByDeadline();
+		Result byPeriod = searchByPeriod();
+		
+		if(byDeadline.isSuccess() && byPeriod.isSuccess()) {
+			// merge matching tasks in both results
+			Iterator<Task> dlIterator = byDeadline.getTasks().iterator();
+			Iterator<Task> prIterator = byPeriod.getTasks().iterator();
+			TaskList mergedFoundTasks = new TaskList();
+			
+			while(dlIterator.hasNext()) {
+				Task dlTask = dlIterator.next();
+				
+				while(prIterator.hasNext()) {
+					Task prTask = prIterator.next();
+					
+					if(!dlTask.equals(prTask)) {
+						mergedFoundTasks.addTask(prTask);
+					}
+				}
+				
+				mergedFoundTasks.addTask(dlTask);
+				prIterator = byPeriod.getTasks().iterator();
+			}
+			
+			mergedResults = new Result(true, MSG_SUCCESS, null, mergedFoundTasks);
+		} else if (byDeadline.isSuccess()) {
+			mergedResults = byDeadline;
+		} else {
+			mergedResults = byPeriod;
+		}
+		
+		return mergedResults;
 	}
 
 	public String getDeadline() {
