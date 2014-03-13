@@ -10,6 +10,7 @@ import goku.action.DisplayAction;
 import goku.action.EditAction;
 import goku.action.ExitAction;
 import goku.action.NoAction;
+import goku.action.RedoAction;
 import goku.action.SearchAction;
 import goku.action.UndoAction;
 import hirondelle.date4j.DateTime;
@@ -45,6 +46,7 @@ public class InputParser {
   private String[] searchKeywords = { "search", "find", "f" };
   private String[] exitKeywords = { "quit", "exit", "q" };
   private String[] undoKeywords = { "undo", "revert", "rollback" };
+  private String[] redoKeywords = { "redo" };
 
   private GOKU goku;
   private String[] params;
@@ -53,162 +55,19 @@ public class InputParser {
     this.goku = goku;
   }
 
-  /*
-   * @return NoAction if the input cannot be parsed, else a subclass of Action
-   */
-  public Action parse(String input) throws MakeActionException {
-    Action action = null;
-
-    if (input == null || input.isEmpty()) {
-      return new NoAction(goku);
-    }
-
-    List<String> inputList = Splitter.on(' ').omitEmptyStrings().trimResults()
-        .splitToList(input);
-    String[] inputArray = inputList.toArray(new String[inputList.size()]);
-    String command = inputArray[0];
-    params = inputArray.length > 1 ? Arrays.copyOfRange(inputArray, 1,
-        inputArray.length) : new String[0];
-
-    if (Arrays.asList(addKeywords).contains(command)) {
-      action = makeAddAction();
-    } else if (Arrays.asList(deleteKeywords).contains(command)) {
-      action = makeDeleteAction();
-    } else if (Arrays.asList(editKeywords).contains(command)) {
-      action = makeEditAction();
-    } else if (Arrays.asList(completeKeywords).contains(command)) {
-      action = makeCompleteAction();
-    } else if (Arrays.asList(displayKeywords).contains(command)) {
-      action = makeDisplayAction();
-    } else if (Arrays.asList(searchKeywords).contains(command)) {
-      action = makeSearchAction();
-    } else if (Arrays.asList(exitKeywords).contains(command)) {
-      action = new ExitAction(goku);
-    } else if (Arrays.asList(undoKeywords).contains(command)) {
-      action = new UndoAction(goku);
-    }
-
-    if (action == null) {
-      return new NoAction(goku);
-    }
-    return action;
-  }
-
-  /*
-   * Add expects to have parameters, minimally params[0] should be the title
-   * of the task.
-   * 
-   * @param params array of parameters that accompany the add action
-   * 
-   * @return null if no parameters are specified, else an AddAction with the
-   * title, due date, or deadline.
-   */
-  private AddAction makeAddAction() throws MakeActionException {
-    if (params.length == 0) {
-      throw new MakeActionException(AddAction.ERR_INSUFFICIENT_ARGS);
-    }
-    AddAction addAction = new AddAction(goku);
-    DateTime dl = extractDeadline();
-    DateRange dr = extractPeriod();
-    addAction.dline = DateUtil.toDate(dl);
-    addAction.period = dr;
-    addAction.title = Joiner.on(" ").join(params);
-    return addAction;
-  }
-
-  /*
-   * EditAction requires minimally 2 parameters 1) id for task to edit 2) an
-   * edit, which could be the title, deadline, period etc.
-   * 
-   * @return null if we cannot decide which task to edit
-   */
-  private EditAction makeEditAction() throws MakeActionException {
-    if (params.length < 2) {
-      throw new MakeActionException(EditAction.ERR_INSUFFICIENT_ARGS);
-    }
-
-    EditAction editAction = new EditAction(goku);
-    try {
-      int id = Integer.parseInt(params[0]);
-      editAction.id = id;
-      params = Arrays.copyOfRange(params, 1, params.length);
-
-      DateTime dl = extractDeadline();
-      DateRange dr = extractPeriod();
-      editAction.dline = DateUtil.toDate(dl);
-      editAction.period = dr;
-      String title = Joiner.on(" ").join(params);
-      if (!title.isEmpty()) {
-        editAction.title = title;
-      }
-    } catch (NumberFormatException e) {
+  private DateTime extractDeadline() {
+    int indexOfBy = Arrays.asList(params).indexOf("by");
+    if (indexOfBy < 0) {
       return null;
     }
-    return editAction;
-  }
-
-  /*
-   * Delete can take in a single parameter which can be parsed into an
-   * integer, this is then assumed to be the ID of the Task to be deleted.
-   * Else the inputs will be taken as the title of the task to be deleted.
-   */
-  private DeleteAction makeDeleteAction() throws MakeActionException {
-    if (params.length == 0) {
-      throw new MakeActionException(DeleteAction.ERR_INSUFFICIENT_ARGS);
+    // get the rest of the params after "by"
+    String[] candidates = Arrays.copyOfRange(params, indexOfBy + 1,
+        params.length);
+    DateTime parsed = DateUtil.parse(candidates);
+    if (parsed != null) {
+      params = Arrays.copyOfRange(params, 0, indexOfBy);
     }
-    DeleteAction da = new DeleteAction(goku);
-    if (params.length == 1) {
-      try {
-        int id = Integer.parseInt(params[0]);
-        da.id = id;
-      } catch (NumberFormatException e) {
-        da.title = params[0];
-      }
-    } else {
-      da.title = Joiner.on(" ").join(params);
-    }
-    return da;
-  }
-
-  private EditAction makeCompleteAction() throws MakeActionException {
-    if (params.length < 1) {
-      throw new MakeActionException(
-          EditAction.ERR_INSUFFICIENT_ARGS_FOR_COMPLETION);
-    }
-    EditAction editAction = new EditAction(goku);
-    try {
-      int id = Integer.parseInt(params[0]);
-      editAction.id = id;
-      editAction.isComplete = true;
-    } catch (NumberFormatException e) {
-      return null;
-    }
-    return editAction;
-  }
-
-  /*
-   * All inputs to search are taken to be the title of the Task to find
-   */
-  private SearchAction makeSearchAction() throws MakeActionException {
-    if (params.length == 0) {
-      throw new MakeActionException(SearchAction.ERR_INSUFFICIENT_ARGS);
-    }
-
-    SearchAction searchAction = new SearchAction(goku);
-    DateTime dl = extractDeadline();
-    DateRange dr = extractPeriod();
-    searchAction.dline = DateUtil.toDate(dl);
-    searchAction.period = dr;
-    String title = Joiner.on(" ").join(params);
-    if (!title.isEmpty()) {
-      searchAction.title = title;
-    }
-    return searchAction;
-  }
-
-  private DisplayAction makeDisplayAction() {
-    DisplayAction da = new DisplayAction(goku);
-    return da;
+    return parsed;
   }
 
   /*
@@ -246,18 +105,163 @@ public class InputParser {
     return dr;
   }
 
-  private DateTime extractDeadline() {
-    int indexOfBy = Arrays.asList(params).indexOf("by");
-    if (indexOfBy < 0) {
+  /*
+   * Add expects to have parameters, minimally params[0] should be the title of
+   * the task.
+   * 
+   * @param params array of parameters that accompany the add action
+   * 
+   * @return null if no parameters are specified, else an AddAction with the
+   * title, due date, or deadline.
+   */
+  private AddAction makeAddAction() throws MakeActionException {
+    if (params.length == 0) {
+      throw new MakeActionException(AddAction.ERR_INSUFFICIENT_ARGS);
+    }
+    AddAction addAction = new AddAction(goku);
+    DateTime dl = extractDeadline();
+    DateRange dr = extractPeriod();
+    addAction.dline = DateUtil.toDate(dl);
+    addAction.period = dr;
+    addAction.title = Joiner.on(" ").join(params);
+    return addAction;
+  }
+
+  private EditAction makeCompleteAction() throws MakeActionException {
+    if (params.length < 1) {
+      throw new MakeActionException(
+          EditAction.ERR_INSUFFICIENT_ARGS_FOR_COMPLETION);
+    }
+    EditAction editAction = new EditAction(goku);
+    try {
+      int id = Integer.parseInt(params[0]);
+      editAction.id = id;
+      editAction.isComplete = true;
+    } catch (NumberFormatException e) {
       return null;
     }
-    // get the rest of the params after "by"
-    String[] candidates = Arrays.copyOfRange(params, indexOfBy + 1,
-        params.length);
-    DateTime parsed = DateUtil.parse(candidates);
-    if (parsed != null) {
-      params = Arrays.copyOfRange(params, 0, indexOfBy);
+    return editAction;
+  }
+
+  /*
+   * Delete can take in a single parameter which can be parsed into an integer,
+   * this is then assumed to be the ID of the Task to be deleted. Else the
+   * inputs will be taken as the title of the task to be deleted.
+   */
+  private DeleteAction makeDeleteAction() throws MakeActionException {
+    if (params.length == 0) {
+      throw new MakeActionException(DeleteAction.ERR_INSUFFICIENT_ARGS);
     }
-    return parsed;
+    DeleteAction da = new DeleteAction(goku);
+    if (params.length == 1) {
+      try {
+        int id = Integer.parseInt(params[0]);
+        da.id = id;
+      } catch (NumberFormatException e) {
+        da.title = params[0];
+      }
+    } else {
+      da.title = Joiner.on(" ").join(params);
+    }
+    return da;
+  }
+
+  private DisplayAction makeDisplayAction() {
+    DisplayAction da = new DisplayAction(goku);
+    return da;
+  }
+
+  /*
+   * EditAction requires minimally 2 parameters 1) id for task to edit 2) an
+   * edit, which could be the title, deadline, period etc.
+   * 
+   * @return null if we cannot decide which task to edit
+   */
+  private EditAction makeEditAction() throws MakeActionException {
+    if (params.length < 2) {
+      throw new MakeActionException(EditAction.ERR_INSUFFICIENT_ARGS);
+    }
+
+    EditAction editAction = new EditAction(goku);
+    try {
+      int id = Integer.parseInt(params[0]);
+      editAction.id = id;
+      params = Arrays.copyOfRange(params, 1, params.length);
+
+      DateTime dl = extractDeadline();
+      DateRange dr = extractPeriod();
+      editAction.dline = DateUtil.toDate(dl);
+      editAction.period = dr;
+      String title = Joiner.on(" ").join(params);
+      if (!title.isEmpty()) {
+        editAction.title = title;
+      }
+    } catch (NumberFormatException e) {
+      return null;
+    }
+    return editAction;
+  }
+
+  /*
+   * All inputs to search are taken to be the title of the Task to find
+   */
+  private SearchAction makeSearchAction() throws MakeActionException {
+    if (params.length == 0) {
+      throw new MakeActionException(SearchAction.ERR_INSUFFICIENT_ARGS);
+    }
+
+    SearchAction searchAction = new SearchAction(goku);
+    DateTime dl = extractDeadline();
+    DateRange dr = extractPeriod();
+    searchAction.dline = DateUtil.toDate(dl);
+    searchAction.period = dr;
+    String title = Joiner.on(" ").join(params);
+    if (!title.isEmpty()) {
+      searchAction.title = title;
+    }
+    return searchAction;
+  }
+
+  /*
+   * @return NoAction if the input cannot be parsed, else a subclass of Action
+   */
+  public Action parse(String input) throws MakeActionException {
+    Action action = null;
+
+    if (input == null || input.isEmpty()) {
+      return new NoAction(goku);
+    }
+
+    List<String> inputList = Splitter.on(' ').omitEmptyStrings().trimResults()
+        .splitToList(input);
+    String[] inputArray = inputList.toArray(new String[inputList.size()]);
+    String command = inputArray[0];
+    params = inputArray.length > 1 ? Arrays.copyOfRange(inputArray, 1,
+        inputArray.length) : new String[0];
+
+    if (Arrays.asList(addKeywords).contains(command)) {
+      action = makeAddAction();
+    } else if (Arrays.asList(deleteKeywords).contains(command)) {
+      action = makeDeleteAction();
+    } else if (Arrays.asList(editKeywords).contains(command)) {
+      action = makeEditAction();
+    } else if (Arrays.asList(completeKeywords).contains(command)) {
+      action = makeCompleteAction();
+    } else if (Arrays.asList(displayKeywords).contains(command)) {
+      action = makeDisplayAction();
+    } else if (Arrays.asList(searchKeywords).contains(command)) {
+      action = makeSearchAction();
+    } else if (Arrays.asList(exitKeywords).contains(command)) {
+      action = new ExitAction(goku);
+    } else if (Arrays.asList(undoKeywords).contains(command)) {
+      action = new UndoAction(goku);
+    } else if (Arrays.asList(redoKeywords).contains(command)) {
+      action = new RedoAction(goku);
+    }
+
+    if (action == null) {
+      return new NoAction(goku);
+    }
+    return action;
   }
 }
