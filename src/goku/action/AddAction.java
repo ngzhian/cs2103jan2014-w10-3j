@@ -24,6 +24,7 @@ public class AddAction extends Action {
   public TaskList list;
   public Date dline;
   public DateRange period;
+  public boolean isImpt;
 
   public AddAction(GOKU goku) {
     super(goku);
@@ -73,6 +74,7 @@ public class AddAction extends Action {
     task.setTitle(title);
     task.setDeadline(dline);
     task.setPeriod(period);
+    task.setImpt(isImpt);
     return task;
   }
 
