@@ -24,6 +24,7 @@ public class UndoAction extends Action {
       return new Result(false, null, ERR_FAIL, null);
     }
 
+    goku.getRedoList().offer(goku.getTaskList());
     TaskList prevList = goku.getUndoList().pollLast();
     goku.setTaskList(prevList);
 
