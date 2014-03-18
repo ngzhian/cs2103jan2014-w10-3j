@@ -196,7 +196,7 @@ public class Task {
 
     if (deadline != null) {
       sb.append(" | Deadline: ");
-      sb.append(deadline);
+      sb.append(deadline.toString().substring(0, 16));
     }
 
     if (period != null) {
