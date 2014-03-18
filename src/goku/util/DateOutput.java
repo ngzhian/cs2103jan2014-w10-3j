@@ -6,10 +6,19 @@ import java.util.Date;
 
 public class DateOutput {
 
+  /*
+   * @see format
+   */
   public static String format(Date date) {
     return format(DateUtil.date4j(date));
   }
 
+  /*
+   * Formats a date into a human-friendly string.
+   * 1 - date is the same day as current day: "X hours later"
+   * 2 - date is less than 7 days away: "X days later"
+   * 3 - all other dates "dd/MM"
+   */
   public static String format(DateTime date) {
     DateTime now = DateUtil.getNow();
     int daysDifference = now.numDaysFrom(date);
@@ -27,6 +36,5 @@ public class DateOutput {
 
   private static int getDifferenceInHours(DateTime now, DateTime date) {
     return date.getHour() - now.getHour();
-
   }
 }
