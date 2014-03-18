@@ -99,10 +99,11 @@ public class TaskList implements Iterable<Task> {
         matches.appendTask(task);
         continue;
       } else if (task.getDateRange() != null
-          && toFind.inPeriod(task.getDateRange().startDate)) { // start date of
-                                                               // period falls
-                                                               // within search
-                                                               // period
+          && (toFind.inPeriod(task.getDateRange().startDate) || toFind
+              .inPeriod(task.getDateRange().endDate))) { // start date of
+        // period falls
+        // within search
+        // period
         matches.appendTask(task);
         continue;
       }
