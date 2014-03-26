@@ -244,6 +244,14 @@ public class InputParserTest {
     assertTrue(a instanceof NoAction);
   }
   
+  /*
+   * SearchAction - Check Free Feature (multiple inputs all combinations)
+   * At the parser level, search action is created first then the testFree parameter
+   * is flagged true if "free" is the command word detected. The next two test cases
+   * checks that the flagging is working properly. The next two test cases ensures
+   * that the dates should only be parsed if they are valid. If it's not valid, the
+   * action should not go through. There are only a total of 4 possible scenarios.
+   */
   @Test
   public void parse_SearchAction_CheckFreeIsTrue() throws Exception {
     a = p.parse("free today");
