@@ -10,9 +10,12 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Logger;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 
 /*
  * LocalFileStorage saves objects into a file on the local file system. By
@@ -80,15 +83,23 @@ public class LocalFileStorage implements Storage {
 
   @Override
   public TaskList loadStorage() throws FileNotFoundException, IOException {
+    List<Integer> errorLines = new ArrayList<Integer>();
+    int currentLine = 1;
     LOGGER.info("Loading from file: " + file.getName());
     TaskList tasklist = new TaskList();
     try (BufferedReader br = new BufferedReader(new FileReader("store.goku"))) {
       String line = br.readLine();
       while (line != null) {
         Gson gson = new Gson();
-        Task task = gson.fromJson(line, Task.class);
-        tasklist.addTask(task);
+        try {
+          Task task = gson.fromJson(line, Task.class);
+          tasklist.addTask(task);
+        } catch (JsonSyntaxException e) {
+          // can't read store.goku
+          errorLines.add(currentLine);
+        }
         line = br.readLine();
+        currentLine++;
       }
     }
     return tasklist;
