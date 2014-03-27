@@ -3,6 +3,7 @@ package goku.action;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import goku.GOKU;
+import goku.Result;
 import goku.Task;
 import goku.TaskList;
 import goku.util.DateUtil;
@@ -19,13 +20,6 @@ public class UndoActionTest {
   TaskList list;
   Deque<TaskList> undoList;
 
-  @Before
-  public void setup() {
-    goku = new GOKU();
-    list = goku.getTaskList();
-    undoList = goku.getUndoList();
-  }
-
   @After
   public void cleanUp() {
     list.clear();
@@ -41,10 +35,8 @@ public class UndoActionTest {
     add3.title = "hi def";
     UndoAction undo = new UndoAction(goku);
 
-    Task task1 = new Task();
-    task1.setTitle("abc");
-    Task task2 = new Task();
-    task2.setTitle("def");
+    Result result = undo.doIt();
+    assertEquals("Failed to undo.", result.getErrorMsg());
 
     add1.doIt();
     assertEquals(1, undoList.size());
@@ -56,6 +48,10 @@ public class UndoActionTest {
     assertEquals(2, undoList.size());
 
     assertEquals(2, goku.getTaskList().size());
+
+    assertEquals("hi abc", goku.getTaskList().getTaskById(1).getTitle());
+    assertEquals("hi abcdef", goku.getTaskList().getTaskById(2).getTitle());
+
   }
 
   @Test
@@ -67,13 +63,11 @@ public class UndoActionTest {
     AddAction add3 = new AddAction(goku);
     add3.title = "hi def";
     DeleteAction delete = new DeleteAction(goku);
-    delete.id = 3; // HAVE TO EDIT THIS ONCE THE ID THING IS FIXED
+    delete.id = 3;
     UndoAction undo = new UndoAction(goku);
 
-    Task task1 = new Task();
-    task1.setTitle("abc");
-    Task task2 = new Task();
-    task2.setTitle("def");
+    Result result = undo.doIt();
+    assertEquals("Failed to undo.", result.getErrorMsg());
 
     add1.doIt();
     assertEquals(1, undoList.size());
@@ -86,6 +80,10 @@ public class UndoActionTest {
     assertEquals(2, goku.getTaskList().size());
     undo.doIt();
     assertEquals(3, goku.getTaskList().size());
+
+    assertEquals("hi abc", goku.getTaskList().getTaskById(1).getTitle());
+    assertEquals("hi abcdef", goku.getTaskList().getTaskById(2).getTitle());
+    assertEquals("hi def", goku.getTaskList().getTaskById(3).getTitle());
   }
 
   @Test
@@ -98,6 +96,9 @@ public class UndoActionTest {
     editTitle.id = 1;
     editTitle.title = "bye abc";
     UndoAction undo = new UndoAction(goku);
+
+    Result result = undo.doIt();
+    assertEquals("Failed to undo.", result.getErrorMsg());
 
     add1.doIt();
     assertEquals(1, undoList.size());
@@ -123,5 +124,12 @@ public class UndoActionTest {
     task2 = goku.getTaskList().getTaskById(1);
     assertEquals(prevDeadline, task2.getDeadline());
 
+  }
+
+  @Before
+  public void setup() {
+    goku = new GOKU();
+    list = goku.getTaskList();
+    undoList = goku.getUndoList();
   }
 }
