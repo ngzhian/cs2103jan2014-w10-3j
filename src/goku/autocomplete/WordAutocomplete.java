@@ -46,12 +46,17 @@ public class WordAutocomplete {
     }
   }
 
-  private List<String> getPossibleCompletions(int insertionPoint) {
-    return corpus.subList(insertionPoint, corpus.size());
+  /*
+   * The insertion point is where a item that is not found in the Collections
+   * would be inserted if it was added. Refer to Collections.binarySearch for
+   * more information.
+   */
+  private int getInsertionPoint(int index) {
+    return -(index + 1);
   }
 
-  private boolean isPossibleCompletion(String possibility, String prefix) {
-    return possibility.startsWith(prefix);
+  private List<String> getPossibleCompletions(int insertionPoint) {
+    return corpus.subList(insertionPoint, corpus.size());
   }
 
   /*
@@ -62,31 +67,26 @@ public class WordAutocomplete {
     return indexPrefixIsFound >= 0;
   }
 
-  /*
-   * The insertion point is where a item that is not found in the Collections
-   * would be inserted if it was added. Refer to Collections.binarySearch for
-   * more information.
-   */
-  private int getInsertionPoint(int index) {
-    return -(index + 1);
+  private boolean isPossibleCompletion(String possibility, String prefix) {
+    return possibility.startsWith(prefix);
   }
 
   private List<String> makeDefaultCorpus() {
     List<String> defaultCorpus = new ArrayList<String>();
     defaultCorpus.addAll(Arrays.asList((new String[] { "add", "edit", "delete",
-        "remove", "update", "done", "complete", "do", "finish", "display",
+        "remove", "update", "done", "completed", "do", "finish", "display",
         "view", "show", "search", "find", "quit", "exit", "undo", "revert",
         "rollback" })));
 
     return defaultCorpus;
   }
 
-  private void setDefaultCorpus() {
-    setCorpus(DEFAULT_CORPUS);
-  }
-
   private void setCorpus(List<String> corpus) {
     this.corpus = corpus;
     Collections.sort(corpus);
+  }
+
+  private void setDefaultCorpus() {
+    setCorpus(DEFAULT_CORPUS);
   }
 }
