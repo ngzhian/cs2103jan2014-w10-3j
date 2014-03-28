@@ -38,27 +38,41 @@ public class CLUserInterface implements UserInterface {
     parser = new InputParser(goku);
   }
 
-  @Override
-  public void run() {
-    printWelcomeMessage();
-    trytoloadfile();
-    getUserInputUntilExit();
-    printExitMessage();
-  }
-
-  private void printWelcomeMessage() {
-    System.out.println(GOKU_WELCOME_MESSAGE);
-  }
-
-  private void trytoloadfile() {
-    try {
-      goku.setTaskList(storage.loadStorage());
-    } catch (FileNotFoundException e) {
-      LOGGER.warning("File cannot be found, no tasks loaded.");
-    } catch (IOException e) {
-      LOGGER.warning("Error loading file, no tasks loaded.");
+  private void doAction(Action action) throws MakeActionException {
+    assert action != null;
+    Result result = action.doIt();
+    if (action instanceof DisplayAction) {
+      printTaskList(result.getTasks());
+    } else {
+      feedBack(result);
+      save();
     }
-    LOGGER.info("Successfully loaded file: " + storage.getName());
+  }
+
+  @Override
+  public void feedBack(Result result) {
+    if (result == null) {
+      return;
+    }
+    if (result.isSuccess()) {
+      System.out.println(result.getSuccessMsg());
+      if (result.getTasks() != null) {
+        printTaskList(result.getTasks());
+      }
+    } else {
+      System.out.println(result.getErrorMsg());
+      if (result.getTasks() != null) {
+        printTaskList(result.getTasks());
+      }
+    }
+  }
+
+  /**
+   * @return string that user entered
+   */
+  @Override
+  public String getUserInput() {
+    return sc.nextLine();
   }
 
   public void getUserInputUntilExit() {
@@ -77,23 +91,29 @@ public class CLUserInterface implements UserInterface {
     }
   }
 
-  private void printPrompt() {
-    System.out.print(GOKU_PROMPT);
-  }
-
   private void printExitMessage() {
     System.out.println(GOKU_EXIT_MESSAGE);
   }
 
-  private void doAction(Action action) throws MakeActionException {
-    assert action != null;
-    Result result = action.doIt();
-    if (action instanceof DisplayAction) {
-      printTaskList(result.getTasks());
-    } else {
-      feedBack(result);
-      save();
-    }
+  private void printPrompt() {
+    System.out.print(GOKU_PROMPT);
+  }
+
+  public void printTaskList(List<Task> list) {
+    TaskListDisplayer tld = new TaskListDisplayer(System.out);
+    tld.display(list);
+  }
+
+  private void printWelcomeMessage() {
+    System.out.println(GOKU_WELCOME_MESSAGE);
+  }
+
+  @Override
+  public void run() {
+    printWelcomeMessage();
+    trytoloadfile();
+    getUserInputUntilExit();
+    printExitMessage();
   }
 
   public void save() {
@@ -104,33 +124,14 @@ public class CLUserInterface implements UserInterface {
     }
   }
 
-  /**
-   * @return string that user entered
-   */
-  @Override
-  public String getUserInput() {
-    return sc.nextLine();
-  }
-
-  @Override
-  public void feedBack(Result result) {
-    if (result == null) {
-      return;
+  private void trytoloadfile() {
+    try {
+      goku.setTaskList(storage.loadStorage());
+    } catch (FileNotFoundException e) {
+      LOGGER.warning("File cannot be found, no tasks loaded.");
+    } catch (IOException e) {
+      LOGGER.warning("Error loading file, no tasks loaded.");
     }
-    if (result.isSuccess()) {
-      System.out.println(result.getSuccessMsg());
-      if (result.getTasks() != null) {
-        printTaskList(result.getTasks());
-      }
-    } else {
-      System.out.println(result.getErrorMsg());
-      if (result.getTasks() != null) {
-      }
-    }
-  }
-
-  public void printTaskList(List<Task> list) {
-    TaskListDisplayer tld = new TaskListDisplayer(System.out);
-    tld.display(list);
+    LOGGER.info("Successfully loaded file: " + storage.getName());
   }
 }

@@ -8,6 +8,8 @@ public class RedoAction extends Action {
   private static final String MSG_SUCCESS = "Command undone!";
   private static final String ERR_FAIL = "Failed to undo.";
 
+  private boolean isEmpty = false;
+
   public RedoAction(GOKU goku) {
     super(goku);
     list = goku.getTaskList();
@@ -16,18 +18,24 @@ public class RedoAction extends Action {
 
   @Override
   public Result doIt() {
-    return redoCommand();
+    if (redoCommand() == false) {
+      return new Result(false, null, ERR_FAIL, goku.getTaskList()
+          .getAllIncomplete());
+    } else {
+      return new Result(true, MSG_SUCCESS, null, goku.getTaskList()
+          .getAllIncomplete());
+    }
   }
 
-  public Result redoCommand() {
+  public boolean redoCommand() {
     if (goku.getRedoList().isEmpty()) {
-      return new Result(false, null, ERR_FAIL, null);
+      return isEmpty;
     }
 
     goku.getUndoList().offer(goku.getTaskList());
     TaskList prevList = goku.getRedoList().pollLast();
     goku.setTaskList(prevList);
 
-    return new Result(true, MSG_SUCCESS, null, null);
+    return !isEmpty;
   }
 }
