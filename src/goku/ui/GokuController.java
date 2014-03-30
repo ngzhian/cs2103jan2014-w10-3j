@@ -85,17 +85,19 @@ public class GokuController {
 
     try {
       goku.setTaskList(storage.loadStorage());
+      doAction(new GreetAction(goku));
     } catch (FileNotFoundException e) {
       LOGGER.warning("File cannot be found, no tasks loaded.");
+      feedbackController
+          .displayLine("Seems like you're new!\nA file called \"store.goku\" has been created to save your tasks!");
     } catch (IOException e) {
       LOGGER.warning("Error loading file, no tasks loaded.");
     } catch (LoadTasksException e) {
+      LOGGER
+          .warning("Error parsing JSON, loaded tasks to the best of my ability.");
       feedbackController.displayErrorMessage(e.getMessage());
-      System.out.println(e.getLoadedTasks().size());
       goku.setTaskList(e.getLoadedTasks());
     }
-
-    doAction(new GreetAction(goku));
   }
 
   /*
