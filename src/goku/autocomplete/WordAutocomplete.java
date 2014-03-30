@@ -86,7 +86,8 @@ public class WordAutoComplete {
     defaultCorpus.addAll(Arrays.asList((new String[] { "the", "and", "with",
         "next", "monday", "tuesday", "wednesday", "thursday", "friday",
         "saturday", "sunday", "week", "from", "by", "on", "do", "find", "play",
-        "meet", "meeting", "homework", "project", "completed", "overdue" })));
+        "meet", "meeting", "homework", "project", "completed", "overdue",
+        "remove", "period", "deadline", "important" })));
 
     return defaultCorpus;
   }

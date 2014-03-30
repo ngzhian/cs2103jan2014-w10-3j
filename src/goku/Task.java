@@ -160,16 +160,10 @@ public class Task implements Storeable {
   }
 
   public void setDeadline(DateTime deadline) {
-    if (deadline == null) {
-      return;
-    }
     this.deadline = deadline;
   }
 
   public void setPeriod(DateRange period) {
-    if (period == null) {
-      return;
-    }
     this.period = period;
   }
 
