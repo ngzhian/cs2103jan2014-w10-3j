@@ -14,7 +14,7 @@ import hirondelle.date4j.DateTime;
 public class AddAction extends Action {
   private static final String MSG_SUCCESS = "Added: \"%s\"";
   private static final String ERR_FAIL = "Fail to add: \"%s\"";
-  public static final String ERR_INSUFFICIENT_ARGS = "Can't add! Try \"add my task! by tomorrow\"";
+  public static final String ERR_INSUFFICIENT_ARGS = "Can't add! Need title. Try \"add my task! by tomorrow\"";
 
   public String title;
   public String deadline;

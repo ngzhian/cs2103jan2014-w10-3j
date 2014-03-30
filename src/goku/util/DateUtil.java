@@ -57,7 +57,9 @@ public class DateUtil {
   }
 
   public static boolean isEarlierOrOn(DateTime aDate, DateTime otherDate) {
-    assert otherDate != null;
+    if (otherDate == null) {
+      return false;
+    }
     if (aDate == null) {
       return false;
     }
@@ -212,20 +214,18 @@ public class DateUtil {
     if (date == null && time == null) {
       return null;
     }
-    
     DateTime result = null;
-    
+
     if (date == null) {
-      date = DateTime.today(TimeZone.getDefault());
-      
-      result = new DateTime(date.getYear(), date.getMonth(),
-          date.getDay(), time.getHour(), time.getMinute(), time.getSecond(),
+      date = getNow();
+      result = new DateTime(date.getYear(), date.getMonth(), date.getDay(),
+          time.getHour(), time.getMinute(), time.getSecond(),
           time.getNanoseconds());
     } else if (time == null) {
       result = date;
     } else {
-      result = new DateTime(date.getYear(), date.getMonth(),
-          date.getDay(), time.getHour(), time.getMinute(), time.getSecond(),
+      result = new DateTime(date.getYear(), date.getMonth(), date.getDay(),
+          time.getHour(), time.getMinute(), time.getSecond(),
           time.getNanoseconds());
     }
 
@@ -311,7 +311,7 @@ public class DateUtil {
       case "tomorrow" :
       case "tml" :
       case "tmr" :
-        return DateTime.today(TimeZone.getDefault()).plusDays(1);
+        return now.plusDays(1);
       default :
         return getNearestDateToWeekday(string);
     }
