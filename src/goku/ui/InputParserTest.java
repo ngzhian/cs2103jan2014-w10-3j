@@ -9,6 +9,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.List;
 import java.util.TimeZone;
 
+import goku.DateRange;
 import goku.GOKU;
 import goku.action.Action;
 import goku.action.AddAction;
@@ -315,6 +316,13 @@ public class InputParserTest {
     assertTrue(a instanceof ExitAction);
   }
   
+  /*
+   * extractDeadline() Specifics
+   * 1) Contains date and time => returns DateTime with date and time
+   * 2) Contains date only => returns DateTime with date only
+   * 3) Contains time only => returns DateTime with today as date and time
+   * 4) Returns null if input is not valid
+   */
   @Test
   public void extractDeadline_SpecificDateSpecificTime() {
     List<String> input = Splitter.on(' ').omitEmptyStrings().
@@ -370,7 +378,14 @@ public class InputParserTest {
   
   @Test
   public void extractPeriod_SpecificDatesOnly() {
-    
+    List<String> input = Splitter.on(' ').omitEmptyStrings().
+        trimResults().splitToList("from today to tmr");
+        String[] inputArray = input.toArray(new String[input.size()]);
+        p.params = inputArray;
+        
+        DateRange resultRange = p.extractPeriod();
+        
+        assertEquals(DateTime.today(TimeZone.getDefault()), resultRange.getStartDate());
   }
   
   @Test
