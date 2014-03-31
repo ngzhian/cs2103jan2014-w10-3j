@@ -7,7 +7,15 @@ import hirondelle.date4j.DateTime;
 import org.junit.Test;
 
 public class DateUtilTest {
+  @Test
+  public void looksLikeOffset() throws Exception {
+    assertTrue(DateUtil.isOffsetWord("next"));
+  }
 
+  /*
+   * Combination heuristics. All inputs below are well-formed
+   * and should pass.
+   */
   @Test
   public void looksLikeTime_success() throws Exception {
     assertTrue(DateUtil.looksLikeTime("1:45"));
@@ -19,6 +27,10 @@ public class DateUtilTest {
     assertTrue(DateUtil.looksLikeTime("1.45am"));
   }
 
+  /*
+   * Combination heuristics. All inputs below are well-formed
+   * and should pass.
+   */
   @Test
   public void looksLikeDate_success() throws Exception {
     assertTrue(DateUtil.looksLikeDay("sUn"));
@@ -45,6 +57,10 @@ public class DateUtilTest {
     assertTrue(DateUtil.looksLikeDate("4-3-12"));
   }
 
+  /*
+   * Combination heuristics. All inputs below are well-formed
+   * and should pass.
+   */
   @Test
   public void parseDay_success() throws Exception {
     DateTime now = DateUtil.getNow();
@@ -57,11 +73,35 @@ public class DateUtilTest {
     assertTrue(expected.isSameDayAs(result));
     result = DateUtil.parseDay("tMr");
     assertTrue(expected.isSameDayAs(result));
-
     result = DateUtil.parseDay("todaY");
     assertTrue(now.isSameDayAs(result));
   }
 
+  @Test
+  public void parseWithWeekOffset_success() throws Exception {
+    DateTime base = new DateTime(2014, 3, 27, 0, 0, 0, 0); // this is a thursday
+    DateTime result, expected;
+
+    expected = base.plusDays(8);
+
+    result = DateUtil.parse("next friday".split(" "));
+    assertEquals(expected.getDay(), result.getDay());
+    assertTrue(expected.isSameDayAs(result));
+
+    // TODO is this expected result?
+    expected = base.plusDays(14);
+    result = DateUtil.parse("next thursday".split(" "));
+    assertTrue(expected.isSameDayAs(result));
+
+    expected = base.plusDays(11);
+    result = DateUtil.parse("Next monday".split(" "));
+    assertTrue(expected.isSameDayAs(result));
+  }
+
+  /*
+   * Combination heuristics. All inputs below are well-formed
+   * and should pass.
+   */
   @Test
   public void parseDate_success() throws Exception {
     DateTime now = DateUtil.getNow(), actual, expected;
@@ -83,6 +123,10 @@ public class DateUtilTest {
     assertTrue(expected.isSameDayAs(actual));
   }
 
+  /*
+   * Combination heuristics. All inputs below are well-formed
+   * and should pass.
+   */
   @Test
   public void parseTime_success() throws Exception {
     DateTime date, expected;
@@ -123,6 +167,10 @@ public class DateUtilTest {
     assertEquals(expected.getMinute(), date.getMinute());
   }
 
+  /*
+   * Combination heuristics. All inputs below are well-formed
+   * and should pass.
+   */
   @Test
   public void getNearestDateToWeekday_success() {
     DateTime start, nearest, result;
@@ -142,17 +190,21 @@ public class DateUtilTest {
     assertTrue(nearest.isSameDayAs(result));
   }
 
+  /*
+   * Combination heuristics. All inputs below are well-formed
+   * and should pass.
+   */
   @Test
   public void mergeDateAndTime_success() throws Exception {
     DateTime date = null, time = null, result, expected;
     date = DateTime.forDateOnly(2014, 3, 4);
     expected = DateTime.forDateOnly(2014, 3, 4);
-    result = DateUtil.mergeDateAndTime(date, null);
+    result = DateUtil.mergeDateAndTime(date, null, 0);
     assertTrue(expected.isSameDayAs(result));
 
     time = DateTime.forTimeOnly(12, 13, 14, 0);
     expected = DateUtil.getNow();
-    result = DateUtil.mergeDateAndTime(null, time);
+    result = DateUtil.mergeDateAndTime(null, time, 0);
     assertTrue(expected.isSameDayAs(result));
     assertTrue(result.getHour() == 12);
     assertTrue(result.getMinute() == 13);
@@ -160,8 +212,8 @@ public class DateUtilTest {
 
     date = DateTime.forDateOnly(2014, 3, 4);
     time = DateTime.forTimeOnly(12, 13, 14, 0);
-    expected = new DateTime(2014, 3, 4, 12, 13, 14, 0);
-    result = DateUtil.mergeDateAndTime(date, time);
+    expected = new DateTime(2014, 3, 4, 12, 13, 14, 0).truncate(DateTime.Unit.SECOND);
+    result = DateUtil.mergeDateAndTime(date, time, 0);
     assertEquals(expected, result);
   }
 }

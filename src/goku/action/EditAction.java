@@ -5,8 +5,7 @@ import goku.GOKU;
 import goku.Result;
 import goku.Task;
 import goku.TaskList;
-
-import java.util.Date;
+import hirondelle.date4j.DateTime;
 
 /*
  * Task is the core of GOKU. GOKU is designed to keep track of tasks, which are
@@ -22,9 +21,12 @@ public class EditAction extends Action {
   public int id;
 
   public String title;
-  public Date dline;
+  public DateTime dline;
   public DateRange period;
   public Boolean isComplete;
+  public boolean removeDeadline;
+  public boolean removePeriod;
+  public boolean removeImportant;
 
   public EditAction(GOKU goku) {
     super(goku);
@@ -33,25 +35,53 @@ public class EditAction extends Action {
 
   public void addToUndoList() {
     TaskList currList = new TaskList();
-    for (Task t : list.getArrayList()) {
-      currList.addUndoTask(t);
+    for (Task t : goku.getTaskList().getArrayList()) {
+      currList.addTaskWithoutSettingId(t);
     }
-    goku.getUndoList().offer(currList);
+
+    TaskList newCurrList = new TaskList();
+    for (Task t : currList) {
+      Task newT = new Task(t);
+      newCurrList.addTaskWithoutSettingId(newT);
+    }
+
+    goku.getUndoList().offer(newCurrList);
   }
 
   @Override
   public Result doIt() {
+    if (removeDeadline) {
+      doRemoveDeadline();
+    } else if (removeImportant) {
+      doRemoveImportant();
+    } else if (removePeriod) {
+      doRemovePeriod();
+    }
+    addToUndoList();
     return updateTask();
   }
 
-  public Result updateTask() {
-    addToUndoList();
+  private void doRemovePeriod() {
+    Task t = list.getTaskById(id);
+    t.setPeriod(null);
+  }
 
+  private void doRemoveImportant() {
+    Task t = list.getTaskById(id);
+    t.setStatus(false);
+  }
+
+  private void doRemoveDeadline() {
+    Task t = list.getTaskById(id);
+    t.setDeadline(null);
+  }
+
+  public Result updateTask() {
     Task taskWithEdits = new Task();
     taskWithEdits.setTitle(title);
     taskWithEdits.setDeadline(dline);
     taskWithEdits.setPeriod(period);
-    taskWithEdits.setComplete(isComplete);
+    taskWithEdits.setStatus(isComplete);
 
     Task t = list.getTaskById(id);
     t.updateWith(taskWithEdits);

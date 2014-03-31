@@ -2,37 +2,30 @@ package goku.ui;
 
 import goku.GOKU;
 import goku.Result;
-import goku.Task;
 import goku.action.Action;
-import goku.action.DeleteAction;
-import goku.action.DisplayAction;
 import goku.action.ExitAction;
 import goku.action.MakeActionException;
 import goku.action.SearchAction;
-import goku.autocomplete.WordAutocomplete;
+import goku.storage.LoadTasksException;
 import goku.storage.Storage;
 import goku.storage.StorageFactory;
+import goku.util.DateUtil;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.ResourceBundle;
+import java.util.logging.Logger;
 
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.collections.ObservableList;
-import javafx.event.EventHandler;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.HBox;
-import javafx.util.Callback;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 
 public class GokuController {
 
@@ -46,203 +39,118 @@ public class GokuController {
   private AnchorPane page;
 
   @FXML
+  private ScrollPane scrollPane;
+
+  @FXML
   private TextField inputField;
 
   @FXML
-  private ListView<Task> listView;
+  private StackPane suggestionBox;
 
   @FXML
-  private TextField feedbackField;
+  private VBox suggestionList;
 
-  private ObservableList<Task> tasks;
+  @FXML
+  private VBox outputField;
+
   private GOKU goku;
 
   private InputParser parser;
 
   private Storage storage;
 
-  private WordAutocomplete autoComplete;
+  private static final Logger LOGGER = Logger
+      .getLogger(Logger.GLOBAL_LOGGER_NAME);
 
-  private static enum Mode {
-    INSERT, COMPLETION
-  };
-
-  private List<String> words;
-  private Mode mode = Mode.INSERT;
+  private CompletionController completionController;
+  private FeedbackController feedbackController;
+  private HistoryController historyController;
 
   @FXML
   void initialize() {
+    assert page != null : "fx:id=\"page\" was not injected: check your FXML file 'Main.fxml'.";
+    assert scrollPane != null : "fx:id=\"scrollPane\" was not injected: check your FXML file 'Main.fxml'.";
     assert inputField != null : "fx:id=\"inputField\" was not injected: check your FXML file 'Main.fxml'.";
-    assert listView != null : "fx:id=\"listView\" was not injected: check your FXML file 'Main.fxml'.";
-    assert feedbackField != null : "fx:id=\"feedbackField\" was not injected: check your FXML file 'Main.fxml'.";
-
-    autoComplete = new WordAutocomplete();
-    words = new ArrayList<String>(5);
-    words.add("spark");
-    words.add("special");
-    words.add("spectacles");
-    words.add("spectacular");
-    words.add("swing");
+    assert suggestionBox != null : "fx:id=\"suggestionBox\" was not injected: check your FXML file 'Main.fxml'.";
+    assert suggestionList != null : "fx:id=\"suggestionList\" was not injected: check your FXML file 'Main.fxml'.";
+    assert outputField != null : "fx:id=\"outputField\" was not injected: check your FXML file 'Main.fxml'.";
 
     goku = FXGUI.getGokuInstance();
-    if (goku == null) {
-      System.out.println("NULL");
-    }
-
+    completionController = new CompletionController(inputField, suggestionBox,
+        suggestionList);
+    feedbackController = new FeedbackController(outputField);
+    historyController = new HistoryController(inputField);
     parser = new InputParser(goku);
-    tasks = goku.getObservable();
-    listView.setItems(tasks);
     storage = StorageFactory.getDefaultStorage();
 
-    inputField.addEventFilter(KeyEvent.KEY_RELEASED,
-        new EventHandler<KeyEvent>() {
-          @Override
-          public void handle(KeyEvent event) {
-            if (event.getCode().isDigitKey() || event.getCode().isLetterKey()) {
-              int pos = inputField.getCaretPosition();
-              String content = inputField.getText();
-              int w;
-              for (w = pos - 1; w >= 0; w--) {
-                if (!Character.isLetter(content.charAt(w))) {
-                  break;
-                }
-              }
-              String prefix = content.substring(w + 1, pos).toLowerCase();
-              System.out.println("prefix: " + prefix);
-              List<String> completions = autoComplete.complete(prefix);
-              if (completions.size() == 0) {
-                mode = Mode.INSERT;
-              } else {
-                System.out.println("suggesting");
-                String match = completions.get(0);
-                System.out.println(match);
-                String completion = match.substring(pos - 1 - w);
-                // System.out.println(completion);
-                inputField.insertText(pos, completion);
-                inputField.selectRange(w + 1 + match.length(),
-                    w + 1 + prefix.length());
-                mode = Mode.COMPLETION;
-              }
-            }
-
-          }
-        });
-
-    inputField.addEventFilter(KeyEvent.KEY_PRESSED,
-        new EventHandler<KeyEvent>() {
-          @Override
-          public void handle(KeyEvent event) {
-            if (event.getCode() == KeyCode.ENTER) {
-              if (mode == Mode.COMPLETION) {
-                int pos = inputField.getLength();
-                inputField.insertText(pos, " ");
-                mode = Mode.INSERT;
-                inputField.end();
-                return;
-              } else {
-                Action action = null;
-                String input = null;
-                try {
-                  input = inputField.getText();
-                  action = parser.parse(input);
-                  if (action instanceof ExitAction) {
-                  }
-                  doAction(action);
-                } catch (MakeActionException e) {
-                  System.out.println(e.getMessage());
-                }
-                if (action instanceof ExitAction) {
-                  return;
-                }
-                inputField.setText("");
-                return;
-              }
-            }
-          }
-        });
-
-    listView.setCellFactory(new Callback<ListView<Task>, ListCell<Task>>() {
-      @Override
-      public ListCell<Task> call(ListView<Task> list) {
-        return new TaskCell();
-      }
-    });
-
-    listView.focusedProperty().addListener(new ChangeListener<Boolean>() {
-      @Override
-      public void changed(ObservableValue<? extends Boolean> observable,
-          Boolean oldValue, Boolean newValue) {
-        if (newValue == false) {
-          listView.getSelectionModel().clearSelection();
-        }
-      }
-    });
-
-    listView.setEditable(true);
-
-    listView.getSelectionModel().selectedItemProperty()
-        .addListener(new ChangeListener<Task>() {
-          @Override
-          public void changed(ObservableValue<? extends Task> observable,
-              Task oldValue, Task newValue) {
-            System.out.println("TASKCHANGE");
-            System.out.println(tasks.size());
-          }
-        });
-    listView.addEventFilter(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>() {
-      @Override
-      public void handle(KeyEvent event) {
-        if (event.getCode() == KeyCode.BACK_SPACE
-            || event.getCode() == KeyCode.DELETE) {
-          Task selected = listView.getSelectionModel().getSelectedItem();
-          if (selected == null) {
-            return;
-          }
-          DeleteAction deleteAction = new DeleteAction(goku);
-          deleteAction.id = selected.getId();
-          try {
-            doAction(deleteAction);
-          } catch (MakeActionException e) {
-          }
-        }
-
-      }
-    });
-  }
-
-  static class TaskCell extends ListCell<Task> {
-    @Override
-    protected void updateItem(Task item, boolean empty) {
-      super.updateItem(item, empty);
-      if (item != null) {
-        this.setFocusTraversable(false);
-        HBox hbox = new HBox();
-        hbox.getStyleClass().add("task-cell");
-        Label id = new Label(String.valueOf(item.getId()));
-        Label title = new Label(item.getTitle());
-        title.focusedProperty().addListener(new ChangeListener<Boolean>() {
-          @Override
-          public void changed(ObservableValue<? extends Boolean> observable,
-              Boolean oldValue, Boolean newValue) {
-            System.out.println("CHANGE IN FOCUS FOR TITLE");
-          }
-        });
-
-        hbox.getChildren().addAll(id, title);
-        setGraphic(hbox);
-      }
+    try {
+      goku.setTaskList(storage.loadStorage());
+      doAction(new GreetAction(goku));
+    } catch (FileNotFoundException e) {
+      LOGGER.warning("File cannot be found, no tasks loaded.");
+      feedbackController
+          .displayLine("Seems like you're new!\nA file called \"store.goku\" has been created to save your tasks!");
+    } catch (IOException e) {
+      LOGGER.warning("Error loading file, no tasks loaded.");
+    } catch (LoadTasksException e) {
+      LOGGER
+          .warning("Error parsing JSON, loaded tasks to the best of my ability.");
+      feedbackController.displayErrorMessage(e.getMessage());
+      goku.setTaskList(e.getLoadedTasks());
     }
   }
 
-  private void doAction(Action action) throws MakeActionException {
-    clearFeedback();
-    if (action instanceof DisplayAction) {
-    } else if (action instanceof SearchAction) {
-      Result result = action.doIt();
-      feedBack(result);
+  /*
+   * This method is called when a keypress in inputField is detected.
+   * A "Enter" keypress means the user wants to run the command.
+   * Any other key will be handled by CompletionController,
+   * which will suggestion completions.
+   * User can then use tab to *select* a completion and have it 
+   * fill up the inputField.
+   * Ctrl + Z and Ctrl + Y is a shortcut for Undo and Redo, respectively.
+   */
+  public void keyPressOnInputField(KeyEvent event) {
+    if (event.getCode() == KeyCode.ENTER) {
+      commitInput();
+    } else if (event.isControlDown()) {
+      if (event.getCode() == KeyCode.Z) {
+        inputField.setText("undo");
+        commitInput();
+      } else if (event.getCode() == KeyCode.Y) {
+        inputField.setText("redo");
+        commitInput();
+      }
+    } else if (event.getCode() == KeyCode.UP || event.getCode() == KeyCode.DOWN) {
+      historyController.handle(event);
     } else {
-      Result result = action.doIt();
-      feedBack(result);
+      completionController.handle(event);
+    }
+  }
+
+  private void commitInput() {
+    if (inputField.getText().isEmpty()) {
+      return;
+    }
+    try {
+      historyController.addInput(inputField.getText());
+      String input = inputField.getText().toLowerCase().trim();
+      Action action = parser.parse(input);
+      if (action instanceof ExitAction) {
+        feedbackController.sayGoodbye();
+        Platform.exit();
+      }
+      doAction(action);
+    } catch (MakeActionException e) {
+      feedbackController.displayErrorMessage(e.getMessage());
+    }
+    clearInput();
+    hideSuggestions();
+  }
+
+  private void doAction(Action action) {
+    Result result = action.doIt();
+    feedBack(result);
+    if (action.shouldSave()) {
       save();
     }
   }
@@ -250,27 +158,9 @@ public class GokuController {
   private void feedBack(Result result) {
     if (result == null) {
       return;
-    }
-    if (result.isSuccess()) {
-      if (result.getSuccessMsg() != null) {
-        feedbackField.setText(result.getSuccessMsg());
-      }
-      if (result.getTasks() != null) {
-      }
     } else {
-      if (result.getErrorMsg() != null) {
-        feedbackField.setText(result.getErrorMsg());
-      }
-      if (result.getTasks() != null) {
-      }
+      feedbackController.displayResult(result);
     }
-  }
-
-  private void clearFeedback() {
-    if (feedbackField == null) {
-      return;
-    }
-    feedbackField.setText("");
   }
 
   public void save() {
@@ -281,4 +171,31 @@ public class GokuController {
       System.out.println("Error saving tasks.");
     }
   }
+
+  private void clearInput() {
+    inputField.clear();
+    ;
+  }
+
+  private void hideSuggestions() {
+    suggestionBox.setVisible(false);
+  }
+
+  private class GreetAction extends Action {
+    private static final String MSG = "Welcome to GOKU! Here's whats upcoming...";
+
+    public GreetAction(GOKU goku) {
+      super(goku);
+    }
+
+    @Override
+    public Result doIt() {
+      SearchAction sa = new SearchAction(goku);
+      sa.dline = DateUtil.getNow().plusDays(1);
+      Result result = sa.doIt();
+      return new Result(true, MSG, null, result.getTasks());
+    }
+
+  }
+
 }

@@ -1,204 +1,213 @@
 package goku;
 
+import goku.util.DateUtil;
 import hirondelle.date4j.DateTime;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 public class TaskList implements Iterable<Task> {
-	private static Integer count = 0;
+  private Integer runningId = 1;
+  private List<Integer> unusedId = new ArrayList<Integer>();
 
-	private ObservableList<Task> _list;
+  private ObservableList<Task> _list;
 
-	public ObservableList<Task> getObservable() {
-		return _list;
-	}
+  public TaskList() {
+    _list = FXCollections.observableArrayList();
+  }
 
-	public TaskList() {
-		_list = FXCollections.observableArrayList();
-	}
+  private int makeId() {
+    if (unusedId.size() > 0) {
+      return unusedId.remove(0);
+    }
+    return runningId++;
+  }
 
-	public int addTask(Task task) {
-		task.setId(++count);
-		boolean success = _list.add(task);
-		return success ? task.getId() : -1;
-	}
+  public int addTask(Task task) {
+    task.setId(makeId());
+    boolean success = _list.add(task);
+    return success ? task.getId() : -1;
+  }
 
-	public boolean addTaskWithoutSettingId(Task task) {
-		if (getTaskById(task.getId()) == null) {
-			return _list.add(task);
-		}
-		return false;
-	}
+  public boolean addTaskWithoutSettingId(Task task) {
+    if (getTaskById(task.getId()) == null) {
+      return _list.add(task);
+    }
+    return false;
+  }
 
-	public boolean appendTask(Task task) {
-		return _list.add(task);
-	}
+  public List<Task> asList() {
+    return _list;
+  }
 
-	public void addUndoTask(Task task) {
-		_list.add(task);
-	}
+  public void clear() {
+    _list.clear();
+  }
 
-	public void clear() {
-		_list.clear();
-	}
+  @Override
+  public TaskList clone() {
+    TaskList cloned = new TaskList();
+    for (Task task : _list) {
+      cloned.addTaskWithoutSettingId(task);
+    }
+    return cloned;
+  }
 
-	private TaskList deleteTask(TaskList matches) {
-		if (matches.size() == 1) {
-			deleteTaskById(matches.getTaskByIndex(0).getId());
-			return new TaskList();
-		} else {
-			return matches;
-		}
-	}
+  public Task deleteTaskById(int id) {
+    int index = getIndexOfTaskById(id);
+    return index < 0 ? null : deleteTaskByIndex(index);
+  }
 
-	public Task deleteTaskById(int id) {
-		int index = getIndexOfTaskById(id);
-		if (index < 0) {
-			return null;
-		} else {
-			return deleteTaskByIndex(index);
-		}
-	}
+  public Task deleteTaskByIndex(int index) {
+    Task t = getTaskByIndex(index);
+    unusedId.add(t.getId());
+    Collections.sort(unusedId);
+    return _list.remove(index);
+  }
 
-	public Task deleteTaskByIndex(int index) {
-		return _list.remove(index);
-	}
+  public List<Task> findTaskByDeadline(DateTime deadline) {
+    List<Task> matches = new ArrayList<>();
+    for (Task task : _list) {
+      if (task.isDueOn(deadline)) {
+        matches.add(task);
+      }
+    }
+    return matches;
+  }
 
-	public TaskList deleteTaskByTitle(Task toDelete) {
-		TaskList matches = findTaskByTitle(toDelete);
-		return deleteTask(matches);
-	}
+  public List<Task> findTaskByPeriod(DateRange range) {
+    List<Task> matches = new ArrayList<>();
+    for (Task task : _list) {
+      if (range.containsDate(task.getDeadline())
+          || range.intersectsWith(task.getDateRange())) {
+        matches.add(task);
+      }
+    }
+    return matches;
+  }
 
-	public TaskList findTaskByDeadline(Task toFind) {
-		TaskList matches = new TaskList();
-		for (Task task : _list) {
-			if (task.getDeadline() == null) {
-				continue;
-			}
-			if (task.isDueOn(toFind)) {
-				matches.appendTask(task);
-			}
-		}
-		return matches;
-	}
+  public List<Task> deleteTaskByTitle(String title) {
+    return deleteTask(findTaskByTitle(title));
+  }
 
-	public TaskList findTaskByPeriod(Task toFind) {
-		TaskList matches = new TaskList();
-		for (Task task : _list) {
-			if (task.getDateRange() == null && task.getDeadline() == null) {
-				continue;
-			} else if (task.getDeadline() != null
-					&& toFind.inPeriod(task.getDeadline())) { // deadline falls within period
-				matches.appendTask(task);
-				continue;
-			} else if (task.getDateRange() != null
-					&& toFind.inPeriod(task.getDateRange().startDate)) { // start date of period falls within search period
-				matches.appendTask(task);
-				continue;
-			}
-		}
+  public List<Task> findTaskByTitle(String title) {
+    List<Task> matches = new ArrayList<>();
+    for (Task task : _list) {
+      if (task.titleMatches(title)) {
+        matches.add(task);
+      }
+    }
+    return matches;
+  }
 
-		return matches;
-	}
+  private List<Task> deleteTask(List<Task> matches) {
+    if (matches.size() == 1) {
+      Task deleted = deleteTaskById(matches.get(0).getId());
+      List<Task> results = new ArrayList<>();
+      results.add(deleted);
+      return results;
+    } else {
+      return matches;
+    }
+  }
 
-	public TaskList findTaskByTitle(Task toFind) {
-		TaskList matches = new TaskList();
-		for (Task task : _list) {
-			if (task.titleMatches(toFind)) {
-				matches.appendTask(task);
-			}
-		}
-		return matches;
-	}
+  public List<Task> getAllCompleted() {
+    List<Task> completed = new ArrayList<Task>();
+    for (Task task : _list) {
+      if (task.getStatus() != null && task.getStatus()) {
+        completed.add(task);
+      }
+    }
+    return completed;
+  }
 
-	public boolean isFree(DateTime dateTime) {
-		
-		boolean result = true;
-		
-		for (Task task : _list) {
-			if (task.getDateRange()!=null && task.inPeriod(DateUtil.toDate(dateTime))) {
-				result = false;
-				break;
-			}
-		}
-		
-		return result;
-	}
-	
-	public TaskList getAll() {
-		return this;
-	}
+  public List<Task> getAllIncomplete() {
+    List<Task> incomplete = new ArrayList<Task>();
+    DateTime now = DateUtil.getNow();
+    for (Task task : _list) {
+      if ((((task.getStatus()) == null || !task.getStatus()))
+          && (task.getDeadline() == null || DateUtil.isEarlierOrOn(now,
+              task.getDeadline()))) {
+        incomplete.add(task);
+      }
+    }
+    return incomplete;
+  }
 
-	public TaskList getAllCompleted() {
-		TaskList result = new TaskList();
-		for (Task task : _list) {
-			if (task.getStatus()) {
-				result.addTask(task);
-			}
-		}
-		return result;
-	}
+  public ObservableList<Task> getArrayList() {
+    return _list;
+  }
 
-	public TaskList getAllIncomplete() {
-		TaskList result = new TaskList();
-		for (Task task : _list) {
-			if ((task.getStatus()) == null || !task.getStatus()) {
-				result.addTask(task);
-			}
-		}
-		return result;
-	}
+  private int getIndexOfTaskById(int id) {
+    return _list.indexOf(getTaskById(id));
+  }
 
-	public ObservableList<Task> getArrayList() {
-		return _list;
-		// return (ArrayList<Task>) Arrays
-		// .asList(_list.toArray(new Task[_list.size()]));
-	}
+  public ObservableList<Task> getObservable() {
+    return _list;
+  }
 
-	private int getIndexOfTaskById(int id) {
-		return _list.indexOf(getTaskById(id));
-	}
+  /*
+   * @param id
+   * 
+   * @returns the task with specified id
+   */
+  public Task getTaskById(int id) {
+    for (Task task : _list) {
+      if (task.getId() == id) {
+        return task;
+      }
+    }
+    return null;
+  }
 
-	/*
-	 * @param id
-	 * 
-	 * @returns the task with specified id
-	 */
-	public Task getTaskById(int id) {
-		for (Task task : _list) {
-			if (task.getId() == id) {
-				return task;
-			}
-		}
-		return null;
-	}
+  protected Task getTaskByIndex(int index) {
+    return _list.get(index);
+  }
 
-	protected Task getTaskByIndex(int index) {
-		return _list.get(index);
-	}
+  public boolean isFree(DateTime dateTime) {
 
-	@Override
-	public Iterator<Task> iterator() {
-		return _list.listIterator();
-	}
+    boolean result = true;
 
-	public int size() {
-		return _list.size();
-	}
+    assert (dateTime != null);
 
-	public TaskList findTaskByTitle(String title) {
-		Task toFind = new Task();
-		toFind.setTitle(title);
-		TaskList matches = new TaskList();
-		for (Task task : _list) {
-			if (task.titleMatches(toFind)) {
-				matches.appendTask(task);
-			}
-		}
-		return matches;
-	}
+    for (Task task : _list) {
+      if (task.getDateRange() != null) {
+        DateTime taskStartDate = task.getDateRange().getStartDate();
+        DateTime taskEndDate = task.getDateRange().getEndDate();
 
+        if (DateUtil.isEarlierOrOn(dateTime, taskEndDate)
+            && DateUtil.isLaterOrOn(dateTime, taskStartDate)) {
+          result = false;
+          break;
+        }
+      }
+    }
+
+    return result;
+  }
+
+  public List<Task> getOverdue() {
+    DateTime now = DateUtil.getNow();
+    List<Task> overdue = new ArrayList<>();
+    for (Task task : _list) {
+      if (DateUtil.isEarlierOrOn(task.getDeadline(), now)) {
+        overdue.add(task);
+      }
+    }
+    return overdue;
+  }
+
+  @Override
+  public Iterator<Task> iterator() {
+    return _list.listIterator();
+  }
+
+  public int size() {
+    return _list.size();
+  }
 }

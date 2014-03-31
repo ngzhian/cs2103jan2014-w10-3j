@@ -5,6 +5,8 @@ import goku.Result;
 import goku.Task;
 import goku.TaskList;
 
+import java.util.List;
+
 /* Delete removes a task from GOKU.
  * It does so in 2 steps:
  * 1 - Tries to find a unique match based on the given Task,
@@ -17,12 +19,13 @@ import goku.TaskList;
  *      returns a failure Result with TaskList.size() > 1
  */
 public class DeleteAction extends Action {
-  private static final String MSG_SUCCESS = "Deleted \"%s\"";
+  private static final String MSG_SUCCESS = "Deleted [%s] %s. *hint* undo to undo ;)";
+  private static final String NO_MATCHES = "No matches found";
   private static final String ERR_FAILURE = "Many matches found for \"%s\".";
   private static final String ERR_NOT_FOUND = "Cannot find \"%s\".";
   public static final String ERR_INSUFFICIENT_ARGS = "Can't delete. Need an ID. Try \"delete 1\"";
 
-  public int id;
+  public Integer id;
 
   public String title;
 
@@ -33,31 +36,30 @@ public class DeleteAction extends Action {
   public void addToUndoList() {
     TaskList currList = new TaskList();
     for (Task t : list.getArrayList()) {
-      currList.addUndoTask(t);
+      currList.addTaskWithoutSettingId(t);
     }
     goku.getUndoList().offer(currList);
   }
 
   public Result deleteTask() {
     addToUndoList();
-    boolean success;
-    success = tryDeleteById();
-    if (success) {
-      return new Result(true, String.format(MSG_SUCCESS, id), null, null);
+    Task deletedTask = tryDeleteById();
+    if (deletedTask != null) {
+      return new Result(true, String.format(MSG_SUCCESS, id,
+          deletedTask.getTitle()), null, null);
     }
-    if (title == null) {
-      return new Result(false, null, String.format(ERR_NOT_FOUND, id), null);
-    }
-    Task task = new Task();
-    task.setTitle(title);
-    TaskList possibleDeletion = list.deleteTaskByTitle(task);
+    List<Task> possibleDeletion = list.deleteTaskByTitle(title);
     if (possibleDeletion.size() == 0) {
-      return new Result(true, String.format(MSG_SUCCESS, task.getTitle()),
-          null, null);
+      return new Result(false, null, NO_MATCHES, null);
+    } else if (possibleDeletion.size() == 1) {
+      deletedTask = possibleDeletion.get(0);
+      return new Result(true, String.format(MSG_SUCCESS, deletedTask.getId(),
+          deletedTask.getTitle()), null, null);
     } else {
       return new Result(false, null, String.format(ERR_FAILURE, title),
           possibleDeletion);
     }
+
   }
 
   @Override
@@ -65,9 +67,11 @@ public class DeleteAction extends Action {
     return deleteTask();
   }
 
-  private boolean tryDeleteById() {
-    Task deleted = list.deleteTaskById(id);
-    return deleted != null;
+  private Task tryDeleteById() {
+    if (id == null) {
+      return null;
+    }
+    return list.deleteTaskById(id);
   }
 
 }

@@ -7,6 +7,8 @@ import goku.Result;
 import goku.Task;
 import goku.TaskList;
 
+import java.util.List;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -31,6 +33,7 @@ public class AddActionTest {
   }
 
   @Test
+  // This tests whether adding a task to the task list works
   public void doIt_TaskWithName_returnsSuccessfulResult() throws Exception {
     AddAction add = new AddAction(goku);
     add.title = "hi";
@@ -40,11 +43,12 @@ public class AddActionTest {
     assertEquals(1, list.size());
     Task task = new Task();
     task.setTitle("hi");
-    TaskList addedTask = list.findTaskByTitle(task);
+    List<Task> addedTask = list.findTaskByTitle("hi");
     assertEquals(1, addedTask.size());
   }
 
   @Test
+  // This tests whether adding different tasks works
   public void doIt_MultipleTasksWithName() throws Exception {
     AddAction add1 = new AddAction(goku);
     add1.title = "hi abc";
@@ -63,11 +67,11 @@ public class AddActionTest {
     add3.doIt();
     assertEquals(3, list.size());
 
-    TaskList results;
-    results = list.findTaskByTitle(task1);
+    List<Task> results;
+    results = list.findTaskByTitle("abc");
     assertEquals(2, results.size());
 
-    results = list.findTaskByTitle(task2);
+    results = list.findTaskByTitle("def");
     assertEquals(2, results.size());
   }
 

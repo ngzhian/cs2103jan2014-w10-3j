@@ -1,158 +1,145 @@
 package goku.action;
 
 import goku.DateRange;
-import goku.DateUtil;
 import goku.GOKU;
 import goku.Result;
 import goku.Task;
 import goku.TaskList;
+import goku.util.DateUtil;
 import hirondelle.date4j.DateTime;
 
-import java.util.Date;
-import java.util.Iterator;
-import java.util.TimeZone;
+import java.util.List;
 
 public class SearchAction extends Action {
 
-	public String title;
-	public String deadline;
-	public String from;
-	public String to;
-	public Date dline;
-	public DateRange period;
-	public boolean testFree;
-	public DateTime dateQuery;
+  public String title;
+  public String deadline;
+  public String from;
+  public String to;
+  public DateTime dline;
+  public DateRange period;
+  public boolean testFree = false;
+  public DateTime dateQuery;
 
-	public SearchAction(GOKU goku) {
-		super(goku);
+  public SearchAction(GOKU goku) {
+    super(goku);
+    shouldSaveAfter = false;
+  }
 
-		// initialise params
-		deadline = null;
-		from = null;
-		to = null;
-		dline = null;
-		period = null;
-		testFree = false;
-		dateQuery = null;
-	}
+  private static final String MSG_SUCCESS = "Found tasks!";
+  private static final String MSG_FAIL = "No relevant tasks.";
+  private static final String IS_FREE = "Specified datetime is available.";
+  private static final String NOT_FREE = "Specified datetime is not available.";
+  public static final String ERR_INSUFFICIENT_ARGS = "Can't search! Try \"search title\"";
+  public static final String ERR_NO_VALID_DATE_FOUND = "Can't search! Try entering a valid date after \"free\"";
+  private static final String ERR_DEADLINE_PERIOD_CONFLICT = "Can't search! Conflicting deadline and period.";
 
-	private static final String MSG_SUCCESS = "Found tasks!";
-	private static final String MSG_FAIL = "No relevant tasks.";
-	private static final String IS_FREE = "Specified datetime is available.";
-	private static final String NOT_FREE = "Specified datetime is not available.";
-	public static final String ERR_INSUFFICIENT_ARGS = "Can't search! Try \"search title\"";
-	public static final String ERR_NO_VALID_DATE_FOUND = "Can't search! Try entering a valid date after \"free\"";
-	private static final String ERR_DEADLINE_PERIOD_CONFLICT = "Can't search! Conflicting deadline and period.";
-	private static final String INVALID_NUMBER_OF_HOURS = "Cant't search! Number of hours of free time invalid.";
-	private static final int INVALID_HOURS = -1;
+  public Result searchTitle() {
+    Task task = new Task();
+    task.setTitle(title);
+    List<Task> foundTasks = list.findTaskByTitle(title);
+    return new Result(true, MSG_SUCCESS, null, foundTasks);
+  }
 
-	public Result searchTitle() {
-		Task task = new Task();
-		task.setTitle(title);
-		TaskList foundTasks = list.findTaskByTitle(task);
-		return new Result(true, MSG_SUCCESS, null, foundTasks);
-	}
+  public Result searchByDeadline() {
+    Task task = new Task();
 
-	public Result searchByDeadline() {
-		Task task = new Task();
-		task.setDeadline(dline);
-		TaskList foundTasks = list.findTaskByDeadline(task);
-		if (foundTasks.size() != 0) {
-			return new Result(true, MSG_SUCCESS, null, foundTasks);
-		} else {
-			return new Result(false, null, MSG_FAIL, null);
-		}
-	}
+    assert (dline != null);
+    task.setDeadline(dline);
+    List<Task> foundTasks = list.findTaskByDeadline(dline);
+    if (foundTasks.size() != 0) {
+      return new Result(true, MSG_SUCCESS, null, foundTasks);
+    } else {
+      return new Result(false, null, MSG_FAIL, null);
+    }
+  }
 
-	public Result searchByPeriod() {
-		Task task = new Task();
-		task.setPeriod(period);
-		TaskList foundTasks = list.findTaskByPeriod(task);
-		if (foundTasks.size() != 0) {
-			return new Result(true, MSG_SUCCESS, null, foundTasks);
-		} else {
-			return new Result(false, null, MSG_FAIL, null);
-		}
-	}
-	
-	public Result testFreeTime() {
-		
-		
-		
-		return new Result(true, IS_FREE, null, null);
-	}
+  /*
+   * Searches for tasks that fall within a specified period.
+   * Tasks that start/end, or has deadline within the period is a match.
+   * Example:
+   * ---  Time line -------------------------------->
+   *   1    2  3  4   5   6    7    8   9  10   11 
+   *           ##########################
+   *   |    |-----|   |---|    |    |------|    |
+   *   A       B        C      D       E        F 
+   *   
+   *   | - a task with a deadline at that point in time
+   *   |-----| a task with a period starting at the first | and ending at second |
+   *   ### - the period we wish to query for
+   * Search should then return tasks, B, C, D, E 
+   */
+  public Result searchByPeriod() {
+    Task task = new Task();
 
-	@Override
-	public Result doIt() throws MakeActionException {
+    assert (period != null);
+    task.setPeriod(period);
+    List<Task> foundTasks = list.findTaskByPeriod(period);
+    if (foundTasks.size() != 0) {
+      return new Result(true, MSG_SUCCESS, null, foundTasks);
+    } else {
+      return new Result(false, null, MSG_FAIL, null);
+    }
+  }
 
-		Result result = null;
+  public Result checkFreeTime() {
 
-		if (dline != null && period != null) {
-			result = searchByDeadlineAndPeriod();
-		} else if (dline != null) {
-			result = searchByDeadline();
-		} else if (period != null) {
-			result = searchByPeriod();
-		} else {
-			result = searchTitle();
-		}
+    assert (dateQuery != null);
 
-		return result;
-	}
+    if (list.isFree(dateQuery) == true) {
+      return new Result(true, IS_FREE, null, null);
+    } else {
+      return new Result(false, null, NOT_FREE, null);
+    }
+  }
 
-	/*
-	 * Searches by both deadline and period and merges result
-	 */
-	private Result searchByDeadlineAndPeriod() throws MakeActionException {
+  @Override
+  public Result doIt() {
 
-		// check for conflicting deadline and period
-		if (!dline.before(period.getEndDate())
-				|| !dline.after(period.getStartDate())) {
-			throw new MakeActionException(ERR_DEADLINE_PERIOD_CONFLICT);
-		}
+    Result result = null;
 
-		Result mergedResults = null;
+    if (dateQuery != null) {
+      result = checkFreeTime();
+    } else if (dline != null && period != null) {
+      result = searchByDeadlineInPeriod();
+    } else if (dline != null) {
+      result = searchByDeadline();
+    } else if (period != null) {
+      result = searchByPeriod();
+    } else {
+      result = searchTitle();
+    }
 
-		Result byDeadline = searchByDeadline();
-		Result byPeriod = searchByPeriod();
+    return result;
+  }
 
-		if (byDeadline.isSuccess() && byPeriod.isSuccess()) {
-			// merge matching tasks in both results
-			Iterator<Task> dlIterator = byDeadline.getTasks().iterator();
-			Iterator<Task> prIterator = byPeriod.getTasks().iterator();
-			TaskList mergedFoundTasks = new TaskList();
+  /*
+   * Searches for tasks within a given period that has the specified deadline.
+   */
+  private Result searchByDeadlineInPeriod() {
+    // check for conflicting deadline and period
+    if (DateUtil.isEarlierThan(dline, period.getStartDate())
+        || DateUtil.isLaterThan(dline, period.getEndDate())) {
+      return new Result(false, null, ERR_DEADLINE_PERIOD_CONFLICT, null);
+    }
 
-			while (dlIterator.hasNext()) {
-				Task dlTask = dlIterator.next();
+    Result byPeriod = searchByPeriod();
+    TaskList tasksDueInPeriod = new TaskList();
 
-				while (prIterator.hasNext()) {
-					Task prTask = prIterator.next();
+    for (Task task : byPeriod.getTasks()) {
+      if (task.getDeadline() != null) {
+        tasksDueInPeriod.addTaskWithoutSettingId(task);
+      }
+    }
 
-					if (!dlTask.equals(prTask)) {
-						mergedFoundTasks.addTask(prTask);
-					}
-				}
+    return new Result(true, MSG_SUCCESS, null, tasksDueInPeriod.asList());
+  }
 
-				mergedFoundTasks.addTask(dlTask);
-				prIterator = byPeriod.getTasks().iterator();
-			}
+  public String getDeadline() {
+    return deadline;
+  }
 
-			mergedResults = new Result(true, MSG_SUCCESS, null,
-					mergedFoundTasks);
-		} else if (byDeadline.isSuccess()) {
-			mergedResults = byDeadline;
-		} else {
-			mergedResults = byPeriod;
-		}
-
-		return mergedResults;
-	}
-
-	public String getDeadline() {
-		return deadline;
-	}
-
-	public String getTitle() {
-		return title;
-	}
+  public String getTitle() {
+    return title;
+  }
 }

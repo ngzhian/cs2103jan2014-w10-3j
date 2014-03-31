@@ -2,13 +2,13 @@ package goku.ui;
 
 import goku.DateRange;
 import goku.Task;
-import goku.TaskList;
 import goku.util.DateUtil;
 import hirondelle.date4j.DateTime;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.Hashtable;
+import java.util.List;
 import java.util.TimeZone;
 
 public class TaskListDisplayer {
@@ -21,7 +21,35 @@ public class TaskListDisplayer {
   DateTime now = DateUtil.getNow();
   DateTime tmr = now.plusDays(1);
 
-  public void display(TaskList list) {
+  public Hashtable<String, List<Task>> build(List<Task> list) {
+    Hashtable<String, List<Task>> ht = new Hashtable<>();
+    if (list == null) {
+      return ht;
+    }
+    ArrayList<Task> past = new ArrayList<Task>();
+    ArrayList<Task> today = new ArrayList<Task>();
+    ArrayList<Task> tomorrow = new ArrayList<Task>();
+    ArrayList<Task> remaining = new ArrayList<Task>();
+
+    for (Task task : list) {
+      if (isOver(task)) {
+        past.add(task);
+      } else if (isToday(task)) {
+        today.add(task);
+      } else if (isTomorrow(task)) {
+        tomorrow.add(task);
+      } else {
+        remaining.add(task);
+      }
+    }
+    ht.put("past", past);
+    ht.put("today", today);
+    ht.put("tomorrow", tomorrow);
+    ht.put("remaining", remaining);
+    return ht;
+  }
+
+  public void display(List<Task> list) {
     if (list == null) {
       return;
     }
@@ -68,14 +96,14 @@ public class TaskListDisplayer {
     if (dateRange == null) {
       return false;
     }
-    return tmr.isSameDayAs(DateUtil.date4j(dateRange.getStartDate()));
+    return tmr.isSameDayAs(dateRange.getStartDate());
   }
 
-  private boolean isTomorrow(Date date) {
+  private boolean isTomorrow(DateTime date) {
     if (date == null) {
       return false;
     }
-    return tmr.isSameDayAs(DateUtil.date4j(date));
+    return tmr.isSameDayAs(date);
 
   }
 
@@ -90,11 +118,11 @@ public class TaskListDisplayer {
     return isToday(dateRange.getEndDate());
   }
 
-  private boolean isToday(Date date) {
+  private boolean isToday(DateTime date) {
     if (date == null) {
       return false;
     }
-    return now.isSameDayAs(DateUtil.date4j(date));
+    return now.isSameDayAs(date);
   }
 
   private boolean isOver(Task task) {
@@ -108,11 +136,10 @@ public class TaskListDisplayer {
     return isOver(dateRange.getEndDate());
   }
 
-  public boolean isOver(Date date) {
+  public boolean isOver(DateTime date) {
     if (date == null) {
       return false;
     }
-    DateTime dt = DateUtil.date4j(date);
-    return dt.isInThePast(TimeZone.getDefault());
+    return date.isInThePast(TimeZone.getDefault());
   }
 }

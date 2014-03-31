@@ -5,8 +5,7 @@ import goku.GOKU;
 import goku.Result;
 import goku.Task;
 import goku.TaskList;
-
-import java.util.Date;
+import hirondelle.date4j.DateTime;
 
 /*
  * Task is the core of GOKU. GOKU is designed to keep track of tasks, which are
@@ -15,14 +14,14 @@ import java.util.Date;
 public class AddAction extends Action {
   private static final String MSG_SUCCESS = "Added: \"%s\"";
   private static final String ERR_FAIL = "Fail to add: \"%s\"";
-  public static final String ERR_INSUFFICIENT_ARGS = "Can't add! Try \"add my task! by tomorrow\"";
+  public static final String ERR_INSUFFICIENT_ARGS = "Can't add! Need title. Try \"add my task! by tomorrow\"";
 
   public String title;
   public String deadline;
   public String from;
   public String to;
   public TaskList list;
-  public Date dline;
+  public DateTime dline;
   public DateRange period;
   public boolean isImpt;
 
@@ -45,7 +44,7 @@ public class AddAction extends Action {
   public void addToUndoList() {
     TaskList currList = new TaskList();
     for (Task t : list.getArrayList()) {
-      currList.addUndoTask(t);
+      currList.addTaskWithoutSettingId(t);
     }
     goku.getUndoList().offer(currList);
   }
@@ -71,6 +70,7 @@ public class AddAction extends Action {
 
   private Task makeTask() {
     Task task = new Task();
+    assert (title != null);
     task.setTitle(title);
     task.setDeadline(dline);
     task.setPeriod(period);

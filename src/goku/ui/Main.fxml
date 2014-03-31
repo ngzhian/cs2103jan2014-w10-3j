@@ -2,56 +2,47 @@
 
 <?import java.lang.*?>
 <?import java.net.*?>
-<?import java.util.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
-<?import javafx.scene.effect.*?>
-<?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.paint.*?>
+<?import javafx.scene.text.*?>
 <?scenebuilder-classpath-element ../../goku?>
 
-<AnchorPane id="AnchorPane" fx:id="page" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" styleClass="page" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2" fx:controller="goku.ui.GokuController">
+<AnchorPane id="AnchorPane" fx:id="page" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0" style="" styleClass="page" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2" fx:controller="goku.ui.GokuController">
   <children>
-    <VBox prefHeight="400.0" prefWidth="600.0" visible="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+    <HBox alignment="CENTER_LEFT" fillHeight="true" prefHeight="-1.0" prefWidth="600.0" spacing="40.0" style="" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
       <children>
-        <HBox alignment="CENTER_LEFT" fillHeight="true" prefHeight="-1.0" prefWidth="600.0" spacing="40.0" style="" VBox.vgrow="NEVER">
-          <children>
-            <TextField id="input-field" fx:id="inputField" cache="false" opacity="1.0" prefWidth="236.0" style="" styleClass="input-field" HBox.hgrow="ALWAYS">
-              <HBox.margin>
-                <Insets />
-              </HBox.margin>
-            </TextField>
-          </children>
-          <padding>
-            <Insets bottom="10.0" left="20.0" right="20.0" top="20.0" />
-          </padding>
-          <VBox.margin>
+        <TextField id="input-field" fx:id="inputField" cache="false" onKeyReleased="#keyPressOnInputField" opacity="1.0" prefWidth="236.0" style="" styleClass="input-field" HBox.hgrow="ALWAYS">
+          <HBox.margin>
             <Insets />
-          </VBox.margin>
-        </HBox>
-        <VBox prefHeight="200.0" prefWidth="100.0" VBox.vgrow="ALWAYS">
-          <children>
-            <ListView fx:id="listView" editable="false" opacity="1.0" prefHeight="200.0" prefWidth="200.0" style="" VBox.vgrow="SOMETIMES">
-              <stylesheets>
-                <URL value="@app.css" />
-              </stylesheets>
-            </ListView>
-            <StackPane prefHeight="40.0" prefWidth="200.0">
-              <children>
-                <TextField fx:id="feedbackField" editable="false" focusTraversable="false" prefWidth="200.0" styleClass="feedback-field" text="asdf" />
-              </children>
-            </StackPane>
-          </children>
-          <padding>
-            <Insets bottom="10.0" left="20.0" right="20.0" />
-          </padding>
-        </VBox>
+          </HBox.margin>
+        </TextField>
       </children>
-      <stylesheets>
-        <URL value="@app.css" />
-      </stylesheets>
-    </VBox>
+      <padding>
+        <Insets bottom="10.0" left="20.0" right="20.0" top="20.0" />
+      </padding>
+    </HBox>
+    <ScrollPane fx:id="scrollPane" prefHeight="-1.0" prefWidth="-1.0" style="" AnchorPane.bottomAnchor="20.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="80.0">
+      <content>
+        <AnchorPane prefHeight="485.0" prefWidth="745.0">
+          <children>
+            <VBox fx:id="outputField" prefHeight="-1.0" prefWidth="-1.0" spacing="5.0" style="" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+              <padding>
+                <Insets bottom="20.0" left="10.0" right="10.0" top="10.0" />
+              </padding>
+            </VBox>
+          </children>
+        </AnchorPane>
+      </content>
+    </ScrollPane>
+    <StackPane fx:id="suggestionBox" layoutX="20.0" layoutY="59.0" prefHeight="-1.0" prefWidth="-1.0" style="" visible="false">
+      <children>
+        <VBox fx:id="suggestionList" prefHeight="-1.0" prefWidth="-1.0" />
+      </children>
+      <padding>
+        <Insets left="20.0" />
+      </padding>
+    </StackPane>
   </children>
   <stylesheets>
     <URL value="@app.css" />
