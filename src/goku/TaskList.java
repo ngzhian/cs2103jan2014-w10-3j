@@ -1,6 +1,5 @@
 package goku;
 
-import goku.util.DateUtil;
 import hirondelle.date4j.DateTime;
 
 import java.util.Iterator;
@@ -137,7 +136,7 @@ public class TaskList implements Iterable<Task> {
 		TaskList result = new TaskList();
 		for (Task task : _list) {
 			if (task.getStatus()) {
-				result.addTaskWithoutSettingId(task);
+				result.addTask(task);
 			}
 		}
 		return result;
@@ -147,7 +146,7 @@ public class TaskList implements Iterable<Task> {
 		TaskList result = new TaskList();
 		for (Task task : _list) {
 			if ((task.getStatus()) == null || !task.getStatus()) {
-				result.addTaskWithoutSettingId(task);
+				result.addTask(task);
 			}
 		}
 		return result;
@@ -190,7 +189,6 @@ public class TaskList implements Iterable<Task> {
 		return _list.size();
 	}
 
-	
 	public TaskList findTaskByTitle(String title) {
 		Task toFind = new Task();
 		toFind.setTitle(title);

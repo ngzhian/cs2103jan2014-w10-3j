@@ -1,7 +1,7 @@
 package goku.action;
 
 import goku.DateRange;
-import goku.util.DateUtil;
+import goku.DateUtil;
 import goku.GOKU;
 import goku.Result;
 import goku.Task;
