@@ -21,6 +21,7 @@ public class DisplayActionTest {
   }
 
   @Test
+  //This tests whether selectively displaying incomplete and/or complete tasks works
   public void doIt_success() {
     Task completedTask = new Task();
     completedTask.setTitle("complete task");
