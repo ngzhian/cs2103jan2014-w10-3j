@@ -26,7 +26,8 @@ public class SearchAction extends Action {
     shouldSaveAfter = false;
   }
 
-  private static final String MSG_SUCCESS = "Found tasks!";
+  private static final String MSG_SUCCESS = "Found tasks for \"%s\"...";
+  private static final String MSG_FAIL_BY_TITLE = "No relevant tasks for \"%s\".";
   private static final String MSG_FAIL = "No relevant tasks.";
   private static final String IS_FREE = "Specified datetime is available.";
   private static final String NOT_FREE = "Specified datetime is not available.";
@@ -38,7 +39,13 @@ public class SearchAction extends Action {
     Task task = new Task();
     task.setTitle(title);
     List<Task> foundTasks = list.findTaskByTitle(title);
-    return new Result(true, MSG_SUCCESS, null, foundTasks);
+    if (foundTasks.size() == 0) {
+      return new Result(false, null, String.format(MSG_FAIL_BY_TITLE, title),
+          null);
+    } else {
+      return new Result(true, String.format(MSG_SUCCESS, title), null,
+          foundTasks);
+    }
   }
 
   public Result searchByDeadline() {
@@ -82,10 +89,27 @@ public class SearchAction extends Action {
     }
   }
 
+  /*
+   * Case 1: dateQuery contains specific date and time
+   * Checks whether dateQuery contains any tasks whose period coincides
+   * If there is => not free, else => free
+   * 
+   * Case 2: dateQuery only contains date
+   * Shows users the list of free(?) timeslots of the specified day
+   */
   public Result checkFreeTime() {
-
     assert (dateQuery != null);
 
+    // Case 1: Specific date and time
+    if (dateQuery.getHour() != null) {
+      return checkIfFree();
+    } else {  // Case 2: Only date given
+      //TODO not implemented yet
+      return null;
+    }
+  }
+
+  private Result checkIfFree() {
     if (list.isFree(dateQuery) == true) {
       return new Result(true, IS_FREE, null, null);
     } else {

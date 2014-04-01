@@ -1,7 +1,5 @@
 package goku.action;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import goku.GOKU;
 import goku.Result;
 import goku.Task;
@@ -12,6 +10,7 @@ import java.util.List;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import static org.junit.Assert.*;
 
 public class AddActionTest {
   TaskList list;
@@ -47,6 +46,34 @@ public class AddActionTest {
     assertEquals(1, addedTask.size());
   }
 
+  @Test
+  // This tests whether adding tasks with unusual names to the task list works
+  public void doIt_TaskWithNullName_returnsSuccessfulResult() throws Exception {
+    AddAction add = new AddAction(goku);
+    add.title = null;
+    Result actualResult = add.doIt();
+    assertTrue(actualResult.isSuccess());
+    assertEquals(1, list.size());
+  }
+  
+  @Test
+  // This tests whether adding tasks with long names to the task list works
+  public void doIt_TaskWithLongName_returnsSuccessfulResult() throws Exception {
+    AddAction add = new AddAction(goku);
+    add.title = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        + "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        + "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        + "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        + "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        + "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        + "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        + "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        + "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+    Result actualResult = add.doIt();
+    assertTrue(actualResult.isSuccess());
+    assertEquals(1, list.size());
+  }
+  
   @Test
   // This tests whether adding different tasks works
   public void doIt_MultipleTasksWithName() throws Exception {

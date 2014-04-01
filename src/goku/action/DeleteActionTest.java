@@ -28,6 +28,7 @@ public class DeleteActionTest {
   }
 
   @Test
+  //This is to test whether deleting a task works
   public void deleteTask_withIdFound_returnsSuccess() throws Exception {
     Task aTask = new Task();
     int id = list.addTask(aTask);
@@ -39,6 +40,7 @@ public class DeleteActionTest {
   }
 
   @Test
+  //This is to test whether deleting a task with the wrong ID fails
   public void deleteTask_withIdNotFound_returnsFailure() throws Exception {
     Task aTask = new Task();
     int id = list.addTask(aTask);
@@ -53,6 +55,7 @@ public class DeleteActionTest {
   }
 
   @Test
+  //This is to test whether deleting a task with the wrong ID and title fails
   public void deleteTask_withIdNotFoundTitleNotFound_returnsFailure()
       throws Exception {
     Task aTask = new Task();
@@ -69,6 +72,7 @@ public class DeleteActionTest {
   }
 
   @Test
+  //This is to test whether deleting a task with wrong ID but correct title works
   public void deleteTask_withIdNotFoundButTitleFound_returnsSuccess()
       throws Exception {
     Task aTask = new Task();
@@ -85,6 +89,7 @@ public class DeleteActionTest {
   }
 
   @Test
+  //This is to test whether deleting with a term that matches multiple tasks fail
   public void deleteTask_withIdNotFoundAndMultipleMatchesInTitle_returnsFailure()
       throws Exception {
     Task aTask = new Task();
@@ -100,5 +105,38 @@ public class DeleteActionTest {
 
     assertEquals(2, list.size());
     assertFalse(result.isSuccess());
+  }
+  
+  @Test
+  //This is to test whether deleting a task with a null ID and title fails
+  public void deleteTask_withNullIdAndTitle_returnsFailure()
+      throws Exception {
+    Task aTask = new Task();
+    aTask.setTitle("abc");
+    list.addTask(aTask);
+
+    DeleteAction delete = new DeleteAction(goku);
+    delete.id = null; 
+    delete.title = null;
+    Result result = delete.doIt();
+   
+    assertEquals(1, list.size());
+    assertFalse(result.isSuccess());
+  }
+
+@Test
+//This is to test whether deleting a task with a null title fails
+public void deleteTask_withNullTitle_returnsFailure()
+    throws Exception {
+  Task aTask = new Task();
+  aTask.setTitle(null);
+  list.addTask(aTask);
+
+  DeleteAction delete = new DeleteAction(goku);
+  delete.title = null;
+  Result result = delete.doIt();
+ 
+  assertEquals(1, list.size());
+  assertFalse(result.isSuccess());
   }
 }

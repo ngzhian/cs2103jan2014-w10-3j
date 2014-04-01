@@ -3,6 +3,7 @@ package goku;
 import goku.storage.Storeable;
 import goku.util.DateOutput;
 import goku.util.DateUtil;
+import goku.util.DiffMatchPath;
 import hirondelle.date4j.DateTime;
 
 import com.google.gson.Gson;
@@ -46,7 +47,9 @@ public class Task implements Storeable {
     }
     String aTitle = getTitle().toLowerCase();
     String otherTitle = title.toLowerCase();
-    return aTitle.contains(otherTitle);
+    int match = (new DiffMatchPath()).match_main(aTitle, otherTitle, 0);
+    return match != -1;
+    // return aTitle.contains(otherTitle);
   }
 
   public void updateWith(Task other) {
@@ -75,14 +78,14 @@ public class Task implements Storeable {
 
     if (deadline != null) {
       sb.append(" | by ");
-      sb.append(DateOutput.format(deadline));
+      sb.append(DateOutput.formatDateTimeDayMonthHourMin(deadline));
     }
 
     if (period != null) {
       sb.append(" | from ");
-      sb.append(DateOutput.format(period.getStartDate()));
+      sb.append(DateOutput.formatDateTimeDayMonthHourMin(period.getStartDate()));
       sb.append(" to ");
-      sb.append(DateOutput.format(period.getEndDate()));
+      sb.append(DateOutput.formatDateTimeDayMonthHourMin(period.getEndDate()));
     }
 
     return sb.toString();
@@ -141,7 +144,7 @@ public class Task implements Storeable {
   }
 
   public boolean isDueOn(DateTime date) {
-    return deadline != null && DateUtil.isEarlierOrOn(date, deadline);
+    return deadline != null && DateUtil.isEarlierOrOn(deadline, date);
   }
 
   public void setId(int id) {
