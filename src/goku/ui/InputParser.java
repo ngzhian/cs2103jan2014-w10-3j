@@ -61,14 +61,14 @@ public class InputParser {
   }
   
   /*
-   * extractDate() Specifics
+   * extractDeadline() Specifics
    * 1) Contains date and time => returns DateTime with date and time
-   * 2) Contains date only => returns DateTime with date only
+   * 2) Contains date only => returns DateTime with date, time initialised to 23:59:59
    * 3) Contains time only => returns DateTime with today as date and time
    * 4) Returns null if input is not valid
    * 5) Nanoseconds are truncated
    */
-  DateTime extractDate() {
+  DateTime extractDeadline() {
     int indexOfBy = Arrays.asList(params).indexOf("by");
     if (indexOfBy < 0) {
       return null;
@@ -213,7 +213,7 @@ public class InputParser {
     if (impt == true) {
       addAction.isImpt = true;
     }
-    DateTime dl = extractDate();
+    DateTime dl = extractDeadline();
     DateRange dr = extractPeriod();
     addAction.dline = dl;
     addAction.period = dr;
@@ -310,7 +310,7 @@ public class InputParser {
         }
       }
 
-      DateTime dl = extractDate();
+      DateTime dl = extractDeadline();
       DateRange dr = extractPeriod();
       editAction.dline = dl;
       editAction.period = dr;
@@ -346,7 +346,7 @@ public class InputParser {
       }
     } else {
       // search normally
-      DateTime dl = extractDate();
+      DateTime dl = extractDeadline();
       DateRange dr = extractPeriod();
       searchAction.dline = dl;
       searchAction.period = dr;
