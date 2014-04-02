@@ -33,7 +33,11 @@ public class DateUtil {
     if (days <= 0) {
       days += 7;
     }
-    return baseDate.plusDays(days);
+    
+    baseDate = baseDate.plusDays(days);
+    baseDate = baseDate.getEndOfDay().truncate(DateTime.Unit.SECOND);
+    
+    return baseDate;
   }
 
   /*
