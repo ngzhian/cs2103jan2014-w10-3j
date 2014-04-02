@@ -30,4 +30,9 @@ public class DateRange {
     if (range == null) return false;
     return containsDate(range.getStartDate()) || containsDate(range.getEndDate());
   }
+  
+  @Override
+  public String toString() {
+    return startDate.toString()+" to "+endDate.toString();
+  }
 }
