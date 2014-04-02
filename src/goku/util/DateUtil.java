@@ -33,10 +33,10 @@ public class DateUtil {
     if (days <= 0) {
       days += 7;
     }
-    
+
     baseDate = baseDate.plusDays(days);
     baseDate = baseDate.getEndOfDay().truncate(DateTime.Unit.SECOND);
-    
+
     return baseDate;
   }
 
@@ -280,12 +280,12 @@ public class DateUtil {
         } else if (looksLikeDay(input) && dateFound == false) {
           date = parseDay(input);
           dateFound = true;
-        } else if (looksLikeDate(input) && dateFound == false) {
+        } else if (looksLikeDate(input) && !dateFound) {
           date = parseDate(input);
-          dateFound = true;
-        } else if (looksLikeTime(input) && timeFound == false) {
+          dateFound = date == null ? false : true;
+        } else if (!timeFound) {
           time = parseTime(input);
-          timeFound = true;
+          timeFound = time == null ? false : true;
         }
 
         // stop searching if all components found
@@ -373,72 +373,32 @@ public class DateUtil {
    * minute The delimiter is either a ":" or "."
    */
   public static DateTime parseTime(String string) {
-    // TODO clean up this mess
-    // TODO error detection, e.g. 25:10 is not valid.
-    if (string.contains("am")) {
-      String time = string.substring(0, string.indexOf("am"));
-      if (time.contains(".")) {
-        String[] hourMinute = time.split("\\.");
-        if (Integer.parseInt(hourMinute[0]) == 12) {
-          return DateTime.forTimeOnly(0, Integer.parseInt(hourMinute[1]), 0, 0);
-        } else {
-          return DateTime.forTimeOnly(Integer.parseInt(hourMinute[0]),
-              Integer.parseInt(hourMinute[1]), 0, 0);
-        }
-      } else if (string.contains(":")) {
-        String[] hourMinute = time.split(":");
-        if (Integer.parseInt(hourMinute[0]) == 12) {
-          return DateTime.forTimeOnly(0, Integer.parseInt(hourMinute[1]), 0, 0);
-        } else {
-          return DateTime.forTimeOnly(Integer.parseInt(hourMinute[0]),
-              Integer.parseInt(hourMinute[1]), 0, 0);
-        }
+    Integer hour = null;
+    Integer min = null;
+    if (string.matches("(([01]?[0-9]|2[0-3])[:.][0-5][0-9])")) {
+      String[] results = string.split("[:.]");
+      hour = Integer.parseInt(results[0]);
+      min = Integer.parseInt(results[1]);
+      return DateTime.forTimeOnly(hour, min, 0, 0);
+    } else if (string.matches("(([1-9]|1[0-2])([:.]?[0-5][0-9])?[ap]m)")) {
+      String[] results = string.split("[:.\\D]");
+      if (string.contains("am")) {
+        hour = Integer.parseInt(results[0]);
       } else {
-        if (Integer.parseInt(time) == 12) {
-          return DateTime.forTimeOnly(0, 0, 0, 0);
-        } else {
-          return DateTime.forTimeOnly(Integer.parseInt(time), 0, 0, 0);
+        hour = Integer.parseInt(results[0]);
+        if (hour != 12) {
+          hour += 12;
         }
       }
-    } else if (string.contains("pm")) {
-      String time = string.substring(0, string.indexOf("pm"));
-      if (time.contains(".")) {
-        String[] hourMinute = time.split("\\.");
-        if (Integer.parseInt(hourMinute[0]) == 12) {
-          return DateTime.forTimeOnly(Integer.parseInt(hourMinute[0]),
-              Integer.parseInt(hourMinute[1]), 0, 0);
-        } else {
-          return DateTime.forTimeOnly(Integer.parseInt(hourMinute[0]) + 12,
-              Integer.parseInt(hourMinute[1]), 0, 0);
-        }
-      } else if (time.contains(":")) {
-        String[] hourMinute = time.split(":");
-        if (Integer.parseInt(hourMinute[0]) == 12) {
-          return DateTime.forTimeOnly(Integer.parseInt(hourMinute[0]),
-              Integer.parseInt(hourMinute[1]), 0, 0);
-        } else {
-          return DateTime.forTimeOnly(Integer.parseInt(hourMinute[0]) + 12,
-              Integer.parseInt(hourMinute[1]), 0, 0);
-        }
+      if (results.length > 1) {
+        min = Integer.parseInt(results[1]);
       } else {
-        if (Integer.parseInt(time) == 12) {
-          return DateTime.forTimeOnly(Integer.parseInt(time), 0, 0, 0);
-        } else {
-          return DateTime.forTimeOnly(Integer.parseInt(time) + 12, 0, 0, 0);
-        }
+        min = 0;
       }
+      return DateTime.forTimeOnly(hour, min, 0, 0);
     } else {
-      if (string.contains(".")) {
-        String[] hourMinute = string.split("\\.");
-        return DateTime.forTimeOnly(Integer.parseInt(hourMinute[0]),
-            Integer.parseInt(hourMinute[1]), 0, 0);
-      } else if (string.contains(":")) {
-        String[] hourMinute = string.split(":");
-        return DateTime.forTimeOnly(Integer.parseInt(hourMinute[0]),
-            Integer.parseInt(hourMinute[1]), 0, 0);
-      }
+      return null;
     }
-    return null;
   }
 
   public static Date toDate(DateTime dateTime) {
@@ -459,13 +419,13 @@ public class DateUtil {
     }
     return -1;
   }
-  
+
   /*
    * readable to string method for datetime
    * TODO format!!
    */
   public String dateTimeToString(DateTime date) {
-    
+
     return null;
   }
 }
