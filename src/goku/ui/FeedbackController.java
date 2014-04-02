@@ -35,17 +35,58 @@ public class FeedbackController {
     output = outputArea;
   }
 
+  public void clearArea() {
+    output.getChildren().clear();
+  }
+
   /*
-   * Displays the Result of an Action.
-   * Shows the success/error message, then displays
-   * any tasks that are in the result.
+   * Displays a simple error message to the user
+   * 
+   * @param message error message to be displayed
+   */
+  public void displayErrorMessage(String message) {
+    clearArea();
+    HBox hbox = new HBox();
+    Text text = makeErrorText("Error: " + message);
+    hbox.getChildren().add(text);
+    displayLine(hbox);
+  }
+
+  /*
+   * Prints a complicated message to output. This HBox needs to be built by the
+   * caller
+   * 
+   * @param message message to be printed
+   */
+  public void displayLine(HBox message) {
+    output.getChildren().add(message);
+  }
+
+  /*
+   * Prints a string to output
+   * 
+   * @param message the string to be printed
+   */
+  public void displayLine(String message) {
+    HBox hbox = new HBox();
+    hbox.getChildren().add(makeNormalText(message));
+    output.getChildren().add(hbox);
+
+  }
+
+  /*
+   * Displays the Result of an Action. Shows the success/error message, then
+   * displays any tasks that are in the result.
    */
   public void displayResult(Result result) {
     clearArea();
 
     HBox hbox = new HBox();
+    HBox hboxOverdue = new HBox();
     hbox.setSpacing(10);
-    Text status, message;
+    Text status, message, overdueMsg = makeNormalText("       You have overdue tasks, \"view overdue\" to see them.");
+
+    hboxOverdue.getChildren().add(overdueMsg);
 
     if (result.isSuccess()) {
       status = makeSuccessText("Yay!");
@@ -61,26 +102,9 @@ public class FeedbackController {
   }
 
   /*
-   * Displays a simple error message to the user
-   * @param message error message to be displayed
-   */
-  public void displayErrorMessage(String message) {
-    clearArea();
-    HBox hbox = new HBox();
-    Text text = makeErrorText("Error: " + message);
-    hbox.getChildren().add(text);
-    displayLine(hbox);
-  }
-
-  public void clearArea() {
-    output.getChildren().clear();
-  }
-
-  /*
-   * Displays a list of task.
-   * Shows header, and then list the tasks under that header.
-   * This is very coupled to TaskListDisplayer, as the header
-   * that is displayed depends on it.
+   * Displays a list of task. Shows header, and then list the tasks under that
+   * header. This is very coupled to TaskListDisplayer, as the header that is
+   * displayed depends on it.
    */
   public void displayTasks(List<Task> tasks) {
     if (tasks == null) {
@@ -88,7 +112,7 @@ public class FeedbackController {
     }
     TaskListDisplayer tld = new TaskListDisplayer(System.out);
     Hashtable<String, List<Task>> ht = tld.build(tasks);
-    String[] headers = { "past", "today", "tomorrow", "remaining" };
+    String[] headers = { "overdue", "today", "tomorrow", "remaining" };
     for (String header : Arrays.asList(headers)) {
       if (ht.get(header).size() != 0) {
         displayLine(makeDateHeader(header));
@@ -100,66 +124,9 @@ public class FeedbackController {
   }
 
   /*
-   * Builds HBox that displays a single task.
-   */
-  public HBox makeDisplayBoxForTask(Task t) {
-    HBox hbox = new HBox();
-    hbox.getStyleClass().add("task");
-    hbox.setSpacing(5);
-    hbox.getChildren().addAll(makeId(t), makeImpt(t), makeTitle(t),
-        makeSeparator(), makeDate(t));
-    return hbox;
-  }
-
-  /*
-   * Builds a Text that shows the ID of the task.
-   * The id will be in square brackets: [1]
-   * @param task task to be shown
-   */
-  public Text makeId(Task task) {
-    Text id = makeNormalText("[" + String.valueOf(task.getId()) + "]");
-    id.getStyleClass().addAll("task-id");
-    return id;
-  }
-
-  /*
-   * Builds a Text that indicates if a task is important or not.
-   * This is indicated by a (!), which is in bright red
-   * @param task task to be shown
-   */
-  public Text makeImpt(Task task) {
-    Text impt = makeImptText(task.getImpt() ? "(!)" : "   ");
-    return impt;
-  }
-
-  /*
-   * Builds a Text that shows the title of a task.
-   * @param task task to be shown
-   */
-  public HBox makeTitle(Task task) {
-    HBox hbox = new HBox();
-    Text title = makeNormalText(task.getTitle());
-    title.setWrappingWidth(output.getWidth() - 300);
-    hbox.getChildren().add(title);
-    HBox.setHgrow(title, Priority.NEVER);
-    return hbox;
-  }
-
-  /*
-   * Builds a separator that is then inserted between the task title and the
-   * due date or period.
-   * This helps the user to align the proper task title to the date.
-   * HBox is set to grow and fill up the extra space in the parent HBox.
-   */
-  private HBox makeSeparator() {
-    HBox separator = new HBox();
-    HBox.setHgrow(separator, Priority.ALWAYS); // IMPT don't change
-    separator.getStyleClass().add("separator");
-    return separator;
-  }
-
-  /*
-   * Builds a Text that represents either the deadline or the period of the task.
+   * Builds a Text that represents either the deadline or the period of the
+   * task.
+   * 
    * @param task t to be shown
    */
   private Text makeDate(Task t) {
@@ -173,7 +140,21 @@ public class FeedbackController {
   }
 
   /*
+   * Builds a header used when displaying tasks. A header is used to categorize
+   * the task by the date, so that users can see the most urgent tasks first.
+   */
+  private HBox makeDateHeader(String header) {
+    HBox hbox = new HBox();
+    hbox.setAlignment(Pos.BASELINE_CENTER);
+    Text t = makeNormalText(header.toUpperCase());
+    t.setUnderline(true);
+    hbox.getChildren().add(t);
+    return hbox;
+  }
+
+  /*
    * Builds a Text that represents the period of a task.
+   * 
    * @param t task to be shown
    */
   private Text makeDateRange(Task t) {
@@ -188,6 +169,7 @@ public class FeedbackController {
 
   /*
    * Builds a Text that represents the deadline of a task.
+   * 
    * @param t task to be shown
    */
   private Text makeDeadline(Task t) {
@@ -198,48 +180,44 @@ public class FeedbackController {
   }
 
   /*
-   * Builds a header used when displaying tasks.
-   * A header is used to categorize the task by the date, so that
-   * users can see the most urgent tasks first.
+   * Builds HBox that displays a single task.
    */
-  private HBox makeDateHeader(String header) {
+  public HBox makeDisplayBoxForTask(Task t) {
     HBox hbox = new HBox();
-    hbox.setAlignment(Pos.BASELINE_CENTER);
-    Text t = makeNormalText(header.toUpperCase());
-    t.setUnderline(true);
-    hbox.getChildren().add(t);
+    hbox.getStyleClass().add("task");
+    hbox.setSpacing(5);
+    hbox.getChildren().addAll(makeId(t), makeImpt(t), makeTitle(t),
+        makeSeparator(), makeDate(t));
     return hbox;
   }
 
-  /*
-   * Prints a string to output
-   * @param message the string to be printed
-   */
-  public void displayLine(String message) {
-    HBox hbox = new HBox();
-    hbox.getChildren().add(makeNormalText(message));
-    output.getChildren().add(hbox);
-
-  }
-
-  /*
-   * Prints a complicated message to output.
-   * This HBox needs to be built by the caller
-   * @param message message to be printed
-   */
-  public void displayLine(HBox message) {
-    output.getChildren().add(message);
-  }
-
-  public void sayGoodbye() {
-    clearArea();
-    displayLine("Goodbye!");
-  }
-
-  public Text makeNormalText(String message) {
+  public Text makeErrorText(String message) {
     Text text = new Text(message);
-    text.setFill(NORMAL_COLOUR);
+    text.setFill(ERROR_COLOUR);
     return text;
+  }
+
+  /*
+   * Builds a Text that shows the ID of the task. The id will be in square
+   * brackets: [1]
+   * 
+   * @param task task to be shown
+   */
+  public Text makeId(Task task) {
+    Text id = makeNormalText("[" + String.valueOf(task.getId()) + "]");
+    id.getStyleClass().addAll("task-id");
+    return id;
+  }
+
+  /*
+   * Builds a Text that indicates if a task is important or not. This is
+   * indicated by a (!), which is in bright red
+   * 
+   * @param task task to be shown
+   */
+  public Text makeImpt(Task task) {
+    Text impt = makeImptText(task.getImpt() ? "(!)" : "   ");
+    return impt;
   }
 
   public Text makeImptText(String message) {
@@ -248,15 +226,46 @@ public class FeedbackController {
     return text;
   }
 
+  public Text makeNormalText(String message) {
+    Text text = new Text(message);
+    text.setFill(NORMAL_COLOUR);
+    return text;
+  }
+
+  /*
+   * Builds a separator that is then inserted between the task title and the due
+   * date or period. This helps the user to align the proper task title to the
+   * date. HBox is set to grow and fill up the extra space in the parent HBox.
+   */
+  private HBox makeSeparator() {
+    HBox separator = new HBox();
+    HBox.setHgrow(separator, Priority.ALWAYS); // IMPT don't change
+    separator.getStyleClass().add("separator");
+    return separator;
+  }
+
   public Text makeSuccessText(String message) {
     Text text = new Text(message);
     text.setFill(SUCCESS_COLOUR);
     return text;
   }
 
-  public Text makeErrorText(String message) {
-    Text text = new Text(message);
-    text.setFill(ERROR_COLOUR);
-    return text;
+  /*
+   * Builds a Text that shows the title of a task.
+   * 
+   * @param task task to be shown
+   */
+  public HBox makeTitle(Task task) {
+    HBox hbox = new HBox();
+    Text title = makeNormalText(task.getTitle());
+    title.setWrappingWidth(output.getWidth() - 300);
+    hbox.getChildren().add(title);
+    HBox.setHgrow(title, Priority.NEVER);
+    return hbox;
+  }
+
+  public void sayGoodbye() {
+    clearArea();
+    displayLine("Goodbye!");
   }
 }

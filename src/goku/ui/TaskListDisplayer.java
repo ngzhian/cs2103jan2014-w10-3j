@@ -14,26 +14,27 @@ import java.util.TimeZone;
 public class TaskListDisplayer {
   PrintStream ps;
 
+  DateTime now = DateUtil.getNow();
+
+  DateTime tmr = now.plusDays(1);
+
   public TaskListDisplayer(PrintStream ps) {
     this.ps = ps;
   }
-
-  DateTime now = DateUtil.getNow();
-  DateTime tmr = now.plusDays(1);
 
   public Hashtable<String, List<Task>> build(List<Task> list) {
     Hashtable<String, List<Task>> ht = new Hashtable<>();
     if (list == null) {
       return ht;
     }
-    ArrayList<Task> past = new ArrayList<Task>();
+    ArrayList<Task> overdue = new ArrayList<Task>();
     ArrayList<Task> today = new ArrayList<Task>();
     ArrayList<Task> tomorrow = new ArrayList<Task>();
     ArrayList<Task> remaining = new ArrayList<Task>();
 
     for (Task task : list) {
       if (isOver(task)) {
-        past.add(task);
+        overdue.add(task);
       } else if (isToday(task)) {
         today.add(task);
       } else if (isTomorrow(task)) {
@@ -42,7 +43,7 @@ public class TaskListDisplayer {
         remaining.add(task);
       }
     }
-    ht.put("past", past);
+    ht.put("overdue", overdue);
     ht.put("today", today);
     ht.put("tomorrow", tomorrow);
     ht.put("remaining", remaining);
@@ -88,8 +89,40 @@ public class TaskListDisplayer {
     }
   }
 
-  private boolean isTomorrow(Task task) {
-    return isTomorrow(task.getDeadline()) || isTomorrow(task.getDateRange());
+  private boolean isOver(DateRange dateRange) {
+    if (dateRange == null) {
+      return false;
+    }
+    return isOver(dateRange.getEndDate());
+  }
+
+  public boolean isOver(DateTime date) {
+    if (date == null) {
+      return false;
+    }
+    return date.isInThePast(TimeZone.getDefault());
+  }
+
+  private boolean isOver(Task task) {
+    return isOver(task.getDateRange()) || isOver(task.getDeadline());
+  }
+
+  private boolean isToday(DateRange dateRange) {
+    if (dateRange == null) {
+      return false;
+    }
+    return isToday(dateRange.getEndDate());
+  }
+
+  private boolean isToday(DateTime date) {
+    if (date == null) {
+      return false;
+    }
+    return now.isSameDayAs(date);
+  }
+
+  private boolean isToday(Task task) {
+    return isToday(task.getDeadline()) || isToday(task.getDateRange());
   }
 
   private boolean isTomorrow(DateRange dateRange) {
@@ -107,39 +140,7 @@ public class TaskListDisplayer {
 
   }
 
-  private boolean isToday(Task task) {
-    return isToday(task.getDeadline()) || isToday(task.getDateRange());
-  }
-
-  private boolean isToday(DateRange dateRange) {
-    if (dateRange == null) {
-      return false;
-    }
-    return isToday(dateRange.getEndDate());
-  }
-
-  private boolean isToday(DateTime date) {
-    if (date == null) {
-      return false;
-    }
-    return now.isSameDayAs(date);
-  }
-
-  private boolean isOver(Task task) {
-    return isOver(task.getDateRange()) || isOver(task.getDeadline());
-  }
-
-  private boolean isOver(DateRange dateRange) {
-    if (dateRange == null) {
-      return false;
-    }
-    return isOver(dateRange.getEndDate());
-  }
-
-  public boolean isOver(DateTime date) {
-    if (date == null) {
-      return false;
-    }
-    return date.isInThePast(TimeZone.getDefault());
+  private boolean isTomorrow(Task task) {
+    return isTomorrow(task.getDeadline()) || isTomorrow(task.getDateRange());
   }
 }

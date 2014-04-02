@@ -29,6 +29,23 @@ import javafx.scene.layout.VBox;
 
 public class GokuController {
 
+  private class GreetAction extends Action {
+    private static final String MSG = "Welcome to GOKU! Here's whats upcoming...";
+
+    public GreetAction(GOKU goku) {
+      super(goku);
+    }
+
+    @Override
+    public Result doIt() {
+      SearchAction sa = new SearchAction(goku);
+      sa.dline = DateUtil.getNow().plusDays(1);
+      Result result = sa.doIt();
+      return new Result(true, MSG, null, result.getTasks());
+    }
+
+  }
+
   @FXML
   private ResourceBundle resources;
 
@@ -61,10 +78,55 @@ public class GokuController {
 
   private static final Logger LOGGER = Logger
       .getLogger(Logger.GLOBAL_LOGGER_NAME);
-
   private CompletionController completionController;
   private FeedbackController feedbackController;
+
   private HistoryController historyController;
+
+  private void clearInput() {
+    inputField.clear();
+    ;
+  }
+
+  private void commitInput() {
+    if (inputField.getText().isEmpty()) {
+      return;
+    }
+    try {
+      historyController.addInput(inputField.getText());
+      String input = inputField.getText().toLowerCase().trim();
+      Action action = parser.parse(input);
+      if (action instanceof ExitAction) {
+        feedbackController.sayGoodbye();
+        Platform.exit();
+      }
+      doAction(action);
+    } catch (MakeActionException e) {
+      feedbackController.displayErrorMessage(e.getMessage());
+    }
+    clearInput();
+    hideSuggestions();
+  }
+
+  private void doAction(Action action) {
+    Result result = action.doIt();
+    feedBack(result);
+    if (action.shouldSave()) {
+      save();
+    }
+  }
+
+  private void feedBack(Result result) {
+    if (result == null) {
+      return;
+    } else {
+      feedbackController.displayResult(result);
+    }
+  }
+
+  private void hideSuggestions() {
+    suggestionBox.setVisible(false);
+  }
 
   @FXML
   void initialize() {
@@ -106,13 +168,12 @@ public class GokuController {
   }
 
   /*
-   * This method is called when a keypress in inputField is detected.
-   * A "Enter" keypress means the user wants to run the command.
-   * Any other key will be handled by CompletionController,
-   * which will suggestion completions.
-   * User can then use tab to *select* a completion and have it 
-   * fill up the inputField.
-   * Ctrl + Z and Ctrl + Y is a shortcut for Undo and Redo, respectively.
+   * This method is called when a keypress in inputField is detected. A "Enter"
+   * keypress means the user wants to run the command. Any other key will be
+   * handled by CompletionController, which will suggestion completions. User
+   * can then use tab to *select* a completion and have it fill up the
+   * inputField. Ctrl + Z and Ctrl + Y is a shortcut for Undo and Redo,
+   * respectively.
    */
   public void keyPressOnInputField(KeyEvent event) {
     if (event.getCode() == KeyCode.ENTER) {
@@ -132,42 +193,6 @@ public class GokuController {
     }
   }
 
-  private void commitInput() {
-    if (inputField.getText().isEmpty()) {
-      return;
-    }
-    try {
-      historyController.addInput(inputField.getText());
-      String input = inputField.getText().toLowerCase().trim();
-      Action action = parser.parse(input);
-      if (action instanceof ExitAction) {
-        feedbackController.sayGoodbye();
-        Platform.exit();
-      }
-      doAction(action);
-    } catch (MakeActionException e) {
-      feedbackController.displayErrorMessage(e.getMessage());
-    }
-    clearInput();
-    hideSuggestions();
-  }
-
-  private void doAction(Action action) {
-    Result result = action.doIt();
-    feedBack(result);
-    if (action.shouldSave()) {
-      save();
-    }
-  }
-
-  private void feedBack(Result result) {
-    if (result == null) {
-      return;
-    } else {
-      feedbackController.displayResult(result);
-    }
-  }
-
   public void save() {
     try {
       storage.saveAll(goku.getTaskList());
@@ -175,32 +200,6 @@ public class GokuController {
       e.printStackTrace();
       System.out.println("Error saving tasks.");
     }
-  }
-
-  private void clearInput() {
-    inputField.clear();
-    ;
-  }
-
-  private void hideSuggestions() {
-    suggestionBox.setVisible(false);
-  }
-
-  private class GreetAction extends Action {
-    private static final String MSG = "Welcome to GOKU! Here's whats upcoming...";
-
-    public GreetAction(GOKU goku) {
-      super(goku);
-    }
-
-    @Override
-    public Result doIt() {
-      SearchAction sa = new SearchAction(goku);
-      sa.dline = DateUtil.getNow().plusDays(1);
-      Result result = sa.doIt();
-      return new Result(true, MSG, null, result.getTasks());
-    }
-
   }
 
 }
