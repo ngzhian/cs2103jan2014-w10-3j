@@ -7,6 +7,7 @@ import goku.TaskList;
 public class UndoAction extends Action {
   private static final String MSG_SUCCESS = "Command undone!";
   private static final String ERR_FAIL = "Failed to undo.";
+  private static final String MSG_HAS_OVERDUE = "[!] You have overdue tasks, \"view overdue\" to see them.";
 
   private boolean isEmpty = false;
 
@@ -19,12 +20,19 @@ public class UndoAction extends Action {
   @Override
   public Result doIt() {
     if (undoCommand() == false) {
-      return new Result(false, null, ERR_FAIL, goku.getTaskList()
-          .getAllIncomplete());
+      return new Result(false, null, editMsgIfHaveOverdue(ERR_FAIL), goku
+          .getTaskList().getAllIncomplete());
     } else {
-      return new Result(true, MSG_SUCCESS, null, goku.getTaskList()
-          .getAllIncomplete());
+      return new Result(true, editMsgIfHaveOverdue(MSG_SUCCESS), null, goku
+          .getTaskList().getAllIncomplete());
     }
+  }
+
+  public String editMsgIfHaveOverdue(String msg) {
+    if (list.getOverdue().size() != 0) {
+      msg += System.lineSeparator() + MSG_HAS_OVERDUE;
+    }
+    return msg;
   }
 
   public boolean undoCommand() {

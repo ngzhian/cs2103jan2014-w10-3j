@@ -20,10 +20,11 @@ import java.util.List;
  */
 public class DeleteAction extends Action {
   private static final String MSG_SUCCESS = "Deleted [%s] %s. *hint* undo to undo ;)";
-  private static final String NO_MATCHES = "No matches found";
+  private static final String NO_MATCHES = "No matches found!";
   private static final String ERR_FAILURE = "Many matches found for \"%s\".";
   private static final String ERR_NOT_FOUND = "Cannot find \"%s\".";
   public static final String ERR_INSUFFICIENT_ARGS = "Can't delete. Need an ID. Try \"delete 1\"";
+  private static final String MSG_HAS_OVERDUE = "[!] You have overdue tasks, \"view overdue\" to see them.";
 
   public Integer id;
 
@@ -45,19 +46,21 @@ public class DeleteAction extends Action {
     addToUndoList();
     Task deletedTask = tryDeleteById();
     if (deletedTask != null) {
-      return new Result(true, String.format(MSG_SUCCESS, id,
-          deletedTask.getTitle()), null, null);
+      return new Result(true, editMsgIfHaveOverdue(String.format(MSG_SUCCESS,
+          id, deletedTask.getTitle())), null, list.getAllIncomplete());
     }
     List<Task> possibleDeletion = list.deleteTaskByTitle(title);
     if (possibleDeletion.size() == 0) {
-      return new Result(false, null, NO_MATCHES, null);
+      return new Result(false, null, editMsgIfHaveOverdue(NO_MATCHES),
+          list.getAllIncomplete());
     } else if (possibleDeletion.size() == 1) {
       deletedTask = possibleDeletion.get(0);
-      return new Result(true, String.format(MSG_SUCCESS, deletedTask.getId(),
-          deletedTask.getTitle()), null, null);
+      return new Result(true, editMsgIfHaveOverdue(String.format(MSG_SUCCESS,
+          deletedTask.getId(), deletedTask.getTitle())), null,
+          list.getAllIncomplete());
     } else {
-      return new Result(false, null, String.format(ERR_FAILURE, title),
-          possibleDeletion);
+      return new Result(false, null, editMsgIfHaveOverdue(String.format(
+          ERR_FAILURE, title)), possibleDeletion);
     }
 
   }
@@ -65,6 +68,13 @@ public class DeleteAction extends Action {
   @Override
   public Result doIt() {
     return deleteTask();
+  }
+
+  public String editMsgIfHaveOverdue(String msg) {
+    if (list.getOverdue().size() != 0) {
+      msg += System.lineSeparator() + MSG_HAS_OVERDUE;
+    }
+    return msg;
   }
 
   private Task tryDeleteById() {

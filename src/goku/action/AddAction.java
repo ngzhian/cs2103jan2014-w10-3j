@@ -15,6 +15,7 @@ public class AddAction extends Action {
   private static final String MSG_SUCCESS = "Added: \"%s\"";
   private static final String ERR_FAIL = "Fail to add: \"%s\"";
   public static final String ERR_INSUFFICIENT_ARGS = "Can't add! Need title. Try \"add my task! by tomorrow\"";
+  private static final String MSG_HAS_OVERDUE = "[!] You have overdue tasks, \"view overdue\" to see them.";
 
   public String title;
   public String deadline;
@@ -54,9 +55,17 @@ public class AddAction extends Action {
     return addTask();
   }
 
+  public String editMsgIfHaveOverdue(String msg) {
+    if (list.getOverdue().size() != 0) {
+      msg += System.lineSeparator() + MSG_HAS_OVERDUE;
+    }
+    return msg;
+  }
+
   private Result failedToAddTask() {
     Result result = Result.makeFailureResult();
-    result.setErrorMsg(String.format(ERR_FAIL, title));
+    result.setErrorMsg(editMsgIfHaveOverdue(String.format(ERR_FAIL, title)));
+    result.setTasks(list.getAllIncomplete());
     return result;
   }
 
@@ -80,7 +89,8 @@ public class AddAction extends Action {
 
   private Result successAddTask() {
     Result result = Result.makeSuccessResult();
-    result.setSuccessMsg(String.format(MSG_SUCCESS, title));
+    result
+        .setSuccessMsg(editMsgIfHaveOverdue(String.format(MSG_SUCCESS, title)));
     result.setTasks(list.getAllIncomplete());
     return result;
   }

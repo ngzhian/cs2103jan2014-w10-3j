@@ -13,8 +13,8 @@ import hirondelle.date4j.DateTime;
  */
 public class EditAction extends Action {
   public static final String ERR_INSUFFICIENT_ARGS = "Can't edit, need ID! Try \"edit 1 new title!\"";
-
   public static final String ERR_INSUFFICIENT_ARGS_FOR_COMPLETION = "Can't complete, need ID! Try \"do 1\"";
+  private static final String MSG_HAS_OVERDUE = "[!] You have overdue tasks, \"view overdue\" to see them.";
 
   public static final String ERR_NO_ID_GIVEN = ERR_INSUFFICIENT_ARGS;
 
@@ -63,9 +63,9 @@ public class EditAction extends Action {
     return updateTask();
   }
 
-  private void doRemovePeriod() {
+  private void doRemoveDeadline() {
     Task t = list.getTaskById(id);
-    t.setPeriod(null);
+    t.setDeadline(null);
   }
 
   private void doRemoveImportant() {
@@ -73,9 +73,16 @@ public class EditAction extends Action {
     t.setImpt(false);
   }
 
-  private void doRemoveDeadline() {
+  private void doRemovePeriod() {
     Task t = list.getTaskById(id);
-    t.setDeadline(null);
+    t.setPeriod(null);
+  }
+
+  public String editMsgIfHaveOverdue(String msg) {
+    if (list.getOverdue().size() != 0) {
+      msg += System.lineSeparator() + MSG_HAS_OVERDUE;
+    }
+    return msg;
   }
 
   public Result updateTask() {
@@ -88,7 +95,9 @@ public class EditAction extends Action {
     Task t = list.getTaskById(id);
     t.updateWith(taskWithEdits);
 
-    return new Result(true, String.format(MSG_SUCCESS, id), null, null);
+    return new Result(true,
+        editMsgIfHaveOverdue(String.format(MSG_SUCCESS, id)), null,
+        list.getAllIncomplete());
   }
 
 }
