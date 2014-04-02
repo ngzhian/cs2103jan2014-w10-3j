@@ -558,7 +558,7 @@ public class InputParserTest {
             .truncate(DateTime.Unit.SECOND), resultRange.getEndDate());
   }
 
-  @Test
+  @Test(expected = MakeActionException.class)
   public void extractPeriod_InvalidPeriodStartDateAfterEndDate() throws MakeActionException {
     List<String> input = Splitter.on(' ').omitEmptyStrings().trimResults()
         .splitToList("from today 10am to today 8am");
@@ -566,8 +566,6 @@ public class InputParserTest {
     p.params = inputArray;
 
     DateRange resultRange = p.extractPeriod();
-
-    assertNull(resultRange);
   }
 
   @Test
