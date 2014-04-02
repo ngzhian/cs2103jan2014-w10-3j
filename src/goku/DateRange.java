@@ -1,15 +1,22 @@
 package goku;
 
+import goku.action.MakeActionException;
 import goku.util.DateUtil;
 import hirondelle.date4j.DateTime;
 
 public class DateRange {
   DateTime startDate;
   DateTime endDate;
-
-  public DateRange(DateTime startDate, DateTime endDate) {
+  
+  private static final String ERR_INVALID_PERIOD = "Invalid period detected!";
+  
+  public DateRange(DateTime startDate, DateTime endDate) throws MakeActionException{
     this.startDate = startDate;
     this.endDate = endDate;
+    
+    if(DateUtil.isEarlierOrOn(endDate, startDate)) {
+      throw new MakeActionException(ERR_INVALID_PERIOD);
+    }
   }
 
   public DateTime getStartDate() {
