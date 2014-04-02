@@ -297,7 +297,7 @@ public class DateUtil {
       // this catches an exception thrown by DateTime's parse methods.
       // when there is a parsing error, e.g. time given is 123.45pm,
       // an exception is thrown and we treat it as no time was given
-      return null;
+      //TODO return null;
     }
     return mergeDateAndTime(date, time, daysOffsets);
   }
@@ -467,7 +467,7 @@ public class DateUtil {
    * Case 2: Only date exists
    */
   public String dateTimeToString(DateTime date) {
-    assert(date)
+    //assert(date)
     
     return null;
   }
