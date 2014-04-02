@@ -388,7 +388,7 @@ public class InputParserTest {
     String[] inputArray = input.toArray(new String[input.size()]);
     p.params = inputArray;
 
-    DateTime resultDate = p.extractDate();
+    DateTime resultDate = p.extractDeadline();
 
     assertNotNull(resultDate.getDay());
     assertEquals((Integer) 10, resultDate.getHour());
@@ -401,7 +401,7 @@ public class InputParserTest {
     String[] inputArray = input.toArray(new String[input.size()]);
     p.params = inputArray;
 
-    DateTime resultDate = p.extractDate();
+    DateTime resultDate = p.extractDeadline();
 
     assertNotNull(resultDate.getDay());
     assertEquals((Integer) 23, resultDate.getHour());
@@ -415,7 +415,7 @@ public class InputParserTest {
     String[] inputArray = input.toArray(new String[input.size()]);
     p.params = inputArray;
 
-    DateTime resultDate = p.extractDate();
+    DateTime resultDate = p.extractDeadline();
 
     assertEquals(DateUtil.getNowDate().getDay(), resultDate.getDay());
     assertEquals((Integer) 12, resultDate.getHour());
@@ -429,7 +429,7 @@ public class InputParserTest {
     String[] inputArray = input.toArray(new String[input.size()]);
     p.params = inputArray;
 
-    DateTime resultDate = p.extractDate();
+    DateTime resultDate = p.extractDeadline();
 
     assertNull(resultDate);
   }
@@ -589,7 +589,7 @@ public class InputParserTest {
     String[] inputArray = input.toArray(new String[input.size()]);
     p.params = inputArray;
 
-    DateTime resultDate = p.extractDate();
+    DateTime resultDate = p.extractDeadline();
     DateRange resultRange = p.extractPeriod();
 
     assertEquals(
@@ -610,7 +610,7 @@ public class InputParserTest {
     String[] inputArray = input.toArray(new String[input.size()]);
     p.params = inputArray;
 
-    DateTime resultDate = p.extractDate();
+    DateTime resultDate = p.extractDeadline();
     DateRange resultRange = p.extractPeriod();
 
     assertEquals(
