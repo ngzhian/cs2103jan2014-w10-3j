@@ -459,4 +459,13 @@ public class DateUtil {
     }
     return -1;
   }
+  
+  /*
+   * readable to string method for datetime
+   * TODO format!!
+   */
+  public String dateTimeToString(DateTime date) {
+    
+    return null;
+  }
 }
