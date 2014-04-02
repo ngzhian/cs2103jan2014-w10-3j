@@ -149,6 +149,7 @@ public class SearchAction extends Action {
     Task task = new Task();
 
     assert (period != null);
+    
     task.setPeriod(period);
     List<Task> foundTasks = list.findTaskByPeriod(period);
     if (foundTasks.size() != 0) {
