@@ -1,19 +1,21 @@
 package test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+
 import goku.GOKU;
 import goku.Task;
 import goku.TaskList;
 import goku.action.Action;
 import goku.action.AddAction;
+import goku.action.EditAction;
 import goku.action.MakeActionException;
 import goku.ui.InputParser;
 
 import org.junit.Before;
 import org.junit.Test;
+import static org.junit.Assert.*;
 
 public class IntegrationTest {
+  private static final EditAction EditAction = null;
   private GOKU goku;
   private TaskList list;
   String userInput;
@@ -43,6 +45,7 @@ public class IntegrationTest {
   }
 
   @Test
+  //This tests whether adding a single task increases task list size
   public void user_addTaskWithTitle_increaseSizeOfList()
       throws MakeActionException {
     Action a = parser.parse("add asdf");
@@ -54,6 +57,7 @@ public class IntegrationTest {
   }
 
   @Test
+  //This tests whether adding multiple tasks works
   public void user_addMultipleTasks() throws Exception {
     AddAction aa = (AddAction) parser.parse("add task 1");
     aa.doIt();
@@ -74,5 +78,24 @@ public class IntegrationTest {
     assertEquals(taskThree.getStartDate().getMonth(), new Integer(4));
     assertEquals(taskThree.getEndDate().getDay(), new Integer(28));
     assertEquals(taskThree.getEndDate().getMonth(), new Integer(4));
+  }
+  
+  @Test
+  //This tests whether editing an existing task works 
+  public void user_addAndEditTasks() throws Exception {
+    AddAction aa = (AddAction) parser.parse("add original by today");
+    aa.doIt();
+    assertEquals(list.size(), 1);
+    assertEquals(list.getTaskById(1).getTitle(), "original");
+    
+    EditAction ea = (EditAction) parser.parse("edit 1 edited");
+    ea.doIt();
+    assertEquals(list.getTaskById(1).getTitle(), "edited");
+    
+   // assertFalse(list.getTaskById(1).getStatus());
+    ea = (EditAction) parser.parse("do 1");
+    ea.doIt();
+    assertTrue(list.getTaskById(1).getStatus());
+
   }
 }
