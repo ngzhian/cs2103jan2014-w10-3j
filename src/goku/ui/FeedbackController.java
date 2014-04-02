@@ -117,7 +117,11 @@ public class FeedbackController {
       if (ht.get(header).size() != 0) {
         displayLine(makeDateHeader(header));
         for (Task task : ht.get(header)) {
-          displayLine(makeDisplayBoxForTask(task));
+          if (header.equals("remaining") || header.equals("overdue")) {
+            displayLine(makeDisplayBoxForRemainingTask(task));
+          } else {
+            displayLine(makeDisplayBoxForTask(task));
+          }
         }
       }
     }
@@ -132,6 +136,16 @@ public class FeedbackController {
   private Text makeDate(Task t) {
     if (t.getDeadline() != null) {
       return makeDeadline(t);
+    } else if (t.getDateRange() != null) {
+      return makeDateRange(t);
+    } else {
+      return makeNormalText("");
+    }
+  }
+
+  private Text makeDateForRemaining(Task t) {
+    if (t.getDeadline() != null) {
+      return makeDeadlineForRemaining(t);
     } else if (t.getDateRange() != null) {
       return makeDateRange(t);
     } else {
@@ -177,6 +191,22 @@ public class FeedbackController {
         + DateOutput.formatTimeOnly12h(t.getDeadline()));
     deadline.getStyleClass().addAll("task-deadline");
     return deadline;
+  }
+
+  private Text makeDeadlineForRemaining(Task t) {
+    Text deadline = makeNormalText("by "
+        + DateOutput.formatDateTimeDayMonthHourMin(t.getDeadline()));
+    deadline.getStyleClass().addAll("task-deadline");
+    return deadline;
+  }
+
+  public HBox makeDisplayBoxForRemainingTask(Task t) {
+    HBox hbox = new HBox();
+    hbox.getStyleClass().add("task");
+    hbox.setSpacing(5);
+    hbox.getChildren().addAll(makeId(t), makeImpt(t), makeTitle(t),
+        makeSeparator(), makeDateForRemaining(t));
+    return hbox;
   }
 
   /*
