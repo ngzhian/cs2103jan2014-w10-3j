@@ -459,16 +459,4 @@ public class DateUtil {
     }
     return -1;
   }
-  
-  /*
-   * Readable to string method for datetime
-   * 
-   * Case 1: Date and time exists
-   * Case 2: Only date exists
-   */
-  public String dateTimeToString(DateTime date) {
-    //assert(date)
-    
-    return null;
-  }
 }
