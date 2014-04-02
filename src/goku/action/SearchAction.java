@@ -107,9 +107,9 @@ public class SearchAction extends Action {
     task.setDeadline(dline);
     List<Task> foundTasks = list.findTaskByDeadline(dline);
     if (foundTasks.size() != 0) {
-      return new Result(true, String.format(MSG_SUCCESS, dline.toString()), null, foundTasks);
+      return new Result(true, String.format(MSG_SUCCESS, DateUtil.toString(dline)), null, foundTasks);
     } else {
-      return new Result(false, null, editMsgIfHaveOverdue(String.format(MSG_FAIL, dline.toString())), null);
+      return new Result(false, null, editMsgIfHaveOverdue(String.format(MSG_FAIL, DateUtil.toString(dline))), null);
     }
   }
 

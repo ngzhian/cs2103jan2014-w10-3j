@@ -459,4 +459,8 @@ public class DateUtil {
     }
     return -1;
   }
+  
+  public static String toString(DateTime date) {
+    return DateOutput.formatDateTimeDayMonthHourMin(date);
+  }
 }
