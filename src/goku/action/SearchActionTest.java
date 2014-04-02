@@ -335,7 +335,7 @@ public class SearchActionTest {
   }
 
   private Task makeTaskWithPeriodDaysRelative(String title, int startDaysLater,
-      int endDaysLater) {
+      int endDaysLater) throws MakeActionException {
     Task task = new Task();
     task.setTitle(title);
     DateTime start = DateUtil.getNowDate().plusDays(startDaysLater);
@@ -347,7 +347,7 @@ public class SearchActionTest {
 
   private Task makeTaskWithPeriodDaysRelativeWithTime(String title,
       int startDaysLater, int startHour, int startMin, int startSec,
-      int endDaysLater, int endHour, int endMin, int endSec) {
+      int endDaysLater, int endHour, int endMin, int endSec) throws MakeActionException {
     Task task = new Task();
     task.setTitle(title);
     DateTime start = DateUtil.getNowDate().plus(0, 0, startDaysLater,

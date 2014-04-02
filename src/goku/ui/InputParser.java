@@ -119,7 +119,7 @@ public class InputParser {
    * 4) Any uninitialised end time will be 23:59:59 (without nanoseconds)
    * 5) If end date before start date, return null
    */
-  DateRange extractPeriod() {
+  DateRange extractPeriod() throws MakeActionException{
     DateRange dr = null;
     int indexOfFrom = Arrays.asList(params).indexOf("from");
     int indexOfTo = Arrays.asList(params).indexOf("to");
@@ -149,7 +149,7 @@ public class InputParser {
           end = initTimeToEndOfDay(end);
         }
 
-        if (start != null && end != null && DateUtil.isEarlierThan(start, end)) {
+        if (start != null && end != null) {
           dr = new DateRange(start, end);
         }
       }
