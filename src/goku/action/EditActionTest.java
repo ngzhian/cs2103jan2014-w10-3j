@@ -32,7 +32,7 @@ public class EditActionTest {
   }
 
   @Test
-  //This tests whether editing works by checking the edited results
+  // This tests whether editing works by checking the edited results
   public void editTask_returnsEditedResult() throws Exception {
     Task toEdit, changedTask;
     Integer id;
@@ -74,9 +74,59 @@ public class EditActionTest {
     assertTrue(toEdit.isDone());
     assertEquals(deadline, toEdit.getDeadline());
   }
-  
+
   @Test
-  //This tests whether removing deadline from tasks works
+  public void editTaskWithDeadline_addPeriod_returnsTaskWithPeriod()
+      throws Exception {
+    Task toEdit, changedTask;
+    Integer id;
+    EditAction editAction;
+    Result result;
+
+    toEdit = new Task();
+    toEdit.setTitle("hello");
+    toEdit.setDeadline(DateUtil.getNow().plusDays(1));
+    id = list.addTask(toEdit);
+
+    editAction = new EditAction(goku);
+    editAction.id = id;
+    editAction.period = new DateRange(DateUtil.getNow().plusDays(1), DateUtil
+        .getNow().plusDays(2));
+    result = editAction.doIt();
+
+    assertTrue(result.isSuccess());
+    assertEquals("hello", toEdit.getTitle());
+    assertNull(toEdit.getDeadline());
+    assertEquals(toEdit.getDateRange(), editAction.period);
+  }
+
+  @Test
+  public void editTaskWithPeriod_addDeadline_returnsTaskWithDeadline()
+      throws Exception {
+    Task toEdit, changedTask;
+    Integer id;
+    EditAction editAction;
+    Result result;
+
+    toEdit = new Task();
+    toEdit.setTitle("hello");
+    toEdit.setPeriod(new DateRange(DateUtil.getNow().plusDays(1), DateUtil
+        .getNow().plusDays(2)));
+    id = list.addTask(toEdit);
+
+    editAction = new EditAction(goku);
+    editAction.id = id;
+    editAction.dline = DateUtil.getNow().plusDays(1);
+    result = editAction.doIt();
+
+    assertTrue(result.isSuccess());
+    assertEquals("hello", toEdit.getTitle());
+    assertNull(toEdit.getDateRange());
+    assertEquals(toEdit.getDeadline(), editAction.dline);
+  }
+
+  @Test
+  // This tests whether removing deadline from tasks works
   public void doIt_removesDeadlineFromTask_returnsTaskWithoutDeadline()
       throws Exception {
     Task toEdit;
@@ -98,7 +148,7 @@ public class EditActionTest {
   }
 
   @Test
-  //This tests whether removing time period from tasks works
+  // This tests whether removing time period from tasks works
   public void doIt_removesPeriodFromTask_returnsTaskWithoutPeriod()
       throws Exception {
     Task toEdit;
@@ -120,7 +170,7 @@ public class EditActionTest {
   }
 
   @Test
-//This tests whether removing importance from tasks works
+  // This tests whether removing importance from tasks works
   public void doIt_removesImportantFromTask_returnsTaskWithoutImportant()
       throws Exception {
     Task toEdit;
