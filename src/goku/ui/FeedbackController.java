@@ -9,13 +9,18 @@ import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.List;
 
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.layout.ColumnConstraints;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.text.Text;
+import javafx.scene.text.TextAlignment;
 
 /*
  * FeedbackController takes care of outputting feedback to user.
@@ -29,15 +34,65 @@ public class FeedbackController {
   private static final Paint SUCCESS_COLOUR = Color.rgb(13, 255, 166);
   private static final Paint NORMAL_COLOUR = Color.rgb(86, 255, 0);
   public static double width = 800 - 90;
+  private static int lines = 0;
+  private static final int numColumns = 12;
 
-  private VBox output;
+  private ScrollPane scrollPane;
 
-  public FeedbackController(VBox outputArea) {
-    output = outputArea;
+  private GridPane output;
+
+  public FeedbackController(ScrollPane scrollPane) {
+    this.scrollPane = scrollPane;
+    this.output = makeNewPage();
+    scrollPane.setContent(output);
+  }
+
+  public GridPane makeNewPage() {
+    lines = 0;
+    GridPane grid = new GridPane();
+    grid.setPadding(new Insets(40));
+    grid.setPrefWidth(scrollPane.getPrefWidth() - 20);
+    grid.setMinWidth(scrollPane.getPrefWidth() - 20);
+    grid.setMaxWidth(scrollPane.getPrefWidth() - 20);
+    double percentWidth = scrollPane.getPrefWidth() / 12;
+    double hgap = 15;
+    ColumnConstraints column1 = new ColumnConstraints();
+    column1.setPercentWidth(percentWidth);
+    ColumnConstraints column2 = new ColumnConstraints();
+    column2.setPercentWidth(percentWidth);
+    ColumnConstraints column3 = new ColumnConstraints();
+    column3.setPercentWidth(percentWidth);
+    ColumnConstraints column4 = new ColumnConstraints();
+    column4.setPercentWidth(percentWidth);
+    ColumnConstraints column5 = new ColumnConstraints();
+    column5.setPercentWidth(percentWidth);
+    ColumnConstraints column6 = new ColumnConstraints();
+    column6.setPercentWidth(percentWidth);
+    ColumnConstraints column7 = new ColumnConstraints();
+    column7.setPercentWidth(percentWidth);
+    ColumnConstraints column8 = new ColumnConstraints();
+    column8.setPercentWidth(percentWidth);
+    ColumnConstraints column9 = new ColumnConstraints();
+    column9.setPercentWidth(percentWidth);
+    ColumnConstraints column10 = new ColumnConstraints();
+    column10.setPercentWidth(percentWidth);
+    ColumnConstraints column11 = new ColumnConstraints();
+    column11.setPercentWidth(percentWidth);
+    ColumnConstraints column12 = new ColumnConstraints();
+    column12.setPercentWidth(percentWidth);
+    grid.getColumnConstraints().addAll(column1, column2, column3, column4,
+        column5, column6, column7, column8, column9, column10, column11,
+        column12);
+    grid.setGridLinesVisible(true);
+    grid.setHgap(hgap);
+    grid.setVgap(10);
+    return grid;
   }
 
   public void clearArea() {
-    output.getChildren().clear();
+    this.output = makeNewPage();
+    scrollPane.setContent(output);
+    // lines = 0; output.getChildren().clear();
   }
 
   /*
@@ -47,20 +102,16 @@ public class FeedbackController {
    */
   public void displayErrorMessage(String message) {
     clearArea();
-    HBox hbox = new HBox();
-    Text text = makeErrorText("Error: " + message);
-    hbox.getChildren().add(text);
-    displayLine(hbox);
+    Label errorLabel = new Label("Error! ");
+    errorLabel.setTextFill(ERROR_COLOUR);
+    Label errorMessage = new Label(message);
+    errorMessage.setTextFill(ERROR_COLOUR);
+    displayLine(errorLabel);
+    displayLine(errorMessage);
   }
 
-  /*
-   * Prints a complicated message to output. This HBox needs to be built by the
-   * caller
-   * 
-   * @param message message to be printed
-   */
-  public void displayLine(HBox message) {
-    output.getChildren().add(message);
+  private void displayLine(Label label) {
+    output.add(label, 0, lines++, numColumns, 1);
   }
 
   /*
@@ -69,10 +120,9 @@ public class FeedbackController {
    * @param message the string to be printed
    */
   public void displayLine(String message) {
-    HBox hbox = new HBox();
-    hbox.getChildren().add(makeNormalText(message));
-    output.getChildren().add(hbox);
-
+    Label l = new Label(message);
+    l.getStyleClass().add("normal-text");
+    output.add(l, 0, lines++, numColumns, 1);
   }
 
   /*
@@ -84,18 +134,27 @@ public class FeedbackController {
 
     HBox hbox = new HBox();
     hbox.setSpacing(10);
-    Text status, message;
+    Label status, message;
+    String text = "";
+    // hboxOverdue.getChildren().add(overdueMsg);
+    displayLine("You have overdue tasks, \"view overdue\" to see them.");
 
     if (result.isSuccess()) {
-      status = makeSuccessText("Yay!");
-      message = makeResultMsg(result.getSuccessMsg());
+      text += "Yay! ";
+      text += result.getSuccessMsg();
+      // status = new Label("Yay!");
+      // status = makeSuccessText("Yay!");
+      // message = makeResultMsg(result.getSuccessMsg());
     } else {
-      status = makeErrorText("Error!");
-      message = makeResultMsg(result.getErrorMsg());
+      text += "Error! ";
+      text += result.getErrorMsg();
+      // status = new Label("Error!");
+      // status = makeErrorText("Error!");
+      // message = makeResultMsg(result.getErrorMsg());
     }
-    hbox.getChildren().addAll(status, message);
-    displayLine(hbox);
-    displayLine("");
+    // hbox.getChildren().addAll(status, message);
+    displayLine(text);
+    // displayLine("");
     displayTasks(result.getTasks());
   }
 
@@ -108,22 +167,55 @@ public class FeedbackController {
     if (tasks == null) {
       return;
     }
+    // for (Task t : tasks) {
+    // displayLine(t.getTitle());
+    // }
     TaskListDisplayer tld = new TaskListDisplayer(System.out);
     Hashtable<String, List<Task>> ht = tld.build(tasks);
     String[] headers = { "overdue", "today", "tomorrow", "remaining",
         "completed" };
     for (String header : Arrays.asList(headers)) {
       if (ht.get(header).size() != 0) {
-        displayLine(makeDateHeader(header));
+        displayTaskListHeader(header);
         for (Task task : ht.get(header)) {
           if (header.equals("remaining") || header.equals("overdue")) {
-            displayLine(makeDisplayBoxForRemainingTask(task));
+            displayTaskOnLine(task);
+            // displayLine(makeDisplayBoxForRemainingTask(task));
           } else {
-            displayLine(makeDisplayBoxForTask(task));
+            displayTaskOnLine(task);
+            // displayLine(makeDisplayBoxForTask(task));
           }
         }
       }
     }
+  }
+
+  private void displayTaskListHeader(String header) {
+    HBox hbox = new HBox();
+    Label label = new Label(header);
+    label.setTextAlignment(TextAlignment.CENTER);
+    label.setTextFill(NORMAL_COLOUR);
+    hbox.getChildren().add(label);
+    hbox.setAlignment(Pos.BOTTOM_CENTER);
+    hbox.setStyle("-fx-background-color:blue");
+    output.add(hbox, 0, lines++, numColumns, 1);
+  }
+
+  private void displayTaskOnLine(Task task) {
+    Label id = new Label("[" + task.getId().toString() + "]");
+    id.setTextFill(NORMAL_COLOUR);
+    Label title = new Label(task.getTitle());
+    title.setTextFill(NORMAL_COLOUR);
+    title.setWrapText(true);
+    title.setMaxHeight(50);
+    Label date = new Label(makeDate(task).getText());
+    date.setTextFill(NORMAL_COLOUR);
+    date.setWrapText(true);
+    date.setMaxHeight(50);
+    output.add(id, 0, lines, 2, 1);
+    output.add(title, 2, lines, 7, 1);
+    output.add(date, 9, lines, 3, 1);
+    lines++;
   }
 
   /*
@@ -172,9 +264,9 @@ public class FeedbackController {
    */
   private Text makeDateRange(Task t) {
     DateRange period = t.getDateRange();
-    Text range = makeNormalText("from "
+    Text range = makeNormalText(""
         + DateOutput.formatDateTimeDayMonthHourMin(period.getStartDate())
-        + "\nto "
+        // + "\nto "
         + DateOutput.formatDateTimeDayMonthHourMin(period.getEndDate()));
     range.getStyleClass().addAll("task-date-range");
     return range;

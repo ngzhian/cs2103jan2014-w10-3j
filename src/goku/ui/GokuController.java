@@ -26,6 +26,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -84,7 +85,7 @@ public class GokuController {
   private VBox suggestionList;
 
   @FXML
-  private VBox outputField;
+  private GridPane outputField;
 
   private static double mousePressX;
   private static double mousePressY;
@@ -159,7 +160,7 @@ public class GokuController {
     goku = FXGUI.getGokuInstance();
     completionController = new CompletionController(inputField, suggestionBox,
         suggestionList);
-    feedbackController = new FeedbackController(outputField);
+    feedbackController = new FeedbackController(scrollPane);
     historyController = new HistoryController(inputField);
     parser = new InputParser(goku);
     storage = StorageFactory.getDefaultStorage();
@@ -171,7 +172,10 @@ public class GokuController {
 
     try {
       goku.addToTaskList(storage.loadStorage());
-      doAction(new GreetAction(goku));
+      // doAction(new GreetAction(goku));
+      feedbackController.displayLine("HIHI");
+      // feedbackController
+      // .displayLine("LKAJDFLalskdfjaskljdflkasjdfjasdfjaklsjfdlKj");
     } catch (FileNotFoundException e) {
       LOGGER.warning("File cannot be found, no tasks loaded.");
       feedbackController
