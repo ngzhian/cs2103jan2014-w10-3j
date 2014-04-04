@@ -67,12 +67,11 @@ public class InputParser {
   }
 
   /*
-   * extractDeadline() Specifics
-   * 1) Contains date and time => returns DateTime with date and time
-   * 2) Contains date only => returns DateTime with date, time initialised to 23:59:59
-   * 3) Contains time only => returns DateTime with today as date and time
-   * 4) Returns null if input is not valid
-   * 5) Nanoseconds are truncated
+   * extractDeadline() Specifics 1) Contains date and time => returns DateTime
+   * with date and time 2) Contains date only => returns DateTime with date,
+   * time initialised to 23:59:59 3) Contains time only => returns DateTime with
+   * today as date and time 4) Returns null if input is not valid 5) Nanoseconds
+   * are truncated
    */
   DateTime extractDeadline() {
     int indexOfBy = Arrays.asList(params).indexOf("by");
@@ -117,12 +116,11 @@ public class InputParser {
    * successful @param params is modified such that the parsed strings,
    * including "from" and "to", is removed - essentially params is shortened.
    * 
-   * extractPeriod() Specifics
-   * 1) Start: date+time End: date+time => Start: date+time End: date+time
-   * 2) Any uninitialised date will be set to today
-   * 3) Any uninitialised start time will be 00:00:00 (without nanoseconds)
-   * 4) Any uninitialised end time will be 23:59:59 (without nanoseconds)
-   * 5) If end date before start date, return null
+   * extractPeriod() Specifics 1) Start: date+time End: date+time => Start:
+   * date+time End: date+time 2) Any uninitialised date will be set to today 3)
+   * Any uninitialised start time will be 00:00:00 (without nanoseconds) 4) Any
+   * uninitialised end time will be 23:59:59 (without nanoseconds) 5) If end
+   * date before start date, return null
    */
   DateRange extractPeriod() throws MakeActionException {
     DateRange dr = null;
@@ -163,12 +161,12 @@ public class InputParser {
   }
 
   /*
-   * Similar to extractDate and extractPeriod, extractTitle finds the relevant title
-   * content in params and returns the title string.
+   * Similar to extractDate and extractPeriod, extractTitle finds the relevant
+   * title content in params and returns the title string.
    * 
-   * Variables paramsByIndex and paramsFromIndex indicates the possible cutoff point
-   * in the input string between title and date time inputs. extractTitle cuts off from
-   * the earliest inde indicated by the two variables.
+   * Variables paramsByIndex and paramsFromIndex indicates the possible cutoff
+   * point in the input string between title and date time inputs. extractTitle
+   * cuts off from the earliest inde indicated by the two variables.
    */
   String extractTitle() {
     int indexToSplit;
@@ -203,8 +201,8 @@ public class InputParser {
   }
 
   /*
-   * Add expects to have parameters, minimally params[0] should be the title
-   * of the task.
+   * Add expects to have parameters, minimally params[0] should be the title of
+   * the task.
    * 
    * @param importance of task (true or false)
    * 
@@ -244,9 +242,9 @@ public class InputParser {
   }
 
   /*
-   * Delete can take in a single parameter which can be parsed into an
-   * integer, this is then assumed to be the ID of the Task to be deleted.
-   * Else the inputs will be taken as the title of the task to be deleted.
+   * Delete can take in a single parameter which can be parsed into an integer,
+   * this is then assumed to be the ID of the Task to be deleted. Else the
+   * inputs will be taken as the title of the task to be deleted.
    */
   private DeleteAction makeDeleteAction() throws MakeActionException {
     if (params.length == 0) {
@@ -272,10 +270,12 @@ public class InputParser {
     DisplayAction da = new DisplayAction(goku);
 
     String nonArrayParams = Joiner.on(" ").join(params).toLowerCase();
-    if (nonArrayParams.contains("completed")) {
+    if (nonArrayParams.equals("completed")) {
       da.viewComplete = true;
-    } else if (nonArrayParams.contains("overdue")) {
+    } else if (nonArrayParams.equals("overdue")) {
       da.viewOverdue = true;
+    } else if (nonArrayParams.equals("all")) {
+      da.viewAll = true;
     } else if (!nonArrayParams.isEmpty()) {
       throw new MakeActionException(DisplayAction.ERR_INVALID_DISPLAY);
     }
@@ -368,7 +368,8 @@ public class InputParser {
   }
 
   /*
-   * @return NoAction if there is no input, UnknownAction if the command is not known
+   * @return NoAction if there is no input, UnknownAction if the command is not
+   * known
    */
   public Action parse(String input) throws MakeActionException {
     reset();
