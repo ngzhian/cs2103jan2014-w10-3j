@@ -9,6 +9,7 @@ public class Result {
   private boolean isSuccess;
   private String successMsg;
   private String errorMsg;
+  private List<String> listMsg;
   public List<Task> listOfTask;
 
   public Result(boolean isSuccess, String successMsg, String errorMsg,
@@ -18,9 +19,22 @@ public class Result {
     setErrorMsg(errorMsg);
     setTasks(list);
   }
+  
+  public Result(boolean isSuccess, String successMsg, String errorMsg, List<String> listMsg,
+      List<Task> list) {
+    this.isSuccess = isSuccess;
+    setSuccessMsg(successMsg);
+    setErrorMsg(errorMsg);
+    setMsgList(listMsg);
+    setTasks(list);
+  }
 
   public void setTasks(List<Task> list) {
     this.listOfTask = list;
+  }
+  
+  public void setMsgList(List<String> list) {
+    this.listMsg = list;
   }
 
   public static Result makeSuccessResult() {
