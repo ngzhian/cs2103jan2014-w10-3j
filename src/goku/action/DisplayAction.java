@@ -20,6 +20,7 @@ public class DisplayAction extends Action {
   DateTime byDeadline;
   public boolean viewComplete;
   public boolean viewOverdue;
+  public boolean viewAll;
 
   public DisplayAction(GOKU goku) {
     super(goku);
@@ -62,12 +63,22 @@ public class DisplayAction extends Action {
     }
   }
 
+  public Result displayAll() {
+    if (list.size() == 0) {
+      return new Result(false, null, MSG_NO_INCOMPLETE, null);
+    } else {
+      return new Result(true, MSG_SUCCESS, null, list.asList());
+    }
+  }
+
   @Override
   public Result doIt() {
     if (viewComplete == true) {
       return displayComplete();
     } else if (viewOverdue == true) {
       return displayOverdue();
+    } else if (viewAll == true) {
+      return displayAll();
     } else {
       return displayIncomplete();
     }
