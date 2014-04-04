@@ -2,7 +2,6 @@ package goku;
 
 import java.util.List;
 
-
 public class Result {
   private static final String MSG_DEFAULT_SUCCESS = "Success!";
   private static final String MSG_DEFAULT_FAILURE = "Failed.";
@@ -53,6 +52,10 @@ public class Result {
     return successMsg;
   }
 
+  public List<String> getListMsg() {
+    return listMsg;
+  }
+  
   public List<Task> getTasks() {
     return listOfTask;
   }
