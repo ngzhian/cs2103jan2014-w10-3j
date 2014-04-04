@@ -5,6 +5,7 @@ import goku.GOKU;
 import goku.Result;
 import goku.Task;
 import goku.TaskList;
+import goku.util.DateOutput;
 import hirondelle.date4j.DateTime;
 
 import java.util.ArrayList;
@@ -22,7 +23,7 @@ public class EditAction extends Action {
 
   public static final String ERR_NO_ID_GIVEN = ERR_INSUFFICIENT_ARGS;
 
-  private final String MSG_SUCCESS = "edited task %d";
+  private final String MSG_SUCCESS = "Edited task %d\n";
 
   public int id;
 
@@ -104,6 +105,8 @@ public class EditAction extends Action {
     taskWithEdits.setStatus(isComplete);
     Task t = list.getTaskById(id);
 
+    String oldTitle = t.getTitle();
+
     // issue is is that when we are setting a new period
     // dealine is null, so the task has a deadline AND a period
     // and when displaying the deadline is checked first, so the task seems to
@@ -118,8 +121,46 @@ public class EditAction extends Action {
       t.setDeadline(null);
     }
 
-    return new Result(true,
-        editMsgIfHaveOverdue(String.format(MSG_SUCCESS, id)), null,
+    String successMsg = String.format(MSG_SUCCESS, id);
+    String titleMsg = "Changed task's name \"%s\" to \"%s\"";
+    String dlineMsg = "Changed task's deadline to \"by %s\"";
+    String periodMsg = "Changed task's period to \"from %s to %s\"";
+    String incompleteMsg = "Task \"%s\" is marked as incomplete";
+    String completeMsg = "Task \"%s\" is marked as completed";
+    int msgCount = 0;
+
+    if (title != null) {
+      successMsg += String.format(titleMsg, oldTitle, title);
+      msgCount++;
+    }
+    if (dline != null) {
+      if (msgCount != 0) {
+        successMsg += "\n";
+      }
+      successMsg += String.format(dlineMsg,
+          DateOutput.formatTimeOnly12hIgnoreZeroMinutes(dline));
+      msgCount++;
+    }
+    if (period != null) {
+      if (msgCount != 0) {
+        successMsg += "\n";
+      }
+      successMsg += String.format(periodMsg,
+          DateOutput.formatDateTimeDayMonthHourMinIgnoreZeroMinutes(period
+              .getStartDate()), DateOutput
+              .formatDateTimeDayMonthHourMinIgnoreZeroMinutes(period
+                  .getEndDate()));
+    }
+
+    if (isComplete != null) {
+      if (isComplete) {
+        successMsg += String.format(completeMsg, id);
+      } else {
+        successMsg += String.format(incompleteMsg, id);
+      }
+    }
+
+    return new Result(true, editMsgIfHaveOverdue(successMsg), null,
         list.getAllIncomplete());
   }
 
