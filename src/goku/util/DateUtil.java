@@ -419,6 +419,10 @@ public class DateUtil {
   }
 
   public static String toString(DateTime date) {
-    return DateOutput.formatDateTimeDayMonthHourMin(date);
+    if(date.getHour() == null) {
+      return DateOutput.formatDateOnlyDayMonth(date);
+    } else {
+      return DateOutput.formatDateTimeDayMonthHourMin(date);
+    }
   }
 }
