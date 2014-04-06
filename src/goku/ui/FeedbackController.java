@@ -134,7 +134,7 @@ public class FeedbackController {
       displayLine("Yay!", SUCCESS_COLOUR);
       displayLine(result.getSuccessMsg());
       if (result.getListMsg() != null) {
-        //TODO stub, to print list of strings
+        displayLines(result.getListMsg());
       }
     } else {
       displayLine("Error!", ERROR_COLOUR);

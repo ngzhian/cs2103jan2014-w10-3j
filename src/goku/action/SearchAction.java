@@ -27,6 +27,8 @@ public class SearchAction extends Action {
   private static final String MSG_FAIL = "No relevant tasks.";
   private static final String IS_FREE = "Specified datetime is available.";
   private static final String NOT_FREE = "Specified datetime is not available.";
+  private static final String FREE_SLOTS = "Here are your free timings of the day.";
+  private static final String NO_FREE_SLOTS = "Your day is fully packed!";
   public static final String ERR_INSUFFICIENT_ARGS = "Can't search! Try \"search title\"";
   public static final String ERR_NO_VALID_DATE_FOUND = "Can't search! Try entering a valid date after \"free\"";
   private static final String ERR_DEADLINE_PERIOD_CONFLICT = "Can't search! Conflicting deadline and period.";
@@ -52,8 +54,7 @@ public class SearchAction extends Action {
     if (dateQuery.getHour() != null) {
       return checkIfFree();
     } else { // Case 2: Only date given
-      // TODO not implemented yet
-      return null;
+      return checkFreeSlots();
     }
   }
 
@@ -62,6 +63,18 @@ public class SearchAction extends Action {
       return new Result(true, IS_FREE, null, null);
     } else {
       return new Result(false, null, NOT_FREE, null);
+    }
+  }
+  
+  private Result checkFreeSlots() {
+    assert dateQuery.getHour() == null;
+    
+    List<String> freeSlots = list.findFreeSlots(dateQuery);
+    
+    if (!freeSlots.isEmpty()) {
+      return new Result(true, FREE_SLOTS, null, freeSlots, null);
+    } else {
+      return new Result(false, null, NO_FREE_SLOTS, null);
     }
   }
 

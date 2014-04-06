@@ -2,6 +2,8 @@ package goku;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import goku.action.MakeActionException;
+import goku.util.DateUtil;
 import hirondelle.date4j.DateTime;
 
 import java.util.ArrayList;
@@ -202,6 +204,33 @@ public class TaskListTest {
     assertReturnListIsSize(2);
 
   }
+  
+  @Test (expected = AssertionError.class)
+  public void findFreeSlots_AssertionErrorDateShouldNotHaveTime() {
+    DateTime now = DateUtil.getNow();
+    
+    list.findFreeSlots(now);
+  }
+  
+  @Test
+  public void findFreeSlots_DateHasNoTasks() {
+    DateTime today = DateUtil.getNowDate();
+    assertListIsSize(0);
+    
+    List<String> expected = new ArrayList<String>();
+    expected.add("[00:00 - 23:59]");
+    
+    assertEquals(expected, list.findFreeSlots(today));
+  }
+  
+  @Test
+  public void findFreeSlots_DateHasTaskThatOccupiesWholeDay() throws MakeActionException {
+    DateTime today = DateUtil.getNowDate();
+    Task aTask = makeTaskWithTitleAndTodayPeriod("a");
+    list.addTask(aTask);
+    
+    assertEquals(new ArrayList<String>(), list.findFreeSlots(today));
+  }
 
   private Task makeTaskWithTitle(String title) {
     Task t = new Task();
@@ -213,6 +242,15 @@ public class TaskListTest {
     Task t = new Task();
     t.setTitle(title);
     t.setDeadline(DateTime.forDateOnly(y, m, d));
+    return t;
+  }
+  
+  private Task makeTaskWithTitleAndTodayPeriod(String title) throws MakeActionException {
+    Task t = new Task();
+    t.setTitle(title);
+    DateRange period = new DateRange(DateUtil.getNow().getStartOfDay().truncate(DateTime.Unit.SECOND), 
+        DateUtil.getNow().getEndOfDay().truncate(DateTime.Unit.SECOND));
+    t.setPeriod(period);    
     return t;
   }
 
