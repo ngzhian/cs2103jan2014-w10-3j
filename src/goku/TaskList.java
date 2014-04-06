@@ -213,6 +213,32 @@ public class TaskList implements Iterable<Task> {
 
     return result;
   }
+  
+  public List<String> findFreeSlots(DateTime dateTime) {
+    assert dateTime.getHour() == null;
+    
+    List<String> resultList = new ArrayList<String>();
+    TaskList taskListOfDate = new TaskList();
+    
+    for (Task task : _list) {
+      if (task.getDateRange() != null) {
+        
+      }
+    }
+    
+    if (taskListOfDate.size() == 0) {
+      resultList.add(timeSlotFormatter(dateTime.getStartOfDay(), dateTime.getEndOfDay()));
+    }
+    
+    return resultList;
+  }
+  
+  private String timeSlotFormatter(DateTime start, DateTime end) {
+    String formatStart = String.format("%02d", start.getHour())+":"+String.format("%02d",start.getMinute());
+    String formatEnd = end.getHour()+":"+end.getMinute();
+    
+    return "["+formatStart+" - "+formatEnd+"]";
+  }
 
   @Override
   public Iterator<Task> iterator() {
