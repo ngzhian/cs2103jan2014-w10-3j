@@ -9,9 +9,11 @@ import goku.action.AddAction;
 import goku.action.EditAction;
 import goku.action.MakeActionException;
 import goku.ui.InputParser;
+import goku.util.InvalidDateRangeException;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import static org.junit.Assert.*;
 
 public class IntegrationTest {
@@ -39,7 +41,7 @@ public class IntegrationTest {
    */
   @Test(expected = MakeActionException.class)
   public void user_addTaskWithNoTitle_throwsMakeActionException()
-      throws MakeActionException {
+      throws MakeActionException, InvalidDateRangeException {
     userInput = "add";
     parser.parse(userInput);
   }
@@ -47,7 +49,7 @@ public class IntegrationTest {
   @Test
   //This tests whether adding a single task increases task list size
   public void user_addTaskWithTitle_increaseSizeOfList()
-      throws MakeActionException {
+      throws MakeActionException, InvalidDateRangeException {
     Action a = parser.parse("add asdf");
     assertTrue(a instanceof AddAction);
     AddAction aa = (AddAction) a;

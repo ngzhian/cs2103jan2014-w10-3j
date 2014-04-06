@@ -6,6 +6,7 @@ import goku.Result;
 import goku.Task;
 import goku.TaskList;
 import goku.util.DateUtil;
+import goku.util.InvalidDateRangeException;
 import hirondelle.date4j.DateTime;
 
 import java.util.List;
@@ -47,7 +48,7 @@ public class SearchAction extends Action {
    * Case 2: dateQuery only contains date Shows users the list of free(?)
    * timeslots of the specified day
    */
-  public Result checkFreeTime() throws MakeActionException {
+  public Result checkFreeTime() throws InvalidDateRangeException {
     assert (dateQuery != null);
 
     // Case 1: Specific date and time
@@ -66,7 +67,7 @@ public class SearchAction extends Action {
     }
   }
   
-  private Result checkFreeSlots() throws MakeActionException {
+  private Result checkFreeSlots() throws InvalidDateRangeException {
     assert dateQuery.getHour() == null;
     
     List<String> freeSlots = list.findFreeSlots(dateQuery);
@@ -86,8 +87,7 @@ public class SearchAction extends Action {
     if (dateQuery != null) {
       try {
         result = checkFreeTime();
-      } catch (MakeActionException e) {
-        // TODO Auto-generated catch block
+      } catch (InvalidDateRangeException e) {
         e.printStackTrace();
       }
     } else if (dline != null && period != null) {

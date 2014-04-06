@@ -2,8 +2,8 @@ package goku;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import goku.action.MakeActionException;
 import goku.util.DateUtil;
+import goku.util.InvalidDateRangeException;
 import hirondelle.date4j.DateTime;
 
 import java.util.ArrayList;
@@ -206,14 +206,14 @@ public class TaskListTest {
   }
   
   @Test (expected = AssertionError.class)
-  public void findFreeSlots_AssertionErrorDateShouldNotHaveTime() throws MakeActionException {
+  public void findFreeSlots_AssertionErrorDateShouldNotHaveTime() throws InvalidDateRangeException {
     DateTime now = DateUtil.getNow();
     
     list.findFreeSlots(now);
   }
   
   @Test
-  public void findFreeSlots_DateHasNoTasks() throws MakeActionException {
+  public void findFreeSlots_DateHasNoTasks() throws InvalidDateRangeException {
     DateTime today = DateUtil.getNowDate();
     assertListIsSize(0);
     
@@ -224,7 +224,7 @@ public class TaskListTest {
   }
   
   @Test
-  public void findFreeSlots_DateHasTaskThatOccupiesWholeDay() throws MakeActionException {
+  public void findFreeSlots_DateHasTaskThatOccupiesWholeDay() throws InvalidDateRangeException {
     DateTime today = DateUtil.getNowDate();
     Task aTask = makeTaskWithTitleAndTodayPeriod("a");
     list.addTask(aTask);
@@ -233,7 +233,7 @@ public class TaskListTest {
   }
   
   @Test
-  public void findFreeSlots_TwoPeriodsNonOverlapping() throws MakeActionException {
+  public void findFreeSlots_TwoPeriodsNonOverlapping() throws InvalidDateRangeException {
     DateTime today = DateUtil.getNowDate();
     Task aTask = makeTaskWithTitle("a");
     Task bTask = makeTaskWithTitle("b");
@@ -253,7 +253,7 @@ public class TaskListTest {
   }
   
   @Test
-  public void findFreeSlots_ThreePeriodsOverlapping() throws MakeActionException {
+  public void findFreeSlots_ThreePeriodsOverlapping() throws InvalidDateRangeException {
     DateTime today = DateUtil.getNowDate();
     Task aTask = makeTaskWithTitle("a");
     Task bTask = makeTaskWithTitle("b");
@@ -276,7 +276,7 @@ public class TaskListTest {
   }
   
   @Test
-  public void findFreeSlots_ThreePeriodsSemiOverlapping() throws MakeActionException {
+  public void findFreeSlots_ThreePeriodsSemiOverlapping() throws InvalidDateRangeException {
     DateTime today = DateUtil.getNowDate();
     Task aTask = makeTaskWithTitle("a");
     Task bTask = makeTaskWithTitle("b");
@@ -300,7 +300,7 @@ public class TaskListTest {
   }
   
   @Test
-  public void findFreeSlots_StartingPeriodSpillOver() throws MakeActionException {
+  public void findFreeSlots_StartingPeriodSpillOver() throws InvalidDateRangeException {
     DateTime today = DateUtil.getNowDate();
     Task aTask = makeTaskWithTitle("a");
     aTask.setPeriod(new DateRange(today.minusDays(1).
@@ -315,7 +315,7 @@ public class TaskListTest {
   }
   
   @Test
-  public void findFreeSlots_EndingPeriodSpillOver() throws MakeActionException {
+  public void findFreeSlots_EndingPeriodSpillOver() throws InvalidDateRangeException {
     DateTime today = DateUtil.getNowDate();
     Task aTask = makeTaskWithTitle("a");
     aTask.setPeriod(new DateRange(today.plus(0, 0, 0, 20, 0, 0, 0, DateTime.DayOverflow.Spillover),
@@ -341,7 +341,7 @@ public class TaskListTest {
     return t;
   }
   
-  private Task makeTaskWithTitleAndTodayPeriod(String title) throws MakeActionException {
+  private Task makeTaskWithTitleAndTodayPeriod(String title) throws InvalidDateRangeException {
     Task t = new Task();
     t.setTitle(title);
     DateRange period = new DateRange(DateUtil.getNow().getStartOfDay().truncate(DateTime.Unit.SECOND), 

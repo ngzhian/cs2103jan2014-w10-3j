@@ -7,6 +7,7 @@ import goku.Result;
 import goku.Task;
 import goku.TaskList;
 import goku.util.DateUtil;
+import goku.util.InvalidDateRangeException;
 import hirondelle.date4j.DateTime;
 
 import java.io.IOException;
@@ -335,7 +336,7 @@ public class SearchActionTest {
   }
 
   private Task makeTaskWithPeriodDaysRelative(String title, int startDaysLater,
-      int endDaysLater) throws MakeActionException {
+      int endDaysLater) throws MakeActionException, InvalidDateRangeException {
     Task task = new Task();
     task.setTitle(title);
     DateTime start = DateUtil.getNowDate().plusDays(startDaysLater);
@@ -347,7 +348,7 @@ public class SearchActionTest {
 
   private Task makeTaskWithPeriodDaysRelativeWithTime(String title,
       int startDaysLater, int startHour, int startMin, int startSec,
-      int endDaysLater, int endHour, int endMin, int endSec) throws MakeActionException {
+      int endDaysLater, int endHour, int endMin, int endSec) throws MakeActionException, InvalidDateRangeException {
     Task task = new Task();
     task.setTitle(title);
     DateTime start = DateUtil.getNowDate().plus(0, 0, startDaysLater,

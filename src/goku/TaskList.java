@@ -1,7 +1,7 @@
 package goku;
 
-import goku.action.MakeActionException;
 import goku.util.DateUtil;
+import goku.util.InvalidDateRangeException;
 import hirondelle.date4j.DateTime;
 
 import java.util.ArrayList;
@@ -215,7 +215,7 @@ public class TaskList implements Iterable<Task> {
     return result;
   }
   
-  public List<String> findFreeSlots(DateTime date) throws MakeActionException {
+  public List<String> findFreeSlots(DateTime date) throws InvalidDateRangeException {
     assert date.getHour() == null;
     
     List<String> resultList = new ArrayList<String>();
@@ -236,7 +236,7 @@ public class TaskList implements Iterable<Task> {
     return resultList;
   }
   
-  private List<String> findFreeSlots(ArrayList<DateRange> periodList, DateTime date) throws MakeActionException {
+  private List<String> findFreeSlots(ArrayList<DateRange> periodList, DateTime date) throws InvalidDateRangeException {
     List<String> result = new ArrayList<String>();
     List<DateTime> periodTokens = new ArrayList<DateTime>();
     
@@ -281,7 +281,7 @@ public class TaskList implements Iterable<Task> {
   }
 
   private ArrayList<DateRange> mergeOverlapPeriods(ArrayList<DateRange> periodList)
-      throws MakeActionException {
+      throws InvalidDateRangeException {
     for (int i=0; i<periodList.size()-1; i++) {
       for (int j=i+1; j<periodList.size(); j++) {
         DateRange periodA = periodList.get(i);
