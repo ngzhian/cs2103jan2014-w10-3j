@@ -10,6 +10,7 @@ import goku.action.MakeActionException;
 import goku.storage.LoadTasksException;
 import goku.storage.Storage;
 import goku.storage.StorageFactory;
+import goku.util.InvalidDateRangeException;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -86,7 +87,7 @@ public class CLUserInterface implements UserInterface {
           return;
         }
         doAction(action);
-      } catch (MakeActionException e) {
+      } catch (MakeActionException | InvalidDateRangeException e) {
         System.out.println(e.getMessage());
       }
     }

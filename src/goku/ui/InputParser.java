@@ -16,6 +16,7 @@ import goku.action.SearchAction;
 import goku.action.UndoAction;
 import goku.action.UnknownAction;
 import goku.util.DateUtil;
+import goku.util.InvalidDateRangeException;
 import hirondelle.date4j.DateTime;
 
 import java.util.Arrays;
@@ -122,7 +123,7 @@ public class InputParser {
    * uninitialised end time will be 23:59:59 (without nanoseconds) 5) If end
    * date before start date, return null
    */
-  DateRange extractPeriod() throws MakeActionException {
+  DateRange extractPeriod() throws InvalidDateRangeException {
     DateRange dr = null;
     int indexOfFrom = Arrays.asList(params).lastIndexOf("from");
     int indexOfTo = Arrays.asList(params).lastIndexOf("to");
@@ -209,7 +210,7 @@ public class InputParser {
    * @return null if no parameters are specified, else an AddAction with the
    * title, due date, or deadline.
    */
-  private AddAction makeAddAction(boolean impt) throws MakeActionException {
+  private AddAction makeAddAction(boolean impt) throws MakeActionException, InvalidDateRangeException {
     if (params.length == 0) {
       throw new MakeActionException(AddAction.ERR_INSUFFICIENT_ARGS);
     }
@@ -291,7 +292,7 @@ public class InputParser {
    * 
    * @return null if we cannot decide which task to edit
    */
-  private EditAction makeEditAction() throws MakeActionException {
+  private EditAction makeEditAction() throws MakeActionException, InvalidDateRangeException {
     if (params.length < 2) {
       throw new MakeActionException(EditAction.ERR_INSUFFICIENT_ARGS);
     }
@@ -338,8 +339,7 @@ public class InputParser {
   /*
    * All inputs to search are taken to be the title of the Task to find
    */
-  private SearchAction makeSearchAction(boolean testFree)
-      throws MakeActionException {
+  private SearchAction makeSearchAction(boolean testFree) throws MakeActionException, InvalidDateRangeException {
     if (params.length == 0) {
       throw new MakeActionException(SearchAction.ERR_INSUFFICIENT_ARGS);
     }
@@ -373,7 +373,7 @@ public class InputParser {
    * @return NoAction if there is no input, UnknownAction if the command is not
    * known
    */
-  public Action parse(String input) throws MakeActionException {
+  public Action parse(String input) throws MakeActionException, InvalidDateRangeException {
     reset();
     Action action = null;
 

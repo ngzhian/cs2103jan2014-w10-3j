@@ -10,6 +10,7 @@ import goku.storage.LoadTasksException;
 import goku.storage.Storage;
 import goku.storage.StorageFactory;
 import goku.util.DateUtil;
+import goku.util.InvalidDateRangeException;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -115,7 +116,7 @@ public class GokuController {
    * inputField. Ctrl + Z and Ctrl + Y is a shortcut for Undo and Redo,
    * respectively.
    */
-  public void keyPressOnInputField(KeyEvent event) {
+  public void keyPressOnInputField(KeyEvent event) throws InvalidDateRangeException {
     if (event.isControlDown()) {
       handleControlKeypress(event);
     } else if (event.getCode() == KeyCode.ENTER) {
@@ -131,7 +132,7 @@ public class GokuController {
    * Called when user presses a Ctrl + ? combination,
    * where ? is any key.
    */
-  private void handleControlKeypress(KeyEvent event) {
+  private void handleControlKeypress(KeyEvent event) throws InvalidDateRangeException {
     if (event.getCode() == KeyCode.Z) {
       inputField.setText("undo");
       commitInput();
@@ -173,7 +174,7 @@ public class GokuController {
     stage.setIconified(true);
   }
 
-  private void commitInput() {
+  private void commitInput() throws InvalidDateRangeException {
     if (inputField.getText().isEmpty()) {
       return;
     }

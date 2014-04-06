@@ -17,6 +17,7 @@ import goku.action.MakeActionException;
 import goku.action.NoAction;
 import goku.action.SearchAction;
 import goku.util.DateUtil;
+import goku.util.InvalidDateRangeException;
 import hirondelle.date4j.DateTime;
 
 import java.util.List;
@@ -449,7 +450,7 @@ public class InputParserTest {
    * 5) If end date before start date, return null
    */
   @Test
-  public void extractPeriod_SpecificDatesOnly() throws MakeActionException {
+  public void extractPeriod_SpecificDatesOnly() throws InvalidDateRangeException {
     List<String> input = Splitter.on(' ').omitEmptyStrings().trimResults()
         .splitToList("from today to tmr");
     String[] inputArray = input.toArray(new String[input.size()]);
@@ -467,7 +468,7 @@ public class InputParserTest {
 
   @Test
   public void extractPeriod_SpecificDatesSpecificTimes()
-      throws MakeActionException {
+      throws MakeActionException, InvalidDateRangeException {
     List<String> input = Splitter.on(' ').omitEmptyStrings().trimResults()
         .splitToList("from today 10am to tmr 2pm");
     String[] inputArray = input.toArray(new String[input.size()]);
@@ -489,7 +490,7 @@ public class InputParserTest {
   }
 
   @Test
-  public void extractPeriod_SpecificTimesOnly() throws MakeActionException {
+  public void extractPeriod_SpecificTimesOnly() throws InvalidDateRangeException {
     List<String> input = Splitter.on(' ').omitEmptyStrings().trimResults()
         .splitToList("from 10am to 2pm");
     String[] inputArray = input.toArray(new String[input.size()]);
@@ -509,7 +510,7 @@ public class InputParserTest {
 
   @Test
   public void extractPeriod_SpecificDatesStartTimeOnly()
-      throws MakeActionException {
+      throws MakeActionException, InvalidDateRangeException {
     List<String> input = Splitter.on(' ').omitEmptyStrings().trimResults()
         .splitToList("from today 10am to tmr");
     String[] inputArray = input.toArray(new String[input.size()]);
@@ -529,7 +530,7 @@ public class InputParserTest {
 
   @Test
   public void extractPeriod_SpecificDatesEndTimeOnly()
-      throws MakeActionException {
+      throws MakeActionException, InvalidDateRangeException {
     List<String> input = Splitter.on(' ').omitEmptyStrings().trimResults()
         .splitToList("from today to tmr 2pm");
     String[] inputArray = input.toArray(new String[input.size()]);
@@ -549,8 +550,7 @@ public class InputParserTest {
   }
 
   @Test
-  public void extractPeriod_SpecificStartTimeSpecificEndDate()
-      throws MakeActionException {
+  public void extractPeriod_SpecificStartTimeSpecificEndDate() throws InvalidDateRangeException {
     List<String> input = Splitter.on(' ').omitEmptyStrings().trimResults()
         .splitToList("from 10am to tmr");
     String[] inputArray = input.toArray(new String[input.size()]);
@@ -568,9 +568,9 @@ public class InputParserTest {
             .truncate(DateTime.Unit.SECOND), resultRange.getEndDate());
   }
 
-  @Test(expected = MakeActionException.class)
+  @Test(expected = InvalidDateRangeException.class)
   public void extractPeriod_InvalidPeriodStartDateAfterEndDate()
-      throws MakeActionException {
+      throws InvalidDateRangeException {
     List<String> input = Splitter.on(' ').omitEmptyStrings().trimResults()
         .splitToList("from today 10am to today 8am");
     String[] inputArray = input.toArray(new String[input.size()]);
@@ -581,7 +581,7 @@ public class InputParserTest {
   }
 
   @Test
-  public void extractPeriod_NoValidInput() throws MakeActionException {
+  public void extractPeriod_NoValidInput() throws InvalidDateRangeException {
     List<String> input = Splitter.on(' ').omitEmptyStrings().trimResults()
         .splitToList("from aaa to bbb");
     String[] inputArray = input.toArray(new String[input.size()]);
@@ -593,8 +593,7 @@ public class InputParserTest {
   }
 
   @Ignore
-  public void extractDeadlineAndPeriod_PeriodThenDeadline()
-      throws MakeActionException {
+  public void extractDeadlineAndPeriod_PeriodThenDeadline() throws InvalidDateRangeException {
     List<String> input = Splitter.on(' ').omitEmptyStrings().trimResults()
         .splitToList("from today to tmr by tmr");
     String[] inputArray = input.toArray(new String[input.size()]);
@@ -615,8 +614,7 @@ public class InputParserTest {
   }
 
   @Test
-  public void extractDeadlineAndPeriod_DeadlineThenPeriod()
-      throws MakeActionException {
+  public void extractDeadlineAndPeriod_DeadlineThenPeriod() throws InvalidDateRangeException {
     List<String> input = Splitter.on(' ').omitEmptyStrings().trimResults()
         .splitToList("by today from today to tmr");
     String[] inputArray = input.toArray(new String[input.size()]);
