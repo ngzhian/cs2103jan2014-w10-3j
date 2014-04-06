@@ -1,5 +1,6 @@
 package goku;
 
+import goku.action.MakeActionException;
 import goku.util.DateUtil;
 import hirondelle.date4j.DateTime;
 
@@ -214,27 +215,103 @@ public class TaskList implements Iterable<Task> {
     return result;
   }
   
-  public List<String> findFreeSlots(DateTime dateTime) {
-    assert dateTime.getHour() == null;
+  public List<String> findFreeSlots(DateTime date) throws MakeActionException {
+    assert date.getHour() == null;
     
     List<String> resultList = new ArrayList<String>();
-    TaskList taskListOfDate = new TaskList();
+    ArrayList<DateRange> periodListOfDate = new ArrayList<DateRange>();
     
     for (Task task : _list) {
-      if (DateUtil.periodClashesWithDay(task.getDateRange(), dateTime)) {
-        taskListOfDate.addTask(task);
+      if (DateUtil.periodClashesWithDay(task.getDateRange(), date)) {
+        periodListOfDate.add(task.getDateRange());
       }
-      
     }
     
-    if (taskListOfDate.size() == 0) {
-      resultList.add(timeSlotFormatter(dateTime.getStartOfDay(), dateTime.getEndOfDay()));
+    if (periodListOfDate.size() == 0) {
+      resultList.add(timeSlotFormatter(date.getStartOfDay(), date.getEndOfDay()));
+    } else {
+      resultList = findFreeSlots(periodListOfDate, date);
     }
     
     return resultList;
   }
   
+  private List<String> findFreeSlots(ArrayList<DateRange> periodList, DateTime date) throws MakeActionException {
+    List<String> resultList = new ArrayList<String>();
+    ArrayList<DateTime> periodTokens = new ArrayList<DateTime>();
+    
+    periodList = mergeOverlapPeriods(periodList);
+    
+    for (DateRange period : periodList) {
+      periodTokens.add(period.getStartDate());
+      periodTokens.add(period.getEndDate());
+    }
+    assert periodTokens.size()%2 == 0;
+    
+    Collections.sort(periodTokens);
+    
+    for (int i=-1; i<=periodTokens.size(); i=i+2) {
+      // boundary case 1 (first iteration)
+      if (i == -1) {
+        if(DateUtil.isSameDayAndTime(date.getStartOfDay(), periodTokens.get(0))) {
+          continue;
+        }
+        resultList.add(timeSlotFormatter(date.getStartOfDay(), periodTokens.get(0)));
+      } else if (i == periodTokens.size()-1) {  // boundary case (end case)
+        if(DateUtil.isSameDayAndTime(periodTokens.get(i-1), date.getEndOfDay())) {
+          continue;
+        }
+        resultList.add(timeSlotFormatter(periodTokens.get(i), date.getEndOfDay()));
+      } else {
+        resultList.add(timeSlotFormatter(periodTokens.get(i), periodTokens.get(i+1)));
+      }
+    }
+    
+    return resultList;
+  }
+
+  private ArrayList<DateRange> mergeOverlapPeriods(ArrayList<DateRange> periodList)
+      throws MakeActionException {
+    for (int i=0; i<periodList.size()-1; i++) {
+      for (int j=i+1; j<periodList.size(); j++) {
+        DateRange periodA = periodList.get(i);
+        DateRange periodB = periodList.get(j);
+        assert periodA!=null && periodB!=null;
+        
+        if (periodA.intersectsWith(periodB)) {
+          DateTime start, end;
+          if (DateUtil.isEarlierOrOn(periodA.getStartDate(), periodB.getStartDate())) {
+            start = periodA.getStartDate();
+          } else {
+            start = periodB.getStartDate();
+          }
+          
+          if (DateUtil.isEarlierOrOn(periodB.getEndDate(), periodA.getEndDate())) {
+            end = periodA.getEndDate();
+          } else {
+            end = periodB.getEndDate();
+          }
+          
+          periodList.add(new DateRange(start, end));
+          periodList.remove(periodA);
+          periodList.remove(periodB);
+          
+          if (periodList.size() == 1) {
+            break;
+          } else {
+            i=0;
+            j=i+1;
+          }
+        }
+      }
+    }
+    
+    return periodList;
+  }
+  
   private String timeSlotFormatter(DateTime start, DateTime end) {
+    assert DateUtil.isEarlierOrOn(start, end);
+    
     String formatStart = String.format("%02d", start.getHour())+":"+String.format("%02d",start.getMinute());
     String formatEnd = end.getHour()+":"+end.getMinute();
     

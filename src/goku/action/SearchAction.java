@@ -47,7 +47,7 @@ public class SearchAction extends Action {
    * Case 2: dateQuery only contains date Shows users the list of free(?)
    * timeslots of the specified day
    */
-  public Result checkFreeTime() {
+  public Result checkFreeTime() throws MakeActionException {
     assert (dateQuery != null);
 
     // Case 1: Specific date and time
@@ -66,7 +66,7 @@ public class SearchAction extends Action {
     }
   }
   
-  private Result checkFreeSlots() {
+  private Result checkFreeSlots() throws MakeActionException {
     assert dateQuery.getHour() == null;
     
     List<String> freeSlots = list.findFreeSlots(dateQuery);
@@ -84,7 +84,12 @@ public class SearchAction extends Action {
     Result result = null;
 
     if (dateQuery != null) {
-      result = checkFreeTime();
+      try {
+        result = checkFreeTime();
+      } catch (MakeActionException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
     } else if (dline != null && period != null) {
       result = searchByDeadlineInPeriod();
     } else if (dline != null) {
