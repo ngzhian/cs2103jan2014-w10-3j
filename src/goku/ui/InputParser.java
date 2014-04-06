@@ -74,7 +74,7 @@ public class InputParser {
    * are truncated
    */
   DateTime extractDeadline() {
-    int indexOfBy = Arrays.asList(params).indexOf("by");
+    int indexOfBy = Arrays.asList(params).lastIndexOf("by");
     if (indexOfBy < 0) {
       return null;
     } else {
@@ -124,8 +124,8 @@ public class InputParser {
    */
   DateRange extractPeriod() throws MakeActionException {
     DateRange dr = null;
-    int indexOfFrom = Arrays.asList(params).indexOf("from");
-    int indexOfTo = Arrays.asList(params).indexOf("to");
+    int indexOfFrom = Arrays.asList(params).lastIndexOf("from");
+    int indexOfTo = Arrays.asList(params).lastIndexOf("to");
     if (indexOfFrom >= 0 && indexOfTo >= 0) {
       paramsFromIndex = indexOfFrom;
       if (indexOfTo + 1 < params.length) {
