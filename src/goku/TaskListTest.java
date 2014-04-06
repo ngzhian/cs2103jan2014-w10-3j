@@ -5,7 +5,6 @@ import static org.junit.Assert.assertNull;
 import goku.action.MakeActionException;
 import goku.util.DateUtil;
 import hirondelle.date4j.DateTime;
-import hirondelle.date4j.DateTime.DayOverflow;
 
 import java.util.ArrayList;
 import java.util.List;
