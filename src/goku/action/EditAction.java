@@ -107,12 +107,18 @@ public class EditAction extends Action {
 
     String oldTitle = t.getTitle();
 
+    t.updateWith(taskWithEdits);
+
+    if (isComplete != null && isComplete) {
+      list.editCompletedTaskById(id);
+      t.setId(-1);
+    }
+
     // issue is is that when we are setting a new period
-    // dealine is null, so the task has a deadline AND a period
+    // deadline is null, so the task has a deadline AND a period
     // and when displaying the deadline is checked first, so the task seems to
     // be not updated
     // but actually it just didn't remove the deadline
-    t.updateWith(taskWithEdits);
     if (dline != null) {
       t.setDeadline(dline);
       t.setPeriod(null);
@@ -154,9 +160,9 @@ public class EditAction extends Action {
 
     if (isComplete != null) {
       if (isComplete) {
-        successMsg += String.format(completeMsg, id);
+        successMsg += String.format(completeMsg, t.getTitle());
       } else {
-        successMsg += String.format(incompleteMsg, id);
+        successMsg += String.format(incompleteMsg, t.getTitle());
       }
     }
 
