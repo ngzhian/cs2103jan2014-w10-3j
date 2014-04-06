@@ -221,9 +221,10 @@ public class TaskList implements Iterable<Task> {
     TaskList taskListOfDate = new TaskList();
     
     for (Task task : _list) {
-      if (task.getDateRange() != null) {
-        
+      if (DateUtil.periodClashesWithDay(task.getDateRange(), dateTime)) {
+        taskListOfDate.addTask(task);
       }
+      
     }
     
     if (taskListOfDate.size() == 0) {

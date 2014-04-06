@@ -1,5 +1,6 @@
 package goku.util;
 
+import goku.DateRange;
 import hirondelle.date4j.DateTime;
 
 import java.util.Date;
@@ -134,6 +135,32 @@ public class DateUtil {
   public static DateTime parse(String string) {
     String[] s = string.split(" ");
     return parse(s);
+  }
+  
+  public static boolean periodClashesWithDay(DateRange period, DateTime day) {
+    assert day != null;
+    if (period == null) {
+      return false;
+    }
+    
+    if (isSameDay(period.getStartDate(), day) || isSameDay(period.getEndDate(), day)) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+  
+  public static boolean isSameDay(DateTime aDate, DateTime otherDate) {
+    assert otherDate != null;
+    if (aDate == null) {
+      return false;
+    }
+
+    if (aDate.getYear()==otherDate.getYear() && aDate.getDayOfYear()==otherDate.getDayOfYear()) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
   /*
