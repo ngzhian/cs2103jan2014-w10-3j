@@ -206,14 +206,14 @@ public class TaskListTest {
   }
   
   @Test (expected = AssertionError.class)
-  public void findFreeSlots_AssertionErrorDateShouldNotHaveTime() {
+  public void findFreeSlots_AssertionErrorDateShouldNotHaveTime() throws MakeActionException {
     DateTime now = DateUtil.getNow();
     
     list.findFreeSlots(now);
   }
   
   @Test
-  public void findFreeSlots_DateHasNoTasks() {
+  public void findFreeSlots_DateHasNoTasks() throws MakeActionException {
     DateTime today = DateUtil.getNowDate();
     assertListIsSize(0);
     

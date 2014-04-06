@@ -150,13 +150,28 @@ public class DateUtil {
     }
   }
   
+  // compare up to day
   public static boolean isSameDay(DateTime aDate, DateTime otherDate) {
     assert otherDate != null;
     if (aDate == null) {
       return false;
     }
 
-    if (aDate.getYear()==otherDate.getYear() && aDate.getDayOfYear()==otherDate.getDayOfYear()) {
+    if (aDate.truncate(DateTime.Unit.DAY).equals(otherDate.truncate(DateTime.Unit.DAY))) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+ 
+  // compare up to minutes
+  public static boolean isSameDayAndTime(DateTime aDate, DateTime otherDate) {
+    assert otherDate != null;
+    if (aDate == null) {
+      return false;
+    }
+    
+    if (aDate.truncate(DateTime.Unit.MINUTE).equals(otherDate.truncate(DateTime.Unit.MINUTE))) {
       return true;
     } else {
       return false;
