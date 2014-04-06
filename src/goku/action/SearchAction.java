@@ -19,8 +19,9 @@ public class SearchAction extends Action {
   public String to;
   public DateTime dline;
   public DateRange period;
+  public DateTime onDateQuery;
   public boolean testFree = false;
-  public DateTime dateQuery;
+  public DateTime freeDateQuery;
 
   private static final String MSG_SUCCESS = "Found tasks for \"%s\"...";
 
@@ -49,10 +50,10 @@ public class SearchAction extends Action {
    * timeslots of the specified day
    */
   public Result checkFreeTime() throws InvalidDateRangeException {
-    assert (dateQuery != null);
+    assert (freeDateQuery != null);
 
     // Case 1: Specific date and time
-    if (dateQuery.getHour() != null) {
+    if (freeDateQuery.getHour() != null) {
       return checkIfFree();
     } else { // Case 2: Only date given
       return checkFreeSlots();
@@ -60,7 +61,7 @@ public class SearchAction extends Action {
   }
 
   private Result checkIfFree() {
-    if (list.isFree(dateQuery) == true) {
+    if (list.isFree(freeDateQuery) == true) {
       return new Result(true, IS_FREE, null, null);
     } else {
       return new Result(false, null, NOT_FREE, null);
@@ -68,9 +69,9 @@ public class SearchAction extends Action {
   }
   
   private Result checkFreeSlots() throws InvalidDateRangeException {
-    assert dateQuery.getHour() == null;
+    assert freeDateQuery.getHour() == null;
     
-    List<String> freeSlots = list.findFreeSlots(dateQuery);
+    List<String> freeSlots = list.findFreeSlots(freeDateQuery);
     
     if (!freeSlots.isEmpty()) {
       return new Result(true, FREE_SLOTS, null, freeSlots, null);
@@ -84,12 +85,14 @@ public class SearchAction extends Action {
 
     Result result = null;
 
-    if (dateQuery != null) {
+    if (freeDateQuery != null) {
       try {
         result = checkFreeTime();
       } catch (InvalidDateRangeException e) {
         e.printStackTrace();
       }
+    } else if (onDateQuery != null) {
+      result = searchTasksOnDay();
     } else if (dline != null && period != null) {
       result = searchByDeadlineInPeriod();
     } else if (dline != null) {
@@ -116,6 +119,15 @@ public class SearchAction extends Action {
 
   public String getTitle() {
     return title;
+  }
+  
+  public Result searchTasksOnDay() {
+    List<Task> foundTasks = list.findTasksOnDay(onDateQuery);
+    if (foundTasks.size() != 0) {
+      return new Result(true, String.format(MSG_SUCCESS, DateUtil.toString(onDateQuery)), null, foundTasks);
+    } else {
+      return new Result(false, null, editMsgIfHaveOverdue(String.format(MSG_FAIL, DateUtil.toString(onDateQuery))), null);
+    }
   }
 
   public Result searchByDeadline() {

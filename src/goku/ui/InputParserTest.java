@@ -354,7 +354,7 @@ public class InputParserTest {
     assertTrue(a instanceof SearchAction);
 
     SearchAction sa = (SearchAction) a;
-    assertNotNull(sa.dateQuery);
+    assertNotNull(sa.freeDateQuery);
   }
 
   @Test(expected = MakeActionException.class)

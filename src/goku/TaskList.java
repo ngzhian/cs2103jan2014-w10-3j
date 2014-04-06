@@ -83,6 +83,16 @@ public class TaskList implements Iterable<Task> {
     return deleteTask(findTaskByTitle(title));
   }
 
+  public List<Task> findTasksOnDay(DateTime dateQuery) {
+    List<Task> matches = new ArrayList<>();
+    for (Task task : _list) {
+      if(task.isOn(dateQuery)) {
+        matches.add(task);
+      }
+    }
+    return matches;
+  }
+  
   public List<Task> findTaskByDeadline(DateTime deadline) {
     List<Task> matches = new ArrayList<>();
     for (Task task : _list) {

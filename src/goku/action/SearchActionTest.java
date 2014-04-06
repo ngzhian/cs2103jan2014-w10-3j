@@ -256,8 +256,8 @@ public class SearchActionTest {
     addAllTasks(task);
 
     SearchAction search = new SearchAction(goku);
-    search.dateQuery = DateUtil.getNow().plusDays(1);
-    assertNotNull(search.dateQuery.getHour());
+    search.freeDateQuery = DateUtil.getNow().plusDays(1);
+    assertNotNull(search.freeDateQuery.getHour());
 
     Result result = search.doIt();
     assertFalse(result.isSuccess());
@@ -273,8 +273,8 @@ public class SearchActionTest {
     addAllTasks(task);
 
     SearchAction search = new SearchAction(goku);
-    search.dateQuery = task.getDateRange().getEndDate();
-    assertNotNull(search.dateQuery.getHour());
+    search.freeDateQuery = task.getDateRange().getEndDate();
+    assertNotNull(search.freeDateQuery.getHour());
 
     Result result = search.doIt();
     assertFalse(result.isSuccess());
@@ -290,8 +290,8 @@ public class SearchActionTest {
     addAllTasks(task);
 
     SearchAction search = new SearchAction(goku);
-    search.dateQuery = DateUtil.getNow();
-    assertNotNull(search.dateQuery.getHour());
+    search.freeDateQuery = DateUtil.getNow();
+    assertNotNull(search.freeDateQuery.getHour());
 
     Result result = search.doIt();
     assertTrue(result.isSuccess());
@@ -307,8 +307,8 @@ public class SearchActionTest {
     addAllTasks(task);
 
     SearchAction search = new SearchAction(goku);
-    search.dateQuery = DateUtil.getNow();
-    assertNotNull(search.dateQuery.getHour());
+    search.freeDateQuery = DateUtil.getNow();
+    assertNotNull(search.freeDateQuery.getHour());
 
     Result result = search.doIt();
     assertTrue(result.isSuccess());
@@ -323,7 +323,7 @@ public class SearchActionTest {
     addAllTasks(task);
 
     SearchAction search = new SearchAction(goku);
-    search.dateQuery = DateUtil.getNow().plusDays(1);
+    search.freeDateQuery = DateUtil.getNow().plusDays(1);
 
     Result result = search.doIt();
     assertFalse(result.isSuccess());
