@@ -246,9 +246,85 @@ public class TaskListTest {
     list.addTask(bTask);
     
     List<String> expected = new ArrayList<String>();
-    expected.add("00:00 - 00:59");
-    expected.add("05:00 - 08:59");
-    expected.add("17:00 - 23:59");
+    expected.add("[00:00 - 00:59]");
+    expected.add("[05:00 - 08:59]");
+    expected.add("[17:00 - 23:59]");
+    
+    assertEquals(expected, list.findFreeSlots(today));
+  }
+  
+  @Test
+  public void findFreeSlots_ThreePeriodsOverlapping() throws MakeActionException {
+    DateTime today = DateUtil.getNowDate();
+    Task aTask = makeTaskWithTitle("a");
+    Task bTask = makeTaskWithTitle("b");
+    Task cTask = makeTaskWithTitle("c");
+    aTask.setPeriod(new DateRange(today.plus(0, 0, 0, 11, 0, 0, 0, DateTime.DayOverflow.Spillover),
+        today.plus(0, 0, 0, 15, 0, 0, 0, DateTime.DayOverflow.Spillover)));
+    bTask.setPeriod(new DateRange(today.plus(0, 0, 0, 13, 0, 0, 0, DateTime.DayOverflow.Spillover), 
+        today.plus(0, 0, 0, 17, 0, 0, 0, DateTime.DayOverflow.Spillover)));
+    cTask.setPeriod(new DateRange(today.plus(0, 0, 0, 16, 0, 0, 0, DateTime.DayOverflow.Spillover), 
+        today.plus(0, 0, 0, 20, 0, 0, 0, DateTime.DayOverflow.Spillover)));
+    list.addTask(aTask);
+    list.addTask(bTask);
+    list.addTask(cTask);
+    
+    List<String> expected = new ArrayList<String>();
+    expected.add("[00:00 - 10:59]");
+    expected.add("[20:00 - 23:59]");
+    
+    assertEquals(expected, list.findFreeSlots(today));
+  }
+  
+  @Test
+  public void findFreeSlots_ThreePeriodsSemiOverlapping() throws MakeActionException {
+    DateTime today = DateUtil.getNowDate();
+    Task aTask = makeTaskWithTitle("a");
+    Task bTask = makeTaskWithTitle("b");
+    Task cTask = makeTaskWithTitle("c");
+    aTask.setPeriod(new DateRange(today.plus(0, 0, 0, 11, 0, 0, 0, DateTime.DayOverflow.Spillover),
+        today.plus(0, 0, 0, 15, 0, 0, 0, DateTime.DayOverflow.Spillover)));
+    bTask.setPeriod(new DateRange(today.plus(0, 0, 0, 13, 0, 0, 0, DateTime.DayOverflow.Spillover), 
+        today.plus(0, 0, 0, 17, 0, 0, 0, DateTime.DayOverflow.Spillover)));
+    cTask.setPeriod(new DateRange(today.plus(0, 0, 0, 21, 0, 0, 0, DateTime.DayOverflow.Spillover), 
+        today.plus(0, 0, 0, 23, 0, 0, 0, DateTime.DayOverflow.Spillover)));
+    list.addTask(aTask);
+    list.addTask(bTask);
+    list.addTask(cTask);
+    
+    List<String> expected = new ArrayList<String>();
+    expected.add("[00:00 - 10:59]");
+    expected.add("[17:00 - 20:59]");
+    expected.add("[23:00 - 23:59]");
+    
+    assertEquals(expected, list.findFreeSlots(today));
+  }
+  
+  @Test
+  public void findFreeSlots_StartingPeriodSpillOver() throws MakeActionException {
+    DateTime today = DateUtil.getNowDate();
+    Task aTask = makeTaskWithTitle("a");
+    aTask.setPeriod(new DateRange(today.minusDays(1).
+        plus(0, 0, 0, 20, 0, 0, 0, DateTime.DayOverflow.Spillover),
+        today.plus(0, 0, 0, 15, 0, 0, 0, DateTime.DayOverflow.Spillover)));
+    list.addTask(aTask);
+    
+    List<String> expected = new ArrayList<String>();
+    expected.add("[15:00 - 23:59]");
+    
+    assertEquals(expected, list.findFreeSlots(today));
+  }
+  
+  @Test
+  public void findFreeSlots_EndingPeriodSpillOver() throws MakeActionException {
+    DateTime today = DateUtil.getNowDate();
+    Task aTask = makeTaskWithTitle("a");
+    aTask.setPeriod(new DateRange(today.plus(0, 0, 0, 20, 0, 0, 0, DateTime.DayOverflow.Spillover),
+        today.plusDays(1).plus(0, 0, 0, 15, 0, 0, 0, DateTime.DayOverflow.Spillover)));
+    list.addTask(aTask);
+    
+    List<String> expected = new ArrayList<String>();
+    expected.add("[00:00 - 19:59]");
     
     assertEquals(expected, list.findFreeSlots(today));
   }

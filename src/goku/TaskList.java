@@ -237,14 +237,22 @@ public class TaskList implements Iterable<Task> {
   }
   
   private List<String> findFreeSlots(ArrayList<DateRange> periodList, DateTime date) throws MakeActionException {
-    List<String> resultList = new ArrayList<String>();
-    ArrayList<DateTime> periodTokens = new ArrayList<DateTime>();
+    List<String> result = new ArrayList<String>();
+    List<DateTime> periodTokens = new ArrayList<DateTime>();
     
     periodList = mergeOverlapPeriods(periodList);
     
     for (DateRange period : periodList) {
-      periodTokens.add(period.getStartDate());
-      periodTokens.add(period.getEndDate());
+      if (DateUtil.isSameDay(period.getStartDate(), date)) {
+        periodTokens.add(period.getStartDate());
+      } else {
+        periodTokens.add(date.getStartOfDay());
+      }
+      if (DateUtil.isSameDay(date, period.getEndDate())) {
+        periodTokens.add(period.getEndDate());
+      } else {
+        periodTokens.add(date.getEndOfDay());
+      }
     }
     assert periodTokens.size()%2 == 0;
     
@@ -256,20 +264,20 @@ public class TaskList implements Iterable<Task> {
         if(DateUtil.isSameDayAndTime(date.getStartOfDay(), periodTokens.get(0))) {
           continue;
         }
-        resultList.add(timeSlotFormatter(date.getStartOfDay(), 
+        result.add(timeSlotFormatter(date.getStartOfDay(), 
             periodTokens.get(0).minus(0, 0, 0, 0, 1, 0, 0, DateTime.DayOverflow.Spillover)));
       } else if (i == periodTokens.size()-1) {  // boundary case (end case)
         if(DateUtil.isSameDayAndTime(periodTokens.get(i), date.getEndOfDay())) {
           continue;
         }
-        resultList.add(timeSlotFormatter(periodTokens.get(i), date.getEndOfDay()));
+        result.add(timeSlotFormatter(periodTokens.get(i), date.getEndOfDay()));
       } else {
-        resultList.add(timeSlotFormatter(periodTokens.get(i), 
+        result.add(timeSlotFormatter(periodTokens.get(i), 
             periodTokens.get(i+1).minus(0, 0, 0, 0, 1, 0, 0, DateTime.DayOverflow.Spillover)));
       }
     }
     
-    return resultList;
+    return result;
   }
 
   private ArrayList<DateRange> mergeOverlapPeriods(ArrayList<DateRange> periodList)
@@ -299,10 +307,10 @@ public class TaskList implements Iterable<Task> {
           periodList.remove(periodB);
           
           if (periodList.size() == 1) {
-            break;
+            return periodList;
           } else {
-            i=0;
-            j=i+1;
+            i=-1;
+            break;
           }
         }
       }
