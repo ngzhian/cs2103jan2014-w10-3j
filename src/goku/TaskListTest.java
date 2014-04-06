@@ -5,6 +5,7 @@ import static org.junit.Assert.assertNull;
 import goku.action.MakeActionException;
 import goku.util.DateUtil;
 import hirondelle.date4j.DateTime;
+import hirondelle.date4j.DateTime.DayOverflow;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -230,6 +231,26 @@ public class TaskListTest {
     list.addTask(aTask);
     
     assertEquals(new ArrayList<String>(), list.findFreeSlots(today));
+  }
+  
+  @Test
+  public void findFreeSlots_TwoPeriodsNonOverlapping() throws MakeActionException {
+    DateTime today = DateUtil.getNowDate();
+    Task aTask = makeTaskWithTitle("a");
+    Task bTask = makeTaskWithTitle("b");
+    aTask.setPeriod(new DateRange(today.plus(0, 0, 0, 1, 0, 0, 0, DateTime.DayOverflow.Spillover),
+        today.plus(0, 0, 0, 5, 0, 0, 0, DateTime.DayOverflow.Spillover)));
+    bTask.setPeriod(new DateRange(today.plus(0, 0, 0, 9, 0, 0, 0, DateTime.DayOverflow.Spillover), 
+        today.plus(0, 0, 0, 17, 0, 0, 0, DateTime.DayOverflow.Spillover)));
+    list.addTask(aTask);
+    list.addTask(bTask);
+    
+    List<String> expected = new ArrayList<String>();
+    expected.add("00:00 - 00:59");
+    expected.add("05:00 - 08:59");
+    expected.add("17:00 - 23:59");
+    
+    assertEquals(expected, list.findFreeSlots(today));
   }
 
   private Task makeTaskWithTitle(String title) {

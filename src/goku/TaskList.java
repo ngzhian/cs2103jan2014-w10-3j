@@ -256,14 +256,16 @@ public class TaskList implements Iterable<Task> {
         if(DateUtil.isSameDayAndTime(date.getStartOfDay(), periodTokens.get(0))) {
           continue;
         }
-        resultList.add(timeSlotFormatter(date.getStartOfDay(), periodTokens.get(0)));
+        resultList.add(timeSlotFormatter(date.getStartOfDay(), 
+            periodTokens.get(0).minus(0, 0, 0, 0, 1, 0, 0, DateTime.DayOverflow.Spillover)));
       } else if (i == periodTokens.size()-1) {  // boundary case (end case)
         if(DateUtil.isSameDayAndTime(periodTokens.get(i), date.getEndOfDay())) {
           continue;
         }
         resultList.add(timeSlotFormatter(periodTokens.get(i), date.getEndOfDay()));
       } else {
-        resultList.add(timeSlotFormatter(periodTokens.get(i), periodTokens.get(i+1)));
+        resultList.add(timeSlotFormatter(periodTokens.get(i), 
+            periodTokens.get(i+1).minus(0, 0, 0, 0, 1, 0, 0, DateTime.DayOverflow.Spillover)));
       }
     }
     
@@ -313,7 +315,7 @@ public class TaskList implements Iterable<Task> {
     assert DateUtil.isEarlierOrOn(start, end);
     
     String formatStart = String.format("%02d", start.getHour())+":"+String.format("%02d",start.getMinute());
-    String formatEnd = end.getHour()+":"+end.getMinute();
+    String formatEnd = String.format("%02d", end.getHour())+":"+String.format("%02d", end.getMinute());
     
     return "["+formatStart+" - "+formatEnd+"]";
   }
