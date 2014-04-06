@@ -162,12 +162,37 @@ public class FeedbackController {
         for (Task task : ht.get(header)) {
           if (header.equals("remaining") || header.equals("overdue")) {
             displayRemainingTask(task);
+          } else if (header.equals("completed")) {
+            displayCompleteTask(task);
           } else {
             displayTask(task);
           }
         }
       }
     }
+  }
+
+  private void displayCompleteTask(Task task) {
+    String fontsize = "26";
+    Label tick = AwesomeDude.createIconLabel(AwesomeIcon.CHECK, fontsize);
+    Label b1 = new Label("[");
+    Label b2 = new Label("]");
+
+    tick.setTextFill(ID_COLOUR);
+    b1.setTextFill(ID_COLOUR);
+    b2.setTextFill(ID_COLOUR);
+    HBox tickHbox = new HBox();
+    tickHbox.getChildren().addAll(b1, tick, b2);
+
+    Label title = new Label(task.getTitle());
+    title.setTextFill(NORMAL_COLOUR);
+    title.setWrapText(true);
+    VBox dateVBox = makeDateVbox(task, true);
+
+    output.add(tickHbox, 0, lines);
+    output.add(title, 1, lines);
+    output.add(dateVBox, 2, lines);
+    lines++;
   }
 
   private void displayRemainingTask(Task task) {
