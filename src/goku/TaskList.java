@@ -258,7 +258,7 @@ public class TaskList implements Iterable<Task> {
         }
         resultList.add(timeSlotFormatter(date.getStartOfDay(), periodTokens.get(0)));
       } else if (i == periodTokens.size()-1) {  // boundary case (end case)
-        if(DateUtil.isSameDayAndTime(periodTokens.get(i-1), date.getEndOfDay())) {
+        if(DateUtil.isSameDayAndTime(periodTokens.get(i), date.getEndOfDay())) {
           continue;
         }
         resultList.add(timeSlotFormatter(periodTokens.get(i), date.getEndOfDay()));
