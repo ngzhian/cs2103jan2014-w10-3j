@@ -83,16 +83,21 @@ public class TaskList implements Iterable<Task> {
     return deleteTask(findTaskByTitle(title));
   }
 
+  public void editCompletedTaskById(int id) {
+    unusedId.add(id);
+    Collections.sort(unusedId);
+  }
+
   public List<Task> findTasksOnDay(DateTime dateQuery) {
     List<Task> matches = new ArrayList<>();
     for (Task task : _list) {
-      if(task.isOn(dateQuery)) {
+      if (task.isOn(dateQuery)) {
         matches.add(task);
       }
     }
     return matches;
   }
-  
+
   public List<Task> findTaskByDeadline(DateTime deadline) {
     List<Task> matches = new ArrayList<>();
     for (Task task : _list) {
@@ -224,34 +229,37 @@ public class TaskList implements Iterable<Task> {
 
     return result;
   }
-  
-  public List<String> findFreeSlots(DateTime date) throws InvalidDateRangeException {
+
+  public List<String> findFreeSlots(DateTime date)
+      throws InvalidDateRangeException {
     assert date.getHour() == null;
-    
+
     List<String> resultList = new ArrayList<String>();
     ArrayList<DateRange> periodListOfDate = new ArrayList<DateRange>();
-    
+
     for (Task task : _list) {
       if (DateUtil.periodClashesWithDay(task.getDateRange(), date)) {
         periodListOfDate.add(task.getDateRange());
       }
     }
-    
+
     if (periodListOfDate.size() == 0) {
-      resultList.add(timeSlotFormatter(date.getStartOfDay(), date.getEndOfDay()));
+      resultList
+          .add(timeSlotFormatter(date.getStartOfDay(), date.getEndOfDay()));
     } else {
       resultList = findFreeSlots(periodListOfDate, date);
     }
-    
+
     return resultList;
   }
-  
-  private List<String> findFreeSlots(ArrayList<DateRange> periodList, DateTime date) throws InvalidDateRangeException {
+
+  private List<String> findFreeSlots(ArrayList<DateRange> periodList,
+      DateTime date) throws InvalidDateRangeException {
     List<String> result = new ArrayList<String>();
     List<DateTime> periodTokens = new ArrayList<DateTime>();
-    
+
     periodList = mergeOverlapPeriods(periodList);
-    
+
     for (DateRange period : periodList) {
       if (DateUtil.isSameDay(period.getStartDate(), date)) {
         periodTokens.add(period.getStartDate());
@@ -264,78 +272,85 @@ public class TaskList implements Iterable<Task> {
         periodTokens.add(date.getEndOfDay());
       }
     }
-    assert periodTokens.size()%2 == 0;
-    
+    assert periodTokens.size() % 2 == 0;
+
     Collections.sort(periodTokens);
-    
-    for (int i=-1; i<=periodTokens.size(); i=i+2) {
+
+    for (int i = -1; i <= periodTokens.size(); i = i + 2) {
       // boundary case 1 (first iteration)
       if (i == -1) {
-        if(DateUtil.isSameDayAndTime(date.getStartOfDay(), periodTokens.get(0))) {
+        if (DateUtil
+            .isSameDayAndTime(date.getStartOfDay(), periodTokens.get(0))) {
           continue;
         }
-        result.add(timeSlotFormatter(date.getStartOfDay(), 
-            periodTokens.get(0).minus(0, 0, 0, 0, 1, 0, 0, DateTime.DayOverflow.Spillover)));
-      } else if (i == periodTokens.size()-1) {  // boundary case (end case)
-        if(DateUtil.isSameDayAndTime(periodTokens.get(i), date.getEndOfDay())) {
+        result.add(timeSlotFormatter(date.getStartOfDay(), periodTokens.get(0)
+            .minus(0, 0, 0, 0, 1, 0, 0, DateTime.DayOverflow.Spillover)));
+      } else if (i == periodTokens.size() - 1) { // boundary case (end case)
+        if (DateUtil.isSameDayAndTime(periodTokens.get(i), date.getEndOfDay())) {
           continue;
         }
         result.add(timeSlotFormatter(periodTokens.get(i), date.getEndOfDay()));
       } else {
-        result.add(timeSlotFormatter(periodTokens.get(i), 
-            periodTokens.get(i+1).minus(0, 0, 0, 0, 1, 0, 0, DateTime.DayOverflow.Spillover)));
+        result.add(timeSlotFormatter(
+            periodTokens.get(i),
+            periodTokens.get(i + 1).minus(0, 0, 0, 0, 1, 0, 0,
+                DateTime.DayOverflow.Spillover)));
       }
     }
-    
+
     return result;
   }
 
-  private ArrayList<DateRange> mergeOverlapPeriods(ArrayList<DateRange> periodList)
-      throws InvalidDateRangeException {
-    for (int i=0; i<periodList.size()-1; i++) {
-      for (int j=i+1; j<periodList.size(); j++) {
+  private ArrayList<DateRange> mergeOverlapPeriods(
+      ArrayList<DateRange> periodList) throws InvalidDateRangeException {
+    for (int i = 0; i < periodList.size() - 1; i++) {
+      for (int j = i + 1; j < periodList.size(); j++) {
         DateRange periodA = periodList.get(i);
         DateRange periodB = periodList.get(j);
-        assert periodA!=null && periodB!=null;
-        
+        assert periodA != null && periodB != null;
+
         if (periodA.intersectsWith(periodB)) {
           DateTime start, end;
-          if (DateUtil.isEarlierOrOn(periodA.getStartDate(), periodB.getStartDate())) {
+          if (DateUtil.isEarlierOrOn(periodA.getStartDate(),
+              periodB.getStartDate())) {
             start = periodA.getStartDate();
           } else {
             start = periodB.getStartDate();
           }
-          
-          if (DateUtil.isEarlierOrOn(periodB.getEndDate(), periodA.getEndDate())) {
+
+          if (DateUtil
+              .isEarlierOrOn(periodB.getEndDate(), periodA.getEndDate())) {
             end = periodA.getEndDate();
           } else {
             end = periodB.getEndDate();
           }
-          
+
           periodList.add(new DateRange(start, end));
           periodList.remove(periodA);
           periodList.remove(periodB);
-          
+
           if (periodList.size() == 1) {
             return periodList;
           } else {
-            i=-1;
+            i = -1;
             break;
           }
         }
       }
     }
-    
+
     return periodList;
   }
-  
+
   private String timeSlotFormatter(DateTime start, DateTime end) {
     assert DateUtil.isEarlierOrOn(start, end);
-    
-    String formatStart = String.format("%02d", start.getHour())+":"+String.format("%02d",start.getMinute());
-    String formatEnd = String.format("%02d", end.getHour())+":"+String.format("%02d", end.getMinute());
-    
-    return "["+formatStart+" - "+formatEnd+"]";
+
+    String formatStart = String.format("%02d", start.getHour()) + ":"
+        + String.format("%02d", start.getMinute());
+    String formatEnd = String.format("%02d", end.getHour()) + ":"
+        + String.format("%02d", end.getMinute());
+
+    return "[" + formatStart + " - " + formatEnd + "]";
   }
 
   @Override
