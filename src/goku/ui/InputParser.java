@@ -54,7 +54,7 @@ public class InputParser {
 
   private GOKU goku;
   String[] params;
-  Integer paramsByIndex, paramsFromIndex;
+  Integer paramsByIndex, paramsFromIndex, paramsOnIndex;
 
   public InputParser(GOKU goku) {
     this.goku = goku;
@@ -94,6 +94,24 @@ public class InputParser {
       return initTimeToEndOfDay(parsed);
     } else {
       return parsed;
+    }
+  }
+  
+  DateTime extractDateQuery() {
+    int indexOfOn = Arrays.asList(params).lastIndexOf("on");
+    if (indexOfOn < 0) {
+      return null;
+    } else {
+      paramsOnIndex = indexOfOn;
+    }
+    // get the rest of the params after "on"
+    String[] candidates = Arrays.copyOfRange(params, indexOfOn + 1,
+        params.length);
+    DateTime parsed = DateUtil.parse(candidates);
+    if (parsed == null) {
+      return parsed;
+    } else {
+      return parsed.truncate(DateTime.Unit.DAY);
     }
   }
 
@@ -350,14 +368,16 @@ public class InputParser {
     if (testFree == true) {
       // test if datetime received is free of tasks
       searchAction.testFree = testFree;
-      searchAction.dateQuery = parseDate();
-      if (searchAction.dateQuery == null) {
+      searchAction.freeDateQuery = parseDate();
+      if (searchAction.freeDateQuery == null) {
         throw new MakeActionException(SearchAction.ERR_NO_VALID_DATE_FOUND);
       }
     } else {
       // search normally
+      DateTime dq = extractDateQuery();
       DateTime dl = extractDeadline();
       DateRange dr = extractPeriod();
+      searchAction.onDateQuery = dq;
       searchAction.dline = dl;
       searchAction.period = dr;
       String title = extractTitle();
