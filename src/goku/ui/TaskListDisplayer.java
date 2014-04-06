@@ -113,7 +113,10 @@ public class TaskListDisplayer {
     if (dateRange == null) {
       return false;
     }
-    return DateUtil.getNow().isSameDayAs(dateRange.getStartDate());
+    DateTime now = DateUtil.getNow();
+
+    return DateUtil.isLaterOrOn(now, dateRange.getStartDate().getStartOfDay())
+        && DateUtil.isEarlierOrOn(now, dateRange.getEndDate().getEndOfDay());
   }
 
   private boolean isToday(DateTime date) {
