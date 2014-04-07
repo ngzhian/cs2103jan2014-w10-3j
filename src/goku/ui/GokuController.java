@@ -133,8 +133,7 @@ public class GokuController {
   }
 
   /*
-   * Called when user presses a Ctrl + ? combination,
-   * where ? is any key.
+   * Called when user presses a Ctrl + ? combination, where ? is any key.
    */
   private void handleControlKeypress(KeyEvent event)
       throws InvalidDateRangeException {
@@ -152,8 +151,8 @@ public class GokuController {
   }
 
   /*
-   * Called when the user clicks on the title bar,
-   * store the position of the mouse to allow for moving the entire window.
+   * Called when the user clicks on the title bar, store the position of the
+   * mouse to allow for moving the entire window.
    */
   public void onTitleBarMousePress(MouseEvent event) {
     mousePressX = event.getSceneX();
@@ -161,8 +160,8 @@ public class GokuController {
   }
 
   /*
-   * Called when user drags on the title bar,
-   * then moves according to where the user drags
+   * Called when user drags on the title bar, then moves according to where the
+   * user drags
    */
   public void onTitleBarDrag(MouseEvent event) {
     Stage stage = FXGUI.getStage();
@@ -255,8 +254,8 @@ public class GokuController {
     public Result doIt() {
       SearchAction sa = new SearchAction(goku);
       try {
-        sa.period = new DateRange(DateUtil.getNow(), DateUtil.getNow()
-            .getEndOfDay());
+        sa.period = new DateRange(DateUtil.getNow().getStartOfDay(), DateUtil
+            .getNow().getEndOfDay());
       } catch (InvalidDateRangeException e) {
       }
       Result result2 = sa.doIt();
