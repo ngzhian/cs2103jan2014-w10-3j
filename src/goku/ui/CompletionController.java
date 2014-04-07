@@ -15,10 +15,11 @@ import javafx.scene.text.Text;
 
 import com.google.common.base.Splitter;
 
-/*
+/**
  * Handles the completion of user input
+ * 
  */
-public class CompletionController {
+public class CompletionController extends Controller {
   /* Engine to handle auto completion */
   private AutoCompleteEngine auto;
   /* TextField where the user enters input */
@@ -36,33 +37,29 @@ public class CompletionController {
     this.suggestionList = suggestionList;
   }
 
-  /*
-   * Handle various KeyEvents.
-   * 1. Tab - will insert the best suggestion, if there are
-   * 2. Space - will cancel the suggestion
-   * 3. Any other character that can be displayed, plus backspace -
-   *    will show possible completions
+  /**
+   * Handle various KeyEvents. 1. Tab - will insert the best suggestion, if
+   * there are 2. Space - will cancel the suggestion 3. Any other character that
+   * can be displayed, plus backspace - will show possible completions
    */
+  @Override
   public void handle(KeyEvent event) {
     KeyCode code = event.getCode();
     if (isCompletionCommitKey(code)) {
       insertSuggestedText(getBestSuggestion());
     } else if (isCancelCompletionKey(code)) {
       cancelSuggestion();
-    } else if (shouldGetCompletion(event)) {
+    } else if (shouldGetCompletion(code)) {
       List<String> completions = retrieveCompletions();
       showCompletions(completions);
     }
   }
 
-  /*
-   * Get all possible completions based on the current context.
-   * There are 2 different kinds of context,
-   * 1. Entering a command,
-   * 2. Others
-   * Commands must be the first word that is entered, so the way
-   * to decide what is context is to check if the current word
-   * is the first word.
+  /**
+   * Get all possible completions based on the current context. There are 2
+   * different kinds of context, 1. Entering a command, 2. Others Commands must
+   * be the first word that is entered, so the way to decide what is context is
+   * to check if the current word is the first word.
    */
   private List<String> retrieveCompletions() {
     int context = 1;
@@ -77,17 +74,17 @@ public class CompletionController {
   }
 
   private boolean isCancelCompletionKey(KeyCode code) {
-    return code.isWhitespaceKey();
+    return code.isWhitespaceKey() || code == KeyCode.ENTER;
   }
 
-  private boolean shouldGetCompletion(KeyEvent event) {
-    return event.getCode().isDigitKey() || event.getCode().isLetterKey()
-        || event.getCode() == KeyCode.BACK_SPACE;
+  private boolean shouldGetCompletion(KeyCode code) {
+    return code.isDigitKey() || code.isLetterKey()
+        || code == KeyCode.BACK_SPACE;
   }
 
-  /*
-   * Inserts the most likely suggestion into the field
-   * where the user is entering input
+  /**
+   * Inserts the most likely suggestion into the field where the user is
+   * entering input
    */
   private void insertSuggestedText(Text suggestedText) {
     if (suggestedText == null) {
@@ -98,7 +95,7 @@ public class CompletionController {
     hideSuggestions();
   }
 
-  /*
+  /**
    * Gets the best suggestion from the list of suggestions
    */
   private Text getBestSuggestion() {
@@ -109,7 +106,7 @@ public class CompletionController {
     return suggestedText;
   }
 
-  /*
+  /**
    * Shows a list of completion to the user
    */
   private void showCompletions(List<String> completions) {
@@ -136,10 +133,12 @@ public class CompletionController {
         .toLowerCase();
   }
 
-  /*
-   * Gets the index of the nearest whitespace just before the current caret position.
-   * @returns w -1 if there is no whitespace before, else the index of the whitespace
-   * in the content string
+  /**
+   * Gets the index of the nearest whitespace just before the current caret
+   * position.
+   * 
+   * @returns w -1 if there is no whitespace before, else the index of the
+   *          whitespace in the content string
    */
   private int getPositionOfNearestWhitespaceBeforeCaret() {
     int caretPos = inputField.getCaretPosition();
@@ -153,21 +152,21 @@ public class CompletionController {
     return w;
   }
 
-  /*
+  /**
    * Shows the list of suggestions
    */
   private void showSuggestions() {
     suggestionBox.setVisible(true);
   }
 
-  /*
+  /**
    * Clears all suggestions from the list of suggestions
    */
   private void clearSuggestions() {
     suggestionList.getChildren().clear();
   }
 
-  /*
+  /**
    * Hides the list of suggestion
    */
   private void hideSuggestions() {
@@ -179,16 +178,16 @@ public class CompletionController {
     hideSuggestions();
   }
 
-  /*
+  /**
    * Adds a suggestion to the list of suggestions
    */
   private void addSuggestionToBeShown(String suggestion) {
     suggestionList.getChildren().add(new Text(suggestion));
   }
 
-  /*
-   * Listens to the list of tasks in GOKU for additions of Tasks.
-   * It then adds the title to the corpus for auto completion.
+  /**
+   * Listens to the list of tasks in GOKU for additions of Tasks. It then adds
+   * the title to the corpus for auto completion.
    */
   public ListChangeListener<? super Task> getCompletionListener() {
     return new ListChangeListener<Task>() {
@@ -215,5 +214,12 @@ public class CompletionController {
         }
       }
     };
+  }
+
+  @Override
+  boolean isHandling(KeyEvent key) {
+    KeyCode code = key.getCode();
+    return isCompletionCommitKey(code) || isCancelCompletionKey(code)
+        || shouldGetCompletion(code);
   }
 }
