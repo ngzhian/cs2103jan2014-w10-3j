@@ -29,7 +29,7 @@ public class UndoAction extends Action {
   }
 
   public String editMsgIfHaveOverdue(String msg) {
-    if (list.getOverdue().size() != 0) {
+    if (goku.getTaskList().getOverdue().size() != 0) {
       msg += System.lineSeparator() + MSG_HAS_OVERDUE;
     }
     return msg;
