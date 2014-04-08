@@ -198,8 +198,16 @@ public class Task implements Storeable, Comparable<Task> {
     }
     
     // Case 2: compare by deadline or start date
-    if (this.deadline==null && this.period==null && thatTask.deadline==null && thatTask.period==null) {
-      return 0;
+    if (this.deadline==null && this.period==null) {
+      if (thatTask.deadline!=null || thatTask.period!=null) {
+        return 1;
+      } else {
+        return 0;
+      }
+    } else if (this.deadline!=null || this.period!=null) {
+      if (thatTask.deadline==null && thatTask.period==null) {
+        return -1;
+      }
     }
     
     DateTime thisDate = null;
