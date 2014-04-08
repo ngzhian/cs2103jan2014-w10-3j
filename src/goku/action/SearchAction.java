@@ -4,13 +4,17 @@ import goku.DateRange;
 import goku.GOKU;
 import goku.Result;
 import goku.Task;
-import goku.TaskList;
 import goku.util.DateUtil;
 import goku.util.InvalidDateRangeException;
 import hirondelle.date4j.DateTime;
 
+import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * @author ZhiAn
+ * 
+ */
 public class SearchAction extends Action {
 
   public String title;
@@ -62,21 +66,25 @@ public class SearchAction extends Action {
 
   private Result checkIfFree() {
     if (list.isFree(freeDateQuery) == true) {
-      return new Result(true, String.format(IS_FREE, DateUtil.toString(freeDateQuery)), null, null);
+      return new Result(true, String.format(IS_FREE,
+          DateUtil.toString(freeDateQuery)), null, null);
     } else {
-      return new Result(false, null, String.format(NOT_FREE, DateUtil.toString(freeDateQuery)), null);
+      return new Result(false, null, String.format(NOT_FREE,
+          DateUtil.toString(freeDateQuery)), null);
     }
   }
-  
+
   private Result checkFreeSlots() throws InvalidDateRangeException {
     assert freeDateQuery.getHour() == null;
-    
+
     List<String> freeSlots = list.findFreeSlots(freeDateQuery);
-    
+
     if (!freeSlots.isEmpty()) {
-      return new Result(true, String.format(FREE_SLOTS, DateUtil.toString(freeDateQuery)), null, freeSlots, null);
+      return new Result(true, String.format(FREE_SLOTS,
+          DateUtil.toString(freeDateQuery)), null, freeSlots, null);
     } else {
-      return new Result(false, null, String.format(NO_FREE_SLOTS, DateUtil.toString(freeDateQuery)), null);
+      return new Result(false, null, String.format(NO_FREE_SLOTS,
+          DateUtil.toString(freeDateQuery)), null);
     }
   }
 
@@ -120,13 +128,15 @@ public class SearchAction extends Action {
   public String getTitle() {
     return title;
   }
-  
+
   public Result searchTasksOnDay() {
     List<Task> foundTasks = list.findTasksOnDay(onDateQuery);
     if (foundTasks.size() != 0) {
-      return new Result(true, String.format(MSG_SUCCESS_BY_DATE, DateUtil.toString(onDateQuery)), null, foundTasks);
+      return new Result(true, String.format(MSG_SUCCESS_BY_DATE,
+          DateUtil.toString(onDateQuery)), null, foundTasks);
     } else {
-      return new Result(false, null, editMsgIfHaveOverdue(String.format(MSG_FAIL, DateUtil.toString(onDateQuery))), null);
+      return new Result(false, null, editMsgIfHaveOverdue(String.format(
+          MSG_FAIL, DateUtil.toString(onDateQuery))), null);
     }
   }
 
@@ -156,17 +166,18 @@ public class SearchAction extends Action {
     }
 
     Result byPeriod = searchByPeriod();
-    TaskList tasksDueInPeriod = new TaskList();
+    List<Task> tasksDueInPeriod = new ArrayList<>();
 
     if (byPeriod.getTasks() != null) {
       for (Task task : byPeriod.getTasks()) {
-        if (task.getDeadline()!=null && DateUtil.isEarlierOrOn(task.getDeadline(), dline)) {
-          tasksDueInPeriod.addTaskWithoutSettingId(task);
+        if (task.getDeadline() != null
+            && DateUtil.isEarlierOrOn(task.getDeadline(), dline)) {
+          tasksDueInPeriod.add(task);
         }
       }
 
-      return new Result(true, String.format(MSG_SUCCESS_BY_DATE, period),
-          null, tasksDueInPeriod.asList());
+      return new Result(true, String.format(MSG_SUCCESS_BY_DATE, period), null,
+          tasksDueInPeriod);
     } else {
       return new Result(false, null, editMsgIfHaveOverdue(MSG_FAIL), null);
     }
@@ -197,10 +208,22 @@ public class SearchAction extends Action {
     }
   }
 
+  /**
+   * If the title is enclosed by quotations (""), we treat this as an
+   * exact-match search. Meaning that the string in between the quotes *MUST* be
+   * found within a task's title in order for it to be considered a match. Else,
+   * a fuzzy search is executed, which is the default behavior.
+   * 
+   * @return
+   */
   public Result searchTitle() {
-    Task task = new Task();
-    task.setTitle(title);
-    List<Task> foundTasks = list.findTaskByTitle(title);
+    List<Task> foundTasks;
+    if (searchForExact()) {
+      title = title.substring(1, title.length() - 1);
+      foundTasks = list.findTaskByTitleExactly(title);
+    } else {
+      foundTasks = list.findTaskByTitle(title);
+    }
     if (foundTasks.size() == 0) {
       return new Result(false, null, editMsgIfHaveOverdue(String.format(
           MSG_FAIL_BY_TITLE, title)), null);
@@ -208,5 +231,15 @@ public class SearchAction extends Action {
       return new Result(true, String.format(MSG_SUCCESS_BY_TITLE, title), null,
           foundTasks);
     }
+  }
+
+  /**
+   * If a exact match for the task title is required
+   * 
+   * @return true if the title begins and ends with a double quote
+   */
+  private boolean searchForExact() {
+    return (title.length() > 2 && title.charAt(0) == '"' && title.charAt(title
+        .length() - 1) == '"');
   }
 }

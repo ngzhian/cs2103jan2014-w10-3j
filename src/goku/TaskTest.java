@@ -65,4 +65,18 @@ public class TaskTest {
     Task taskC = gson.fromJson(string3, Task.class);
     assertEquals(task3, taskC);
   }
+
+  @Test
+  public void titleMatchesExactly_matchesTitle() throws Exception {
+    Task a = new Task();
+    a.setTitle("ABcD");
+
+    assertTrue(a.titleMatchesExactly("a"));
+    assertTrue(a.titleMatchesExactly("C"));
+    assertTrue(a.titleMatchesExactly("ab"));
+    assertTrue(a.titleMatchesExactly("bCd"));
+    assertTrue(a.titleMatchesExactly("abcd"));
+    assertFalse(a.titleMatchesExactly("acd"));
+    assertFalse(a.titleMatchesExactly("x"));
+  }
 }

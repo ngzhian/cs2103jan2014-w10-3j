@@ -135,6 +135,16 @@ public class TaskList implements Iterable<Task> {
     return matches;
   }
 
+  public List<Task> findTaskByTitleExactly(String title) {
+    List<Task> matches = new ArrayList<>();
+    for (Task task : _list) {
+      if (task.titleMatchesExactly(title)) {
+        matches.add(task);
+      }
+    }
+    return matches;
+  }
+
   public List<Task> getAllCompleted() {
     List<Task> completed = new ArrayList<Task>();
     for (Task task : _list) {
