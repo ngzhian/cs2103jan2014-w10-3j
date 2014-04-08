@@ -173,39 +173,23 @@ public class FeedbackPane {
     }
   }
 
-  private HBox makeImptIcon() {
-    Label impt = AwesomeDude.createIconLabel(AwesomeIcon.EXCLAMATION);
-    impt.setTextFill(IMPT_COLOUR);
-    HBox imptIcon = new HBox();
-    imptIcon.getChildren().add(impt);
-    imptIcon.setScaleX(1.3);
-    imptIcon.setScaleY(1.3);
-    imptIcon.setTranslateY(13);
-
-    return imptIcon;
-  }
-
   private void displayCompleteTask(Task task) {
     Label tick = AwesomeDude.createIconLabel(AwesomeIcon.CHECK);
     Label b1 = new Label("[");
     Label b2 = new Label("]");
 
     tick.setTextFill(DONE_COLOUR);
-    HBox tickIcon = new HBox();
-    tickIcon.getChildren().add(tick);
-    tickIcon.setAlignment(Pos.CENTER);
-
     b1.setTextFill(ID_COLOUR);
     b2.setTextFill(ID_COLOUR);
     HBox tickHbox = new HBox();
-    // tickHbox.getChildren().addAll(b1, tick, b2);
-    // tickHbox.setAlignment(Pos.CENTER);
-    tickHbox.getChildren().addAll(b1, tickIcon, b2);
+    tickHbox.getChildren().addAll(b1, tick, b2);
+    tickHbox.setAlignment(Pos.CENTER_LEFT);
 
     Label title = new Label(task.getTitle());
     title.setTextFill(NORMAL_COLOUR);
     title.setWrapText(true);
     VBox dateVBox = makeDateVbox(task, true);
+    // dateVBox.setStyle("-fx-background-color:rgba(85, 255, 68,0.2)");
 
     output.add(tickHbox, 0, lines);
     output.add(title, 1, lines);
@@ -215,10 +199,17 @@ public class FeedbackPane {
 
   private void displayRemainingTask(Task task) {
     Label id = new Label("[" + task.getId().toString() + "]");
-    id.setTextFill(ID_COLOUR);
+    if (!task.getImpt()) {
+      id.setTextFill(ID_COLOUR);
+    } else {
+      id.setTextFill(IMPT_COLOUR);
+    }
 
     HBox idWithImpt = new HBox();
-    idWithImpt.getChildren().addAll(id, makeImptIcon());
+    Label impt = AwesomeDude.createIconLabel(AwesomeIcon.EXCLAMATION);
+    impt.setTextFill(IMPT_COLOUR);
+    idWithImpt.getChildren().addAll(id, impt);
+    idWithImpt.setAlignment(Pos.CENTER_LEFT);
 
     Label title = new Label(task.getTitle());
     title.setTextFill(NORMAL_COLOUR);
@@ -238,10 +229,17 @@ public class FeedbackPane {
 
   private void displayTask(Task task) {
     Label id = new Label("[" + task.getId().toString() + "]");
-    id.setTextFill(ID_COLOUR);
+    if (!task.getImpt()) {
+      id.setTextFill(ID_COLOUR);
+    } else {
+      id.setTextFill(IMPT_COLOUR);
+    }
+
     HBox idWithImpt = new HBox();
-    idWithImpt.getChildren().addAll(id, makeImptIcon());
-    // idWithImpt.setAlignment(Pos.CENTER);
+    Label impt = AwesomeDude.createIconLabel(AwesomeIcon.EXCLAMATION);
+    impt.setTextFill(IMPT_COLOUR);
+    idWithImpt.getChildren().addAll(id, impt);
+    idWithImpt.setAlignment(Pos.CENTER_LEFT);
     // if (task.getImpt()) {
     // id.setTextFill(IMPT_COLOUR);
     // }
