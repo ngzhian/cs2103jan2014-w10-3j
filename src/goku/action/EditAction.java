@@ -111,7 +111,7 @@ public class EditAction extends Action {
 
     if (isComplete != null && isComplete) {
       list.editCompletedTaskById(id);
-      t.setId(-1);
+      t.setId(0);
     }
 
     // issue is is that when we are setting a new period

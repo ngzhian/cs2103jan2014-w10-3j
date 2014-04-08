@@ -23,16 +23,22 @@ public class TaskList implements Iterable<Task> {
   }
 
   public int addTask(Task task) {
-    task.setId(makeId());
+    if (task.getId() == null) {
+      task.setId(makeId());
+    } else if (task.getId() == 0) {
+      task.setId(0);
+    } else {
+      task.setId(makeId());
+    }
     boolean success = _list.add(task);
     return success ? task.getId() : -1;
   }
 
   public boolean addTaskWithoutSettingId(Task task) {
-    if (getTaskById(task.getId()) == null) {
-      return _list.add(task);
-    }
-    return false;
+    // if (getTaskById(task.getId()) == null) {
+    return _list.add(task);
+    // }
+    // return false;
   }
 
   public List<Task> asList() {
