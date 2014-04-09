@@ -4,6 +4,13 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 
+/**
+ * ScrollController takes care of scrolling the pane that displays feedback to
+ * the user
+ * 
+ * @author ZhiAn
+ * 
+ */
 public class ScrollController extends Controller {
   ScrollPane scrollPane;
 
