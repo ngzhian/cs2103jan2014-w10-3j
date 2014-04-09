@@ -135,6 +135,7 @@ public class MainController {
     controllers.add(new HistoryController(inputField));
     controllers.add(new GokuController(goku, inputField, feedbackPane));
     controllers.add(new LiveSearch(goku, inputField, feedbackPane));
+    controllers.add(new ScrollController(scrollPane));
   }
 
   /*
