@@ -1,3 +1,4 @@
+//@A0099858Y
 package goku.action;
 
 import goku.GOKU;
