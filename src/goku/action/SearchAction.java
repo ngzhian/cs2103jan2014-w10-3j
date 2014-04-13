@@ -11,10 +11,7 @@ import hirondelle.date4j.DateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * @author ZhiAn
- * 
- */
+//@author A0096444X
 public class SearchAction extends Action {
 
   public String title;
@@ -129,7 +126,6 @@ public class SearchAction extends Action {
     return title;
   }
 
-  //@author A0096444X
   public Result searchTasksOnDay() {
     List<Task> foundTasks = list.findTasksOnDay(onDateQuery);
     if (foundTasks.size() != 0) {
@@ -209,13 +205,11 @@ public class SearchAction extends Action {
     }
   }
 
-  /**
+  /*
    * If the title is enclosed by quotations (""), we treat this as an
    * exact-match search. Meaning that the string in between the quotes *MUST* be
    * found within a task's title in order for it to be considered a match. Else,
    * a fuzzy search is executed, which is the default behavior.
-   * 
-   * @return
    */
   public Result searchTitle() {
     List<Task> foundTasks;
@@ -236,7 +230,6 @@ public class SearchAction extends Action {
 
   /**
    * If a exact match for the task title is required
-   * 
    * @return true if the title begins and ends with a double quote
    */
   private boolean searchForExact() {

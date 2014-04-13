@@ -14,9 +14,9 @@ import java.io.IOException;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
+//@author A0096444X
 public class SearchActionTest {
   TaskList list;
   GOKU goku;
@@ -151,9 +151,7 @@ public class SearchActionTest {
     assertEquals(4, result.getTasks().size());
   }
 
-  //@author A0096444X
   /*
-   * 
    * Similar test to previous, but involves search period with time
    */
   @Test
@@ -220,7 +218,6 @@ public class SearchActionTest {
     assertEquals(1, result.getTasks().size());
   }
 
-  //@author A0096444X
   /*
    * Similar to previous test, except deadline query now indicates time
    */
@@ -248,7 +245,6 @@ public class SearchActionTest {
     assertEquals(1, result.getTasks().size());
   }
 
-  //@author A0096444X
   /*
    * Query date well within period of a task
    * Returns false
@@ -266,7 +262,6 @@ public class SearchActionTest {
     assertFalse(result.isSuccess());
   }
 
-  //@author A0096444X
   /*
    * Query date on boundary of period of a task
    * Returns false
@@ -284,7 +279,6 @@ public class SearchActionTest {
     assertFalse(result.isSuccess());
   }
 
-  //@author A0096444X
   /*
    * Query date outside period of task
    * Returns true
@@ -302,7 +296,6 @@ public class SearchActionTest {
     assertTrue(result.isSuccess());
   }
 
-  //@author A0096444X
   /*
    * Query date in system where task has no period
    * Returns true always
@@ -320,7 +313,6 @@ public class SearchActionTest {
     assertTrue(result.isSuccess());
   }
   
-  //@author A0096444X
   /*
    * Returns free time slots given day
    */
