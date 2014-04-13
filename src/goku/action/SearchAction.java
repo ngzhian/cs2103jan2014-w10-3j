@@ -111,13 +111,6 @@ public class SearchAction extends Action {
     return result;
   }
 
-  public String editMsgIfHaveOverdue(String msg) {
-    if (list.getOverdue().size() != 0) {
-      msg += System.lineSeparator() + MSG_HAS_OVERDUE;
-    }
-    return msg;
-  }
-
   public String getDeadline() {
     return deadline;
   }
@@ -235,5 +228,13 @@ public class SearchAction extends Action {
   private boolean searchForExact() {
     return (title.length() > 2 && title.charAt(0) == '"' && title.charAt(title
         .length() - 1) == '"');
+  }
+
+  // @author A0101232H
+  private String editMsgIfHaveOverdue(String msg) {
+    if (list.getOverdue().size() != 0) {
+      msg += System.lineSeparator() + MSG_HAS_OVERDUE;
+    }
+    return msg;
   }
 }

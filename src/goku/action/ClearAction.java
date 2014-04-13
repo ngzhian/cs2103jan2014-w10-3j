@@ -1,3 +1,4 @@
+//@author A0101232H
 package goku.action;
 
 import goku.GOKU;
@@ -39,7 +40,7 @@ public class ClearAction extends Action {
     return clear();
   }
 
-  public String editMsgIfHaveOverdue(String msg) {
+  private String editMsgIfHaveOverdue(String msg) {
     if (list.getOverdue().size() != 0) {
       msg += System.lineSeparator() + MSG_HAS_OVERDUE;
     }
