@@ -1,3 +1,4 @@
+//@author A0101232H
 package goku.action;
 
 import static org.junit.Assert.assertEquals;
@@ -26,7 +27,7 @@ public class UndoActionTest {
   }
 
   @Test
-  //This tests whether undoing adding action works
+  // This tests whether undoing adding action works
   public void doIt_UndoAddAction() throws Exception {
     AddAction add1 = new AddAction(goku);
     add1.title = "hi abc";
@@ -56,7 +57,7 @@ public class UndoActionTest {
   }
 
   @Test
-  //This tests whether undoing deleting action works
+  // This tests whether undoing deleting action works
   public void doIt_UndoDeleteAction() throws Exception {
     AddAction add1 = new AddAction(goku);
     add1.title = "hi abc";
@@ -89,7 +90,7 @@ public class UndoActionTest {
   }
 
   @Test
-  //This tests whether undoing editing action works
+  // This tests whether undoing editing action works
   public void doIt_UndoEditAction() throws Exception {
     AddAction add1 = new AddAction(goku);
     add1.title = "hi abc";

@@ -1,3 +1,4 @@
+//@author A0101232H
 package goku.action;
 
 import goku.GOKU;
@@ -27,7 +28,7 @@ public class DisplayAction extends Action {
     shouldSaveAfter = false;
   }
 
-  public Result displayComplete() {
+  private Result displayComplete() {
     if (list.getAllCompleted().isEmpty()) {
       return new Result(false, null, MSG_NO_COMPLETED, null);
     } else {
@@ -36,7 +37,7 @@ public class DisplayAction extends Action {
     }
   }
 
-  public Result displayDate() {
+  private Result displayDate() {
     assert (byDeadline != null);
     DateTime deadline = byDeadline;
     Task t = new Task();
@@ -45,7 +46,7 @@ public class DisplayAction extends Action {
     return new Result(true, null, null, result);
   }
 
-  public Result displayIncomplete() {
+  private Result displayIncomplete() {
     if (list.getAllIncomplete().isEmpty()) {
       return new Result(true, editMsgIfHaveOverdue(MSG_NO_INCOMPLETE), null,
           null);
@@ -55,7 +56,7 @@ public class DisplayAction extends Action {
     }
   }
 
-  public Result displayOverdue() {
+  private Result displayOverdue() {
     if (list.getOverdue().isEmpty()) {
       return new Result(true, MSG_NO_OVERDUE, null, null);
     } else {
@@ -63,7 +64,7 @@ public class DisplayAction extends Action {
     }
   }
 
-  public Result displayAll() {
+  private Result displayAll() {
     if (list.size() == 0) {
       return new Result(false, null, MSG_NO_INCOMPLETE, null);
     } else {
@@ -84,7 +85,7 @@ public class DisplayAction extends Action {
     }
   }
 
-  public String editMsgIfHaveOverdue(String msg) {
+  private String editMsgIfHaveOverdue(String msg) {
     if (list.getOverdue().size() != 0) {
       msg += System.lineSeparator() + MSG_HAS_OVERDUE;
     }

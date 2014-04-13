@@ -1,3 +1,4 @@
+//@author A0101232H
 package goku.action;
 
 import goku.GOKU;
@@ -17,7 +18,7 @@ public class RedoAction extends Action {
     // TODO Auto-generated constructor stub
   }
 
-  public String editMsgIfHaveOverdue(String msg) {
+  private String editMsgIfHaveOverdue(String msg) {
     if (goku.getTaskList().getOverdue().size() != 0) {
       msg += System.lineSeparator() + MSG_HAS_OVERDUE;
     }
@@ -36,7 +37,7 @@ public class RedoAction extends Action {
     }
   }
 
-  public void addToUndoList(String input) {
+  private void addToUndoList(String input) {
     TaskList currList = new TaskList();
     currList = list.clone();
 
@@ -44,7 +45,7 @@ public class RedoAction extends Action {
     goku.getUndoInputList().offer(input);
   }
 
-  public boolean redoCommand() {
+  private boolean redoCommand() {
     if (goku.getRedoList().isEmpty() || goku.getRedoInputList().isEmpty()) {
       return isEmpty;
     }
