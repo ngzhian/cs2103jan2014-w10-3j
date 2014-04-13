@@ -7,11 +7,6 @@ import hirondelle.date4j.DateTime;
 import java.util.Date;
 import java.util.TimeZone;
 
-/**
- * @author Jonathan
- * @author ZhiAn
- * 
- */
 public class DateUtil {
   private static String[] weekdays = { null, "sunday", "monday", "tuesday",
       "wednesday", "thursday", "friday", "saturday" };

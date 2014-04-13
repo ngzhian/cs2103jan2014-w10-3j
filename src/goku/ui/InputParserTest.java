@@ -31,11 +31,6 @@ import org.junit.Test;
 
 import com.google.common.base.Splitter;
 
-/**
- * @author Jonathan
- * @author ZhiAn
- * 
- */
 public class InputParserTest {
   InputParser p;
   Action a;

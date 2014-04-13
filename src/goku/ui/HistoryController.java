@@ -8,9 +8,6 @@ import javafx.scene.input.KeyEvent;
 /**
  * Takes care of the user's input history, allowing the user to recall previous
  * inputs.
- * 
- * @author ZhiAn
- * 
  */
 public class HistoryController extends Controller {
   private InputHistory history;

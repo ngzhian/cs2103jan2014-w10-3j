@@ -8,11 +8,6 @@ import hirondelle.date4j.DateTime;
 
 import org.junit.Test;
 
-/**
- * @author Jocelyn
- * @author ZhiAn
- * 
- */
 public class TaskListDisplayerTest {
   TaskListDisplayer tld = new TaskListDisplayer(System.out);
   TaskList list = new TaskList();

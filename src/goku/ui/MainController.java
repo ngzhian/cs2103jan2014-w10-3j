@@ -43,9 +43,6 @@ import javafx.stage.Stage;
  * this event is sent to the HistoryController, which responsibility is to
  * remember what the user has entered and to allow the user to scroll through
  * the history.
- * 
- * @author ZhiAn
- * 
  */
 public class MainController {
 

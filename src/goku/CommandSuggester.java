@@ -5,10 +5,6 @@ import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-/**
- * @author ZhiAn
- * 
- */
 public class CommandSuggester {
   private static List<String> allCommands = Commands.getAllKeywords();
 

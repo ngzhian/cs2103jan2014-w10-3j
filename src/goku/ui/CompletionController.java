@@ -18,9 +18,6 @@ import com.google.common.base.Splitter;
 
 /**
  * Handles the completion of user input
- * 
- * @author ZhiAn
- * 
  */
 public class CompletionController extends Controller {
   /* Engine to handle auto completion */

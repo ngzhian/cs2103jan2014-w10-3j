@@ -21,9 +21,6 @@ import javafx.scene.input.KeyEvent;
  * word is part of a keyword that results in a SearchAction, it will then
  * greedily parse the text in the input field and show the search results to the
  * user.
- * 
- * @author ZhiAn
- * 
  */
 public class LiveSearch extends Controller {
   private GOKU goku;

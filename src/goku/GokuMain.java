@@ -7,9 +7,6 @@ import goku.ui.UserInterface;
 
 /**
  * Entry point of GOKU
- * 
- * @author ZhiAn
- * 
  */
 public class GokuMain {
   static UserInterface ui;

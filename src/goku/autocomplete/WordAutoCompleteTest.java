@@ -8,10 +8,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-/**
- * @author ZhiAn
- * 
- */
 public class WordAutoCompleteTest {
   private WordAutoComplete auto;
   private static final String[] TEST_CORPUS_STRING_ARRAY = { "add", "edit",

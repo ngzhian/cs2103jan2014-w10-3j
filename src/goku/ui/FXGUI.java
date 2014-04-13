@@ -22,9 +22,6 @@ import javafx.stage.StageStyle;
  * to the user. FXGUI has a number of empty method implementations of
  * UserInterface because of the big differences in the way a CLI and GUI in
  * JavaFX does things.
- * 
- * @author ZhiAn
- * 
  */
 public class FXGUI extends Application implements UserInterface {
   private static GOKU goku;

@@ -3,9 +3,6 @@ package goku.storage;
 
 /**
  * Factory class to get concrete implementations of the Storage interface
- * 
- * @author ZhiAn
- * 
  */
 public class StorageFactory {
   /*

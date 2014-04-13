@@ -11,9 +11,6 @@ import java.util.TreeSet;
  * CommandAutoComplete completes prefixes that is likely to be a command. This
  * words exactly like a @see WordAutoComplete but just with a corpus that has
  * all the commands GOKU accepts and recognizes
- * 
- * @author ZhiAn
- * 
  */
 public class CommandAutoComplete extends WordAutoComplete {
 

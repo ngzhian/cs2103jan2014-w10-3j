@@ -6,9 +6,6 @@ import java.util.List;
 /**
  * An engine for multiple auto complete implementation. Decides which
  * implementation to call base on the current context.
- * 
- * @author ZhiAn
- * 
  */
 public class AutoCompleteEngine {
   private WordAutoComplete wordAuto;

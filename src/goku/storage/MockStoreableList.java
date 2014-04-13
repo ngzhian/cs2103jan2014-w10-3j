@@ -5,10 +5,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-/**
- * @author ZhiAn
- * 
- */
 public class MockStoreableList implements Iterable<Storeable> {
   private List<Storeable> _list = new ArrayList<Storeable>();
 

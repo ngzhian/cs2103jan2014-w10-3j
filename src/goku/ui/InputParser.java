@@ -35,10 +35,6 @@ import com.google.common.base.Splitter;
  * check is done by iterating through the arrays of keywords. 3. The appropriate
  * subclass of Action is made using the makeXAction methods. 4. In the event
  * when any of the Actions are null, a NoAction is returned.
- * 
- * @author Jonathan
- * @author ZhiAn
- * 
  */
 public class InputParser {
   /*

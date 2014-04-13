@@ -5,10 +5,6 @@ import goku.TaskList;
 
 import java.util.List;
 
-/**
- * @author ZhiAn
- * 
- */
 @SuppressWarnings("serial")
 public class LoadTasksException extends Exception {
   private TaskList loadedTasks;
