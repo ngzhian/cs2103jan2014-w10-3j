@@ -8,9 +8,6 @@ import hirondelle.date4j.DateTime;
 
 /**
  * Represents a period of time which has a start and an end.
- * 
- * @author ZhiAn
- * 
  */
 public class DateRange {
   DateTime startDate;

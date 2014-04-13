@@ -13,11 +13,6 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.TimeZone;
 
-/**
- * @author Jocelyn
- * @author ZhiAn
- * 
- */
 public class TaskListDisplayer {
   PrintStream ps;
 

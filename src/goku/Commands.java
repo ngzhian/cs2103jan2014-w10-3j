@@ -4,10 +4,6 @@ package goku;
 import java.util.Arrays;
 import java.util.List;
 
-/**
- * @author ZhiAn
- * 
- */
 public class Commands {
   public static String[] addKeywords = { "add", "a", "add!" };
   public static String[] deleteKeywords = { "delete", "d", "remove", "r" };

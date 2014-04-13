@@ -7,11 +7,6 @@ import hirondelle.date4j.DateTime;
 import org.junit.Before;
 import org.junit.Test;
 
-/**
- * @author Jonathan
- * @author ZhiAn
- * 
- */
 public class DateOutputTest {
   public static final String TOMORROW = "tomorrow";
   public static final String HOURS_LATER = "h later";

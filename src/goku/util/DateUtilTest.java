@@ -8,11 +8,6 @@ import hirondelle.date4j.DateTime;
 
 import org.junit.Test;
 
-/**
- * @author Jonathan
- * @author ZhiAn
- * 
- */
 public class DateUtilTest {
   /*
    * Combination heuristics. All inputs below are well-formed

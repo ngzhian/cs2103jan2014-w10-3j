@@ -14,8 +14,6 @@ import java.util.TreeSet;
  * and completion suggestions are based of this default corpus. User has the
  * ability to add more words to this corpus for WordAutoComplete to be able to
  * suggest completions from them as well
- * 
- * @author ZhiAn
  */
 public class WordAutoComplete {
   private final static SortedSet<String> DEFAULT_CORPUS = makeDefaultCorpus();
