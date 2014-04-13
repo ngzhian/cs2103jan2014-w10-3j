@@ -1,3 +1,4 @@
+//@author A0096444X
 package goku.action;
 
 import goku.DateRange;
@@ -11,7 +12,6 @@ import hirondelle.date4j.DateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-//@author A0096444X
 public class SearchAction extends Action {
 
   public String title;
