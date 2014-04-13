@@ -1,3 +1,4 @@
+//@author A0101232H
 package goku.action;
 
 import goku.GOKU;
@@ -29,14 +30,14 @@ public class UndoAction extends Action {
     }
   }
 
-  public String editMsgIfHaveOverdue(String msg) {
+  private String editMsgIfHaveOverdue(String msg) {
     if (goku.getTaskList().getOverdue().size() != 0) {
       msg += System.lineSeparator() + MSG_HAS_OVERDUE;
     }
     return msg;
   }
 
-  public void addToRedoList(String input) {
+  private void addToRedoList(String input) {
     TaskList currList = new TaskList();
     currList = list.clone();
 
@@ -44,7 +45,7 @@ public class UndoAction extends Action {
     goku.getRedoList().offer(currList);
   }
 
-  public boolean undoCommand() {
+  private boolean undoCommand() {
     if (goku.getUndoList().isEmpty() || goku.getUndoInputList().isEmpty()) {
       return isEmpty;
     }

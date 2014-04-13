@@ -1,3 +1,4 @@
+//@author A0099903R
 package goku.action;
 
 import goku.GOKU;
@@ -18,6 +19,7 @@ import java.util.List;
  * 2c- If multiple matches,
  *      returns a failure Result with TaskList.size() > 1
  */
+
 public class DeleteAction extends Action {
   private static final String MSG_SUCCESS = "Deleted [%s] %s. *hint* undo to undo ;)";
   private static final String NO_MATCHES = "No matches found!";
@@ -35,15 +37,7 @@ public class DeleteAction extends Action {
     super(goku);
   }
 
-  public void addToUndoList() {
-    TaskList currList = new TaskList();
-    currList = list.clone();
-
-    goku.getUndoList().offer(currList);
-    goku.getUndoInputList().offer(input);
-  }
-
-  public Result deleteTask() {
+  private Result deleteTask() {
     addToUndoList();
     Task deletedTask = tryDeleteById();
     if (deletedTask != null) {
@@ -71,18 +65,27 @@ public class DeleteAction extends Action {
     return deleteTask();
   }
 
-  public String editMsgIfHaveOverdue(String msg) {
-    if (list.getOverdue().size() != 0) {
-      msg += System.lineSeparator() + MSG_HAS_OVERDUE;
-    }
-    return msg;
-  }
-
   private Task tryDeleteById() {
     if (id == null) {
       return null;
     }
     return list.deleteTaskById(id);
+  }
+
+  // @author A0101232H
+  private void addToUndoList() {
+    TaskList currList = new TaskList();
+    currList = list.clone();
+
+    goku.getUndoList().offer(currList);
+    goku.getUndoInputList().offer(input);
+  }
+
+  private String editMsgIfHaveOverdue(String msg) {
+    if (list.getOverdue().size() != 0) {
+      msg += System.lineSeparator() + MSG_HAS_OVERDUE;
+    }
+    return msg;
   }
 
 }
