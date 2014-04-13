@@ -1,3 +1,4 @@
+//@author A0101232H
 package goku.action;
 
 import goku.DateRange;
@@ -42,29 +43,6 @@ public class EditAction extends Action {
     // TODO Auto-generated constructor stub
   }
 
-  public void addToUndoList() {
-    TaskList currList = new TaskList();
-    currList = list.clone();
-
-    TaskList newCurrList = new TaskList();
-    for (Task t : currList) {
-      Task newT = new Task(t);
-      newCurrList.addTaskWithoutSettingId(newT);
-    }
-
-    List<Integer> newIdList = new ArrayList<Integer>();
-    for (Integer id : list.getUnusedId()) {
-      newIdList.add(id);
-    }
-
-    Collections.sort(newIdList);
-    newCurrList.setRunningId(list.getRunningId());
-    newCurrList.setUnusedId(newIdList);
-
-    goku.getUndoList().offer(newCurrList);
-    goku.getUndoInputList().offer(input);
-  }
-
   @Override
   public Result doIt() {
     addToUndoList();
@@ -93,14 +71,7 @@ public class EditAction extends Action {
     t.setPeriod(null);
   }
 
-  public String editMsgIfHaveOverdue(String msg) {
-    if (list.getOverdue().size() != 0) {
-      msg += System.lineSeparator() + MSG_HAS_OVERDUE;
-    }
-    return msg;
-  }
-
-  public Result updateTask() {
+  private Result updateTask() {
     Task taskWithEdits = new Task();
     taskWithEdits.setTitle(title);
     taskWithEdits.setDeadline(dline);
@@ -171,6 +142,36 @@ public class EditAction extends Action {
 
     return new Result(true, editMsgIfHaveOverdue(successMsg), null,
         list.getAllIncomplete());
+  }
+
+  private void addToUndoList() {
+    TaskList currList = new TaskList();
+    currList = list.clone();
+
+    TaskList newCurrList = new TaskList();
+    for (Task t : currList) {
+      Task newT = new Task(t);
+      newCurrList.addTaskWithoutSettingId(newT);
+    }
+
+    List<Integer> newIdList = new ArrayList<Integer>();
+    for (Integer id : list.getUnusedId()) {
+      newIdList.add(id);
+    }
+
+    Collections.sort(newIdList);
+    newCurrList.setRunningId(list.getRunningId());
+    newCurrList.setUnusedId(newIdList);
+
+    goku.getUndoList().offer(newCurrList);
+    goku.getUndoInputList().offer(input);
+  }
+
+  private String editMsgIfHaveOverdue(String msg) {
+    if (list.getOverdue().size() != 0) {
+      msg += System.lineSeparator() + MSG_HAS_OVERDUE;
+    }
+    return msg;
   }
 
 }

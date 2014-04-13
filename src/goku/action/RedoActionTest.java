@@ -20,7 +20,7 @@ public class RedoActionTest {
   GOKU goku;
   TaskList list;
   Deque<TaskList> undoList;
-  
+
   @Before
   public void setup() {
     goku = new GOKU();
@@ -34,13 +34,13 @@ public class RedoActionTest {
   }
 
   @Test
-  //This tests whether redoing undoing adding action works
+  // This tests whether redoing undoing adding action works
   public void doIt_UndoAddAction() throws Exception {
     AddAction add1 = new AddAction(goku);
     add1.title = "hi abc";
     AddAction add2 = new AddAction(goku);
     add2.title = "hi abcdef";
-    
+
     UndoAction undo = new UndoAction(goku);
     RedoAction redo = new RedoAction(goku);
 
@@ -54,17 +54,15 @@ public class RedoActionTest {
     assertEquals(2, list.size());
     assertEquals(2, undoList.size());
     undo.doIt();
-    assertEquals(1, list.size());
+    assertEquals(1, goku.getTaskList().size());
     assertEquals(1, undoList.size());
     redo.doIt();
-    assertEquals(2, list.size());
     assertEquals(2, goku.getTaskList().size());
-
 
   }
 
   @Test
-  //This tests whether undoing deleting action works
+  // This tests whether undoing deleting action works
   public void doIt_UndoDeleteAction() throws Exception {
     AddAction add1 = new AddAction(goku);
     add1.title = "hi abc";
@@ -97,7 +95,7 @@ public class RedoActionTest {
   }
 
   @Test
-  //This tests whether undoing editing action works
+  // This tests whether undoing editing action works
   public void doIt_UndoEditAction() throws Exception {
     AddAction add1 = new AddAction(goku);
     add1.title = "hi abc";

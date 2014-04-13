@@ -1,3 +1,4 @@
+//@author A0099903R
 package goku.action;
 
 import goku.DateRange;
@@ -48,25 +49,10 @@ public class AddAction extends Action {
     }
   }
 
-  public void addToUndoList() {
-    TaskList currList = new TaskList();
-    currList = list.clone();
-
-    goku.getUndoList().offer(currList);
-    goku.getUndoInputList().offer(input);
-  }
-
   @Override
   public Result doIt() {
     System.out.println(input);
     return addTask();
-  }
-
-  public String editMsgIfHaveOverdue(String msg) {
-    if (list.getOverdue().size() != 0) {
-      msg += System.lineSeparator() + MSG_HAS_OVERDUE;
-    }
-    return msg;
   }
 
   private Result failedToAddTask() {
@@ -100,6 +86,22 @@ public class AddAction extends Action {
         .setSuccessMsg(editMsgIfHaveOverdue(String.format(MSG_SUCCESS, title)));
     result.setTasks(list.getAllIncomplete());
     return result;
+  }
+
+  // @author A0101232H
+  private void addToUndoList() {
+    TaskList currList = new TaskList();
+    currList = list.clone();
+
+    goku.getUndoList().offer(currList);
+    goku.getUndoInputList().offer(input);
+  }
+
+  private String editMsgIfHaveOverdue(String msg) {
+    if (list.getOverdue().size() != 0) {
+      msg += System.lineSeparator() + MSG_HAS_OVERDUE;
+    }
+    return msg;
   }
 
   private Result clashAddTask() {

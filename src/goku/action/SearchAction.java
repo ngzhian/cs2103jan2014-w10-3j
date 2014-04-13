@@ -1,3 +1,4 @@
+// @author A0096444X
 package goku.action;
 
 import goku.DateRange;
@@ -11,10 +12,6 @@ import hirondelle.date4j.DateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * @author ZhiAn
- * 
- */
 public class SearchAction extends Action {
 
   public String title;
@@ -114,13 +111,6 @@ public class SearchAction extends Action {
     return result;
   }
 
-  public String editMsgIfHaveOverdue(String msg) {
-    if (list.getOverdue().size() != 0) {
-      msg += System.lineSeparator() + MSG_HAS_OVERDUE;
-    }
-    return msg;
-  }
-
   public String getDeadline() {
     return deadline;
   }
@@ -129,7 +119,6 @@ public class SearchAction extends Action {
     return title;
   }
 
-  //@author A0096444X
   public Result searchTasksOnDay() {
     List<Task> foundTasks = list.findTasksOnDay(onDateQuery);
     if (foundTasks.size() != 0) {
@@ -242,5 +231,13 @@ public class SearchAction extends Action {
   private boolean searchForExact() {
     return (title.length() > 2 && title.charAt(0) == '"' && title.charAt(title
         .length() - 1) == '"');
+  }
+
+  // @author A0101232H
+  private String editMsgIfHaveOverdue(String msg) {
+    if (list.getOverdue().size() != 0) {
+      msg += System.lineSeparator() + MSG_HAS_OVERDUE;
+    }
+    return msg;
   }
 }
